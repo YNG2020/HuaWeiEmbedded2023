@@ -3,7 +3,7 @@
 #include <queue>
 #include <algorithm>
 #include <unordered_map>
-#define INF 2147483647
+#define INF 2147483647  // 最大距离常数
 
 using namespace std;
 
