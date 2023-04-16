@@ -13,7 +13,7 @@ int DMAX = 1000, DMIN = 2;
 
 void generateRandomNet(vector<vector<int>>& rEdge, vector<vector<int>>& rBus, int& rN, int& rM, int& rT, int& rP, int& rD) {
 
-	srand(time(NULL) + rand() % 1000);  // 设置随机数种子  
+	//srand(time(NULL) + rand() % 1000);  // 设置随机数种子  
 	rN = rand() % (NMAX - NMIN + 1) + NMIN;  // 生成随机数  
 	//rM = rand() % (MMAX - MMIN + 1) + MMIN;  // 生成随机数  
 	rT = rand() % (TMAX - TMIN + 1) + TMIN;  // 生成随机数  
@@ -30,15 +30,15 @@ void generateRandomNet(vector<vector<int>>& rEdge, vector<vector<int>>& rBus, in
 
 	for (int i = 0; i < rM1; ++i) {
 
-		srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
+		//srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
 		int s = rand() % rN;  // 生成随机数 1
-		srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
+		//srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
 		int t = rand() % rN;   // 生成随机数 2  
 
 		do {   // 如果两个随机数相同，则重新生成 
 			if (s != t)
 				break;
-			srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
+			//srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
 			t = rand() % rN;
 		} while (true);
 
@@ -54,23 +54,23 @@ void generateRandomNet(vector<vector<int>>& rEdge, vector<vector<int>>& rBus, in
 		int d = rand() % rD + 1;	// 保证距离大于0且不大于rD
 		rEdge[i][0] = 0;
 		rEdge[i][1] = i - rM1 + 1;
-		rEdge[i][2] = d;
+		rEdge[i][2] = 10000;
 	}
 
 	rBus.resize(rT);
 	for (auto& one : rBus) {
 		one.resize(2);
 
-		srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
+		//srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
 		int S = rand() % rN;  // 生成随机数 1
-		srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
+		//srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
 		int T = rand() % rN;   // 生成随机数 2  
   
 		do {   // 如果两个随机数相同，则重新生成 
 			if (S != T)
 				break;
 
-			srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
+			//srand(time(NULL) + rand() % 1000);  // 设置随机数种子 
 			T = rand() % rN;
 		} while(true);
 
