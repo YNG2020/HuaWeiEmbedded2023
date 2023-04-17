@@ -26,6 +26,7 @@ public:
 class Edge {
 public:
     int from, to, d, next;    // 起点，终点，边的距离，同起点的下一条边在edge中的编号
+    int trueD;    // 边的真正距离
     int Pile[maxP]; // 该边上存在的通道，记录的是当前承载的业务的编号，不承载业务时值为-1
     Edge() {
         from = -1;
@@ -151,13 +152,13 @@ void loadBus(int busId) {
             trueNextEdgeId = buses[busId].path[i] * 2 + 1;
         curNode = edge[trueNextEdgeId].to;
 
-        if (buses[busId].curA >= edge[trueNextEdgeId].d) {
-            buses[busId].curA -= edge[trueNextEdgeId].d;
+        if (buses[busId].curA >= edge[trueNextEdgeId].trueD) {
+            buses[busId].curA -= edge[trueNextEdgeId].trueD;
         }
         else {
             node[edge[trueNextEdgeId].from].Multiplier[buses[busId].pileId] = buses[busId].pileId;
             buses[busId].curA = D;
-            buses[busId].curA -= edge[trueNextEdgeId].d;
+            buses[busId].curA -= edge[trueNextEdgeId].trueD;
             buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
         }
     }
@@ -184,7 +185,8 @@ void init() {   // 初始化
 void addEdge(int s, int t, int d) {    // 加边函数，s起点，t终点，d距离
     edge[cntEdge].from = s; // 起点
     edge[cntEdge].to = t;   // 终点
-    edge[cntEdge].d = d;    // 距离
+    edge[cntEdge].d = 1;    // 距离
+    edge[cntEdge].trueD = d;    // 距离
     edge[cntEdge].next = head[s];   // 链式前向。以s为起点下一条边的编号，head[s]代表的是当前以s为起点的在逻辑上的第一条边在边集数组的位置（编号）
     for (int i = 0; i < P; ++i)
         edge[cntEdge].Pile[i] = -1;
@@ -271,12 +273,12 @@ void dijkstra1(Business& bus) {
         }
         if (s == end) { // 当end已经加入到了生成树，则结束搜索
 
-            if (p == 0) {   // 加了这个if语句后，用旧的加边策略，能跑到12.7kw
-                choosenP = p;
-                findPath = true;
-                bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-                break;
-            }
+            //if (p == 0) {   // 加了这个if语句后，用旧的加边策略，能跑到12.7kw
+            //    choosenP = p;
+            //    findPath = true;
+            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+            //    break;
+            //}
             int curNode = end, tmpDist = 0;
             while (tmpOKPath[curNode] != -1) {
                 int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
@@ -594,7 +596,7 @@ void findAddPath(Business& bus, bool* vis2) {
                 if (t == bus.start)
                     OKPile = 0;
                 else
-                    OKPile = node[t].reachPile[node[t].reachPile.size() - 1];
+                    OKPile = node[t].reachPile[0];
                 break;
             }
             else {  // 说明t点也是不可达点
