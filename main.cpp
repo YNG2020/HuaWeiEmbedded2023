@@ -1,3 +1,5 @@
+
+
 //#include "generateRandomNet.h"
 #include <iostream>
 #include <vector>
@@ -26,7 +28,6 @@ class Edge {
 public:
     int from, to, d, next;    // 起点，终点，边的距离，同起点的下一条边在edge中的编号
     int Pile[maxP]; // 该边上存在的通道，记录的是当前承载的业务的编号，不承载业务时值为-1
-    bool isFull;    // 标识边上的通道是否全都被占满
     Edge() {
         from = -1;
         to = -1;
@@ -126,7 +127,6 @@ int main() {
     return 0;
 }
 
-
 //// 主函数
 //int main() {
 //
@@ -218,7 +218,6 @@ void addEdge(int s, int t, int d) {    // 加边函数，s起点，t终点，d距离
     edge[cntEdge].to = t;   // 终点
     edge[cntEdge].d = d;    // 距离
     edge[cntEdge].next = head[s];   // 链式前向。以s为起点下一条边的编号，head[s]代表的是当前以s为起点的在逻辑上的第一条边在边集数组的位置（编号）
-    edge[cntEdge].isFull = false;
     for (int i = 0; i < P; ++i)
         edge[cntEdge].Pile[i] = -1;
 
@@ -234,24 +233,23 @@ void addBus(int start, int end) {   // 加业务函数
     vector<int>().swap(buses[cntBus].path);
     vector<int>().swap(buses[cntBus].pathTmp);
     vector<int>().swap(buses[cntBus].mutiplierId);
-    
+
     ++cntBus;
 }
 
 void dijkstra1(Business& bus) {
 
     int start = bus.start, end = bus.end, p = 0;
-    
+
     bool findPath = false;
     int minPathDist = INF;
     int choosenP = -1;
     vector<int> tmpOKPath;
 
-    
+
     for (; p < P; ++p) {
 
         tmpOKPath.resize(N, -1);
-        //bus.pathTmp.resize(N, -1);
         for (int i = 0; i < N; ++i) { // 赋初值
             dis[i] = INF;
             vis[i] = false;
@@ -282,7 +280,6 @@ void dijkstra1(Business& bus) {
                     int t = edge[i].to;
                     if (dis[t] > dis[s] + edge[i].d) {
                         tmpOKPath[t] = i;    // 记录下抵达路径点t的边的编号i
-                        //bus.pathTmp[t] = i;    // 记录下抵达路径点t的边的编号i
                         dis[t] = dis[s] + edge[i].d;   // 松弛操作
                         q.push(Node1(dis[t], t));   // 把新遍历到的点加入堆中
                     }
@@ -295,6 +292,12 @@ void dijkstra1(Business& bus) {
         }
         if (s == end) { // 当end已经加入到了生成树，则结束搜索
 
+            if (p == 0) {
+                choosenP = p;
+                findPath = true;
+                bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+                break;
+            }
             int curNode = end, tmpDist = 0;
             while (tmpOKPath[curNode] != -1) {
                 int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
@@ -325,18 +328,6 @@ void dijkstra1(Business& bus) {
 
         bus.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
         edge[edgeId].Pile[choosenP] = bus.busId;
-        int i = 0;
-        for (; i < P; ++i) {
-            if (edge[edgeId].Pile[i] == -1)
-                break;
-        }
-        if (i == P) {   // 添加业务后，看有没有被挤满通道的边
-            edge[edgeId].isFull = true;
-            if (edgeId % 2) // 奇数-1
-                edge[edgeId - 1].isFull = true;   // 双向边，两边一起处理
-            else            // 偶数+1
-                edge[edgeId + 1].isFull = true;
-        }
 
         if (edgeId % 2) // 奇数-1
             edge[edgeId - 1].Pile[choosenP] = bus.busId;   // 双向边，两边一起处理
@@ -345,8 +336,7 @@ void dijkstra1(Business& bus) {
 
 
         curNode = edge[bus.pathTmp[curNode]].from;
-        //if (curNode == start)
-        //    break;
+
     }
     reverseArray(bus.path);
 }
@@ -397,16 +387,14 @@ void dijkstra2(Business& bus) {
     int curNode = end;
     while (bus.pathTmp[curNode] != -1) {
         int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
-        //if (edge[edgeId].isFull) {  // 如果路径中含有通道被挤满的边，就在该边对应的点对上添加新边
-            addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
-            addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
-            
-            if (edge[edgeId].from < edge[edgeId].to)
-                newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
-            else
-                newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
+        addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
+        addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
 
-        //}
+        if (edge[edgeId].from < edge[edgeId].to)
+            newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
+        else
+            newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
+
         curNode = edge[bus.pathTmp[curNode]].from;
     }
     dijkstra1(bus);
