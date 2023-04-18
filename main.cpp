@@ -162,6 +162,7 @@ int main() {
 void allocateBus() {
 
     Business1 temp, next;
+    vector<Business1> remainBus;
     bool isSame = false, isExist1 = false, isExist2 = false;
     createBusQueue();
     //在去向化队列中找到起点终点相同及其反向的业务组加载到光网络
@@ -229,6 +230,8 @@ void allocateBus() {
                     isSame = false;
                     loadBus(temp.busId);
                 }
+                else
+                    remainBus.push_back(temp);
             }
         }
         //如果只找到了temp
@@ -237,14 +240,13 @@ void allocateBus() {
                 isSame = false;
                 loadBus(temp.busId);
             }
+            else
+                remainBus.push_back(temp);
         }
     }
-    //把剩余未加载的业务加载到光网络
-    for (int i = 0; i < T; ++i) {
-        if (buses[i].pileId == -1) {
-            loadBus(i);
-        }
-    }
+    //把剩余未加载的业务加载到光网络（被排序过）
+    for (int i = 0; i < remainBus.size(); ++i)
+        loadBus(remainBus[i].busId);
 }
 
 // 把业务busId加载到光网络中
