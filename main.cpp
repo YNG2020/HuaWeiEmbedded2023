@@ -58,6 +58,7 @@ int dis[maxN];  // dis[i]，表示以源点到i到距离
 bool vis1[maxN];  // 标识该点有无被访问过
 bool vis2[maxN]; // 标识该点有无在添加某业务时，被路径搜索访问过
 vector<pair<int, int>> newEdge; // 记录新添加的边的起点和终点
+vector<int> newEdgePathId;   // 记录新边在边集中的位置（此处双向边视为同一边）
 vector<int> eraseEdge;  // 记录下被清除掉的新边的编号
 
 struct HashFunc_t {
@@ -151,12 +152,8 @@ void allocateBus() {
 // 试图重新分配业务到光网络中
 void reAllocateBus() {
 
-    bool tmpFlag = true;
     int n = newEdge.size(), trueEdgeId;
     for (int i = 0; i < n; ++i) {
-
-        if (!tmpFlag)
-            break;
 
         trueEdgeId = (i + M) * 2;
         int busCnt = 0, lastBusID, lastPileId;
@@ -177,17 +174,16 @@ void reAllocateBus() {
             reCoverNetwork(lastBusID, lastPileId);
 
             findPath = dijkstra5(buses[lastBusID], i + M);
-            findPath = false;
 
             if (findPath) {
 
-                tmpFlag = false;
                 for (int k = 0; k < newEdge.size(); ++k) {
 
-                    if (edge[trueEdgeId].from == newEdge[k].first && edge[trueEdgeId].to == newEdge[k].second)
+                    if (newEdgePathId[k] == i + M) {
                         newEdge.erase(newEdge.begin() + k);
-                    else if (edge[trueEdgeId].to == newEdge[k].first && edge[trueEdgeId].from == newEdge[k].second)
-                        newEdge.erase(newEdge.begin() + k);
+                        newEdgePathId.erase(newEdgePathId.begin() + k);
+                    }
+
                 }
                 
                 for (int k = 0; k < P; ++k) {
@@ -239,10 +235,11 @@ void reAllocateBus() {
         //    tmpFlag = false;
         //    for (int k = 0; k < newEdge.size(); ++k) {
 
-        //        if (edge[trueEdgeId].from == newEdge[k].first && edge[trueEdgeId].to == newEdge[k].second)
+        //        if (newEdgePathId[k] == i + M) {
         //            newEdge.erase(newEdge.begin() + k);
-        //        else if (edge[trueEdgeId].to == newEdge[k].first && edge[trueEdgeId].from == newEdge[k].second)
-        //            newEdge.erase(newEdge.begin() + k);
+        //            newEdgePathId.erase(newEdgePathId.begin() + k);
+        //        }
+
         //    }
         //    eraseEdge.push_back(i + M);
         //}
@@ -512,7 +509,7 @@ void dijkstra2(Business& bus) {
                 newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
             else
                 newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
-
+            newEdgePathId.emplace_back(cntEdge / 2 - 1);
 
         curNode = edge[bus.trueMinPath[curNode]].from;
     }
@@ -884,6 +881,7 @@ void findAddPath(Business& bus, bool* vis2) {
                 newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
             else
                 newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
+            newEdgePathId.emplace_back(cntEdge / 2 - 1);
 
             bus.path.push_back((cntEdge - 1) / 2); // edgeId / 2是为了适应题目要求
             edge[(cntEdge - 1)].Pile[OKPile] = bus.busId;
