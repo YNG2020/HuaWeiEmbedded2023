@@ -112,84 +112,86 @@ bool bfsTestConnection(int start, int end);
 void findAddPath1(Business& bus, bool* vis2);
 void findAddPath2(Business& bus, int* vis2);
 
-int testTime = 0;
-int maxTestTime = 10;
-vector<vector<int>> rEdge;
-vector<vector<int>> rBus;
-vector<int> allNewEdgeCnt;
-vector<int> allPathCnt;
-vector<int> allMultiplierCnt;
-
+//int testTime = 0;
+//int maxTestTime = 10;
+//vector<vector<int>> rEdge;
+//vector<vector<int>> rBus;
+//vector<int> allNewEdgeCnt;
+//vector<int> allPathCnt;
+//vector<int> allMultiplierCnt;
+//
 //// 主函数
 //int main() {
 //
-//    cin >> N >> M >> T >> P >> D;
-//    init();
-//    int s = 0, t = 0, d = 0;
-//    for (int i = 0; i < M; ++i) {
-//        cin >> s >> t >> d;
-//        minDist[make_pair(s, t)] = INF;
-//        minDist[make_pair(t, s)] = INF;
-//        addEdge(s, t, d);
-//        addEdge(t, s, d);   // 添加双向边
-//    }
+//    allNewEdgeCnt.resize(maxTestTime, 0);
+//    allPathCnt.resize(maxTestTime, 0);
+//    allMultiplierCnt.resize(maxTestTime, 0);
 //
-//    int Sj, Tj;
-//    for (int i = 0; i < T; ++i) {
-//        cin >> Sj >> Tj;
-//        addBus(Sj, Tj); // 添加业务
-//    }
+//    for (; testTime < maxTestTime; ++testTime) {
+//        cntEdge = 0;    // 当前边集数组所存储的边的数目
+//        cntBus = 0;     // 当前业务数组所存储业务的数目
+//        minDist.clear();    // 清空
+//        vector<vector<int>>().swap(rEdge);
+//        vector<vector<int>>().swap(rBus);
+//        vector<pair<int, int>>().swap(newEdge);
 //
-//    allocateBus();
-//    outPut();
+//        generateRandomNet(rEdge, rBus, N, M, T, P, D);
+//
+//        init();
+//        int s = 0, t = 0, d = 0;
+//        for (int i = 0; i < M; ++i) {
+//            s = rEdge[i][0], t = rEdge[i][1], d = rEdge[i][2];
+//            minDist[make_pair(s, t)] = INF;
+//            minDist[make_pair(t, s)] = INF;
+//            addEdge(s, t, d);
+//            addEdge(t, s, d);   // 添加双向边
+//        }
+//
+//        int Sj, Tj;
+//        for (int i = 0; i < T; ++i) {
+//            Sj = rBus[i][0], Tj = rBus[i][1];
+//            addBus(Sj, Tj); // 添加业务
+//        }
+//
+//        allocateBus();
+//        outPut();
+//        cout << "\ntestTime " << testTime << endl;
+//        cout << "allNewEdgeCnt " << allNewEdgeCnt[testTime] << endl;
+//        cout << "allPathCnt " << allPathCnt[testTime] << endl;
+//        cout << "allMultiplierCnt " << allMultiplierCnt[testTime] << endl;
+//    }
 //
 //    return 0;
 //}
 
-
 // 主函数
 int main() {
 
-    allNewEdgeCnt.resize(maxTestTime, 0);
-    allPathCnt.resize(maxTestTime, 0);
-    allMultiplierCnt.resize(maxTestTime, 0);
-
-    for (; testTime < maxTestTime; ++testTime) {
-        cntEdge = 0;    // 当前边集数组所存储的边的数目
-        cntBus = 0;     // 当前业务数组所存储业务的数目
-        minDist.clear();    // 清空
-        vector<vector<int>>().swap(rEdge);
-        vector<vector<int>>().swap(rBus);
-        vector<pair<int, int>>().swap(newEdge);
-
-        generateRandomNet(rEdge, rBus, N, M, T, P, D);
-
-        init();
-        int s = 0, t = 0, d = 0;
-        for (int i = 0; i < M; ++i) {
-            s = rEdge[i][0], t = rEdge[i][1], d = rEdge[i][2];
-            minDist[make_pair(s, t)] = INF;
-            minDist[make_pair(t, s)] = INF;
-            addEdge(s, t, d);
-            addEdge(t, s, d);   // 添加双向边
-        }
-
-        int Sj, Tj;
-        for (int i = 0; i < T; ++i) {
-            Sj = rBus[i][0], Tj = rBus[i][1];
-            addBus(Sj, Tj); // 添加业务
-        }
-
-        allocateBus();
-        outPut();
-        cout << "\ntestTime " << testTime << endl;
-        cout << "allNewEdgeCnt " << allNewEdgeCnt[testTime] << endl;
-        cout << "allPathCnt " << allPathCnt[testTime] << endl;
-        cout << "allMultiplierCnt " << allMultiplierCnt[testTime] << endl;
+    cin >> N >> M >> T >> P >> D;
+    init();
+    int s = 0, t = 0, d = 0;
+    for (int i = 0; i < M; ++i) {
+        cin >> s >> t >> d;
+        minDist[make_pair(s, t)] = INF;
+        minDist[make_pair(t, s)] = INF;
+        addEdge(s, t, d);
+        addEdge(t, s, d);   // 添加双向边
     }
+
+    int Sj, Tj;
+    for (int i = 0; i < T; ++i) {
+        cin >> Sj >> Tj;
+        addBus(Sj, Tj); // 添加业务
+    }
+
+    allocateBus();
+    outPut();
 
     return 0;
 }
+
+
+
 
 void allocateBus() {
     for (int i = 0; i < T; ++i) {
@@ -198,8 +200,8 @@ void allocateBus() {
 }
 
 void loadBus(int busId) {
-    //BFS1(buses[busId]);
-    dijkstra1(buses[busId]);
+    BFS1(buses[busId]);
+    //dijkstra1(buses[busId]);
     int curNode = buses[busId].start, trueNextEdgeId;
     for (int i = 0; i < buses[busId].path.size(); ++i) {
 
@@ -840,9 +842,9 @@ void reverseArray(vector<int>& arr) {
 void outPut() {
     cout << newEdge.size() << endl;
 
-    int totNewEdge = newEdge.size();
-    int totPathSize = 0;
-    int totMultiplier = 0;
+    //int totNewEdge = newEdge.size();
+    //int totPathSize = 0;
+    //int totMultiplier = 0;
 
     for (int i = 0; i < newEdge.size(); ++i) {
         cout << newEdge[i].first << " " << newEdge[i].second << endl;
@@ -851,8 +853,8 @@ void outPut() {
         int pSize = buses[i].path.size();
         int mSize = buses[i].mutiplierId.size();
 
-        totPathSize += pSize;
-        totMultiplier += mSize;
+        //totPathSize += pSize;
+        //totMultiplier += mSize;
 
         cout << buses[i].pileId << " " << pSize << " "
             << mSize << " ";
@@ -874,9 +876,9 @@ void outPut() {
         }
     }
 
-    allNewEdgeCnt[testTime] = totNewEdge;
-    allPathCnt[testTime] = totPathSize;
-    allMultiplierCnt[testTime] = totMultiplier;
+    //allNewEdgeCnt[testTime] = totNewEdge;
+    //allPathCnt[testTime] = totPathSize;
+    //allMultiplierCnt[testTime] = totMultiplier;
 }
 
 // 测试start与end两点之间的连通性，连通则返回true
