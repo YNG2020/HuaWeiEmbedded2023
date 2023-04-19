@@ -221,8 +221,8 @@ void reAllocateBus() {
                 }
 
                 for (int k = 0; k < P; ++k) {
-                    edge[trueEdgeId].Pile[k] = 1;
-                    edge[trueEdgeId + 1].Pile[k] = 1;   // 偶数+1
+                    edge[trueEdgeId].Pile[k] = P;
+                    edge[trueEdgeId + 1].Pile[k] = P;   // 偶数+1
                 }
 
                 eraseEdge.push_back(i + M);
@@ -274,6 +274,10 @@ void reAllocateBus() {
                 }
 
             }
+            for (int k = 0; k < P; ++k) {
+                edge[trueEdgeId].Pile[k] = P;
+                edge[trueEdgeId + 1].Pile[k] = P;   // 偶数+1
+            }
             eraseEdge.push_back(i + M);
         }
 
@@ -303,6 +307,8 @@ void loadBus(int busId) {
             buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
         }
     }
+    if (busId % 10 == 9)
+        reAllocateBus();
 }
 
 // 初始化
