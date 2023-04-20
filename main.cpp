@@ -158,7 +158,7 @@ void reAllocateBus() {
         vector<int> lastBusIds, lastPileIds;
 
         for (int j = 0; j < P; ++j)
-            if (edge[trueEdgeId].Pile[j] != -1 && edge[trueEdgeId].Pile[j] != P) {   // 说明在通道j上承载了该业务
+            if (edge[trueEdgeId].Pile[j] != -1 && edge[trueEdgeId].Pile[j] != T) {   // 说明在通道j上承载了该业务
                 ++busCnt;
                 lastBusIds.push_back(edge[trueEdgeId].Pile[j]);
                 lastPileIds.push_back(j);
@@ -178,8 +178,8 @@ void reAllocateBus() {
 
             }
             for (int k = 0; k < P; ++k) {   // 该边已删除，就应对其进行封锁
-                edge[trueEdgeId].Pile[k] = P;
-                edge[trueEdgeId + 1].Pile[k] = P;   // 偶数+1
+                edge[trueEdgeId].Pile[k] = T;
+                edge[trueEdgeId + 1].Pile[k] = T;   // 偶数+1
             }
             eraseEdge.push_back(i + M);     // 记下删边的编号
         }
@@ -215,8 +215,8 @@ void reAllocateBus() {
                 }
 
                 for (int k = 0; k < P; ++k) {   // 该边已删除，就应对其进行封锁
-                    edge[trueEdgeId].Pile[k] = P;
-                    edge[trueEdgeId + 1].Pile[k] = P;   // 偶数+1
+                    edge[trueEdgeId].Pile[k] = T;
+                    edge[trueEdgeId + 1].Pile[k] = T;   // 偶数+1
                 }
 
                 eraseEdge.push_back(i + M);     // 记下删边的编号
