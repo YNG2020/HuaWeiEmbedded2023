@@ -175,6 +175,7 @@ void reAllocateBus() {
                 if (newEdgePathId[k] == i + M) {        // 删去对应边
                     newEdge.erase(newEdge.begin() + k);
                     newEdgePathId.erase(newEdgePathId.begin() + k);
+                    break;
                 }
 
             }
@@ -193,14 +194,14 @@ void reAllocateBus() {
             }
 
             int stopK = -1;
-            vector<int> tmpTastPileIds;
+            vector<int> tmpLastPileIds;
             for (int k = 0; k < busCnt; ++k) {
                 findPath = dijkstra5(buses[lastBusIds[k]], i + M);
                 if (findPath == false) {
                     stopK = k;
                     break;
                 }
-                tmpTastPileIds.push_back(buses[lastBusIds[k]].pileId);   // 原本的pileId已改变，此处进行更新，以防止reCoverNetwork时出bug
+                tmpLastPileIds.push_back(buses[lastBusIds[k]].pileId);   // 原本的pileId已改变，此处进行更新，以防止reCoverNetwork时出bug
             }
             
             if (findPath) {
@@ -210,6 +211,7 @@ void reAllocateBus() {
                     if (newEdgePathId[k] == i + M) {    // 删去对应边
                         newEdge.erase(newEdge.begin() + k);
                         newEdgePathId.erase(newEdgePathId.begin() + k);
+                        break;
                     }
 
                 }
@@ -253,7 +255,7 @@ void reAllocateBus() {
             else {
 
                 for (int k = 0; k < stopK; ++k) {   // 把试图寻路时，造成的对网络的影响消除
-                    reCoverNetwork(lastBusIds[k], tmpTastPileIds[k]);
+                    reCoverNetwork(lastBusIds[k], tmpLastPileIds[k]);
                 }
 
                 for (int k = 0; k < busCnt; ++k) {  // 重新加载所有的边
