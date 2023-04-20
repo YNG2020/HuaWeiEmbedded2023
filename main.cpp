@@ -83,7 +83,6 @@ public:
         this->d = d;
         this->nodeId = nodeId;
     }
-
     Node1() {}
     bool operator < (const Node1& x) const { // 重载运算符把最小的元素放在堆顶（大根堆）
         return d > x.d;
@@ -112,7 +111,6 @@ void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 
 int testTime = 0;
 int maxTestTime = 10;
-
 
 // 主函数
 int main() {
@@ -160,7 +158,7 @@ void reAllocateBus() {
         vector<int> lastBusIds, lastPileIds;
 
         for (int j = 0; j < P; ++j)
-            if (edge[trueEdgeId].Pile[j] != -1 && edge[trueEdgeId].Pile[j] != P) {   // 说明在通道j上承载了该业务
+            if (edge[trueEdgeId].Pile[j] != -1 && edge[trueEdgeId].Pile[j] != T) {   // 说明在通道j上承载了该业务
                 ++busCnt;
                 lastBusIds.push_back(edge[trueEdgeId].Pile[j]);
                 lastPileIds.push_back(j);
@@ -179,9 +177,9 @@ void reAllocateBus() {
                 }
 
             }
-            for (int k = 0; k < P; ++k) {
-                edge[trueEdgeId].Pile[k] = P;
-                edge[trueEdgeId + 1].Pile[k] = P;   // 偶数+1
+            for (int k = 0; k < P; ++k) {   // 该边已删除，就应对其进行封锁
+                edge[trueEdgeId].Pile[k] = T;
+                edge[trueEdgeId + 1].Pile[k] = T;   // 偶数+1
             }
             eraseEdge.push_back(i + M);     // 记下删边的编号
         }
@@ -216,9 +214,9 @@ void reAllocateBus() {
 
                 }
 
-                for (int k = 0; k < P; ++k) {
-                    edge[trueEdgeId].Pile[k] = P;
-                    edge[trueEdgeId + 1].Pile[k] = P;   // 偶数+1
+                for (int k = 0; k < P; ++k) {   // 该边已删除，就应对其进行封锁
+                    edge[trueEdgeId].Pile[k] = T;
+                    edge[trueEdgeId + 1].Pile[k] = T;   // 偶数+1
                 }
 
                 eraseEdge.push_back(i + M);     // 记下删边的编号
@@ -301,7 +299,7 @@ void loadBus(int busId) {
 }
 
 // 初始化
-void init() {   // 初始化
+void init() {
 
     for (int i = 0; i < N; ++i) {
 
@@ -318,7 +316,7 @@ void init() {   // 初始化
 }
 
 // 加边函数，s起点，t终点，d距离
-void addEdge(int s, int t, int d) {    // 加边函数，s起点，t终点，d距离
+void addEdge(int s, int t, int d) {
     edge[cntEdge].from = s; // 起点
     edge[cntEdge].to = t;   // 终点
     edge[cntEdge].d = 1;    // 距离
@@ -334,7 +332,7 @@ void addEdge(int s, int t, int d) {    // 加边函数，s起点，t终点，d距离
 }
 
 // 加业务函数
-void addBus(int start, int end) {   // 加业务函数
+void addBus(int start, int end) {
     buses[cntBus].start = start;
     buses[cntBus].end = end;
     buses[cntBus].busId = cntBus;
@@ -347,7 +345,6 @@ void addBus(int start, int end) {   // 加业务函数
 // 考虑一边多通道的情况下，寻找业务bus的起点到终点的路径（不一定是最短路径，因为有可能边的通道被完全占用）
 void dijkstra1(Business& bus) {
 
-    //dijkstra3(bus);
     int start = bus.start, end = bus.end, p = 0;
     
     bool findPath = false;
@@ -410,12 +407,6 @@ void dijkstra1(Business& bus) {
         }
         if (s == end) { // 当end已经加入到了生成树，则结束搜索
 
-            //if (p == 0) {   // 加了这个if语句后，用旧的加边策略，能跑到12.7kw
-            //    choosenP = p;
-            //    findPath = true;
-            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-            //    break;
-            //}
             int curNode = end, tmpDist = 0;
             while (tmpOKPath[curNode] != -1) {
                 int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
@@ -430,33 +421,6 @@ void dijkstra1(Business& bus) {
                 choosenP = p;
             }
             findPath = true;
-
-            ////当走p通道的路径是事实上的最短路径时，则结束p的循环
-            //int curNode = end, tmpDist = 0;
-            //bool breakFlag = true;
-            //while (tmpOKPath[curNode] != -1) {
-
-            //    if (bus.trueMinPath[curNode] != tmpOKPath[curNode]) {   // 与最短路径稍有不同，就不中断往下一个通道的搜索
-            //        breakFlag = false;
-            //    }
-            //    int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
-            //    curNode = edge[edgeId].from;
-            //    tmpDist += edge[edgeId].d;
-            //    if (curNode == start)
-            //        break;
-            //}
-            //if (breakFlag) {
-            //    choosenP = p;
-            //    findPath = true;
-            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-            //    break;
-            //}
-            //if (tmpDist < minPathDist) {
-            //    minPathDist = tmpDist;
-            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-            //    choosenP = p;
-            //}
-            //findPath = true;
 
         }
     }
@@ -669,9 +633,6 @@ bool dijkstra5(Business& bus, int blockEdge) {
             vis1[s] = true;
             for (int i = head[s]; i != -1; i = edge[i].next) { // 搜索堆顶所有连边
 
-                if (i >= 26)
-                    int a = 1;
-
                 if (i / 2 == blockEdge)
                     continue;
 
@@ -688,12 +649,6 @@ bool dijkstra5(Business& bus, int blockEdge) {
         }
         if (s == end) { // 当end已经加入到了生成树，则结束搜索
 
-            //if (p == 0) {   // 加了这个if语句后，用旧的加边策略，能跑到12.7kw
-            //    choosenP = p;
-            //    findPath = true;
-            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-            //    break;
-            //}
             int curNode = end, tmpDist = 0;
             while (tmpOKPath[curNode] != -1) {
                 int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
