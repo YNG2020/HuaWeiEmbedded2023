@@ -1,4 +1,4 @@
-#include "generateRandomNet.h"
+//#include "generateRandomNet.h"
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -57,9 +57,9 @@ int head[maxN]; // head[i]£¬±íÊ¾ÒÔiÎªÆğµãµÄÔÚÂß¼­ÉÏµÄµÚÒ»Ìõ±ßÔÚ±ß¼¯Êı×éµÄÎ»ÖÃ£¨±
 int dis[maxN];  // dis[i]£¬±íÊ¾ÒÔÔ´µãµ½iµ½¾àÀë
 bool vis1[maxN];  // ±êÊ¶¸ÃµãÓĞÎŞ±»·ÃÎÊ¹ı
 bool vis2[maxN]; // ±êÊ¶¸ÃµãÓĞÎŞÔÚÌí¼ÓÄ³ÒµÎñÊ±£¬±»Â·¾¶ËÑË÷·ÃÎÊ¹ı
-int minDist2start[maxN]; // ¼ÇÂ¼¸Ãµãµ½ÆğµãÔÚ¿¼ÂÇÍ¨µÀ¶ÂÈûÏÂµÄ£¨¶àÍ¨µÀÖĞµÄ×îĞ¡£©¾àÀë£¬ÖµÎª-1Ê±£¬¸Ãµã²»¿É´ï£¬ÖµÎª0»ò¸ü´óÊ±£¬Öµ´ú±í¸Ãµãµ½ÆğµãµÄ±ßÊı
-int tmpDist2start[maxN]; // ¼ÇÂ¼¸Ãµãµ½ÆğµãÔÚ¿¼ÂÇÍ¨µÀ¶ÂÈûÏÂµÄ£¨µ±Ç°Í¨µÀÖĞµÄ£©¾àÀë£¬ÖµÎª-1Ê±£¬¸Ãµã²»¿É´ï£¬ÖµÎª0»ò¸ü´óÊ±£¬Öµ´ú±í¸Ãµãµ½ÆğµãµÄ±ßÊıvector<pair<int, int>> newEdge; // ¼ÇÂ¼ĞÂÌí¼ÓµÄ±ßµÄÆğµãºÍÖÕµã
 vector<pair<int, int>> newEdge; // ¼ÇÂ¼ĞÂÌí¼ÓµÄ±ßµÄÆğµãºÍÖÕµã
+vector<int> newEdgePathId;   // ¼ÇÂ¼ĞÂ±ßÔÚ±ß¼¯ÖĞµÄÎ»ÖÃ£¨´Ë´¦Ë«Ïò±ßÊÓÎªÍ¬Ò»±ß£©
+vector<int> eraseEdge;  // ¼ÇÂ¼ÏÂ±»Çå³ıµôµÄĞÂ±ßµÄ±àºÅ
 
 struct HashFunc_t {
     size_t operator() (const pair<int, int>& key) const {
@@ -83,7 +83,6 @@ public:
         this->d = d;
         this->nodeId = nodeId;
     }
-
     Node1() {}
     bool operator < (const Node1& x) const { // ÖØÔØÔËËã·û°Ñ×îĞ¡µÄÔªËØ·ÅÔÚ¶Ñ¶¥£¨´ó¸ù¶Ñ£©
         return d > x.d;
@@ -91,7 +90,6 @@ public:
 };
 
 priority_queue<Node1>q;  // ÓÅÏÈ¶ÓÁĞ£¬´æµÄÊÇÔİÊ±µÄµãnodeIdµ½Ô´µãµÄ¾àÀëºÍnodeId±àºÅ±¾Éí
-queue<pair<int, int>> bfsQ;
 
 void init();
 void addEdge(int s, int t, int d);
@@ -100,69 +98,22 @@ void dijkstra1(Business& bus);
 void dijkstra2(Business& bus);
 void dijkstra3(Business& bus);
 void dijkstra4(int start, int end, int pileId, vector<int>& tmpOKPath);
+bool dijkstra5(Business& bus, int blockEdge);
 void BFS1(Business& bus);
 void BFS2(Business& bus);
-void BFS3(Business& bus);
-void BFS4(int start, int end, int pileId, vector<int>& tmpOKPath);
+bool BFS5(Business& bus, int blockEdge);
 void loadBus(int busId);
 void allocateBus();
+void reAllocateBus();
 void reverseArray(vector<int>& arr);
 void outPut();
 bool bfsTestConnection(int start, int end);
-void findAddPath1(Business& bus, bool* vis2);
-void findAddPath2(Business& bus, int* vis2);
+void findAddPath(Business& bus, bool* vis2);
+void reCoverNetwork(int lastBusID, int lastPileId);
+void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 
-//int testTime = 0;
-//int maxTestTime = 10;
-//vector<vector<int>> rEdge;
-//vector<vector<int>> rBus;
-//vector<int> allNewEdgeCnt;
-//vector<int> allPathCnt;
-//vector<int> allMultiplierCnt;
-//
-//// Ö÷º¯Êı
-//int main() {
-//
-//    allNewEdgeCnt.resize(maxTestTime, 0);
-//    allPathCnt.resize(maxTestTime, 0);
-//    allMultiplierCnt.resize(maxTestTime, 0);
-//
-//    for (; testTime < maxTestTime; ++testTime) {
-//        cntEdge = 0;    // µ±Ç°±ß¼¯Êı×éËù´æ´¢µÄ±ßµÄÊıÄ¿
-//        cntBus = 0;     // µ±Ç°ÒµÎñÊı×éËù´æ´¢ÒµÎñµÄÊıÄ¿
-//        minDist.clear();    // Çå¿Õ
-//        vector<vector<int>>().swap(rEdge);
-//        vector<vector<int>>().swap(rBus);
-//        vector<pair<int, int>>().swap(newEdge);
-//
-//        generateRandomNet(rEdge, rBus, N, M, T, P, D);
-//
-//        init();
-//        int s = 0, t = 0, d = 0;
-//        for (int i = 0; i < M; ++i) {
-//            s = rEdge[i][0], t = rEdge[i][1], d = rEdge[i][2];
-//            minDist[make_pair(s, t)] = INF;
-//            minDist[make_pair(t, s)] = INF;
-//            addEdge(s, t, d);
-//            addEdge(t, s, d);   // Ìí¼ÓË«Ïò±ß
-//        }
-//
-//        int Sj, Tj;
-//        for (int i = 0; i < T; ++i) {
-//            Sj = rBus[i][0], Tj = rBus[i][1];
-//            addBus(Sj, Tj); // Ìí¼ÓÒµÎñ
-//        }
-//
-//        allocateBus();
-//        outPut();
-//        cout << "\ntestTime " << testTime << endl;
-//        cout << "allNewEdgeCnt " << allNewEdgeCnt[testTime] << endl;
-//        cout << "allPathCnt " << allPathCnt[testTime] << endl;
-//        cout << "allMultiplierCnt " << allMultiplierCnt[testTime] << endl;
-//    }
-//
-//    return 0;
-//}
+int testTime = 0;
+int maxTestTime = 10;
 
 // Ö÷º¯Êı
 int main() {
@@ -185,23 +136,153 @@ int main() {
     }
 
     allocateBus();
+    reAllocateBus();
     outPut();
 
     return 0;
 }
 
-
-
-
+// ½«ËùÓĞµÄÒµÎñ·ÖÅäµ½¹âÍøÂçÖĞ
 void allocateBus() {
     for (int i = 0; i < T; ++i) {
         loadBus(i);
+        //reAllocateBus();
     }
 }
 
+// ÊÔÍ¼ÖØĞÂ·ÖÅäÒµÎñµ½¹âÍøÂçÖĞ
+void reAllocateBus() {
+
+    int n = newEdge.size(), trueEdgeId;
+    for (int i = 0; i < n; ++i) {
+    //for (int i = n - 1; i >= 0; --i) {
+
+        trueEdgeId = (i + M) * 2;
+        int busCnt = 0;
+        vector<int> lastBusIds, lastPileIds;
+
+        for (int j = 0; j < P; ++j)
+            if (edge[trueEdgeId].Pile[j] != -1 && edge[trueEdgeId].Pile[j] != T) {   // ËµÃ÷ÔÚÍ¨µÀjÉÏ³ĞÔØÁË¸ÃÒµÎñ
+                ++busCnt;
+                lastBusIds.push_back(edge[trueEdgeId].Pile[j]);
+                lastPileIds.push_back(j);
+            }
+         
+        bool findPath = false;
+
+        if (busCnt == 0) {      // Èç¹û¸ÃĞÂ±ßÉÏ£¬Ò»ÌõÒµÎñ¶¼Ã»ÓĞ³ĞÔØ£¬Ö±½ÓÉ¾±ß
+
+            for (int k = 0; k < newEdge.size(); ++k) {
+
+                if (newEdgePathId[k] == i + M) {        // É¾È¥¶ÔÓ¦±ß
+                    newEdge.erase(newEdge.begin() + k);
+                    newEdgePathId.erase(newEdgePathId.begin() + k);
+                    break;
+                }
+
+            }
+            for (int k = 0; k < P; ++k) {   // ¸Ã±ßÒÑÉ¾³ı£¬¾ÍÓ¦¶ÔÆä½øĞĞ·âËø
+                edge[trueEdgeId].Pile[k] = T;
+                edge[trueEdgeId + 1].Pile[k] = T;   // Å¼Êı+1
+            }
+            eraseEdge.push_back(i + M);     // ¼ÇÏÂÉ¾±ßµÄ±àºÅ
+        }
+        else {  // Èç¹û¸ÃĞÂ±ßÉÏ£¬³ĞÔØÁË¶àÌõÒµÎñ£¬Ôò¶Ô¸Ã±ßÉÏµÄËùÓĞÒµÎñÖØĞÂ·ÖÅä£¬¿´ÄÜ·ñ²»ÒÀÀµ¸ÃĞÂ±ß
+
+            vector<vector<int>> pathTmp(busCnt, vector<int>());     // ÓÃÓÚ´ËºóÖØĞÂ¼ÓÔØ±ß
+            for (int k = 0; k < busCnt; ++k) {
+                pathTmp[k] = buses[lastBusIds[k]].pathTmp;
+                reCoverNetwork(lastBusIds[k], lastPileIds[k]);
+            }
+
+            int stopK = -1;
+            vector<int> tmpLastPileIds;
+            for (int k = 0; k < busCnt; ++k) {
+                //findPath = dijkstra5(buses[lastBusIds[k]], i + M);
+                findPath = BFS5(buses[lastBusIds[k]], i + M);
+                if (findPath == false) {
+                    stopK = k;
+                    break;
+                }
+                tmpLastPileIds.push_back(buses[lastBusIds[k]].pileId);   // Ô­±¾µÄpileIdÒÑ¸Ä±ä£¬´Ë´¦½øĞĞ¸üĞÂ£¬ÒÔ·ÀÖ¹reCoverNetworkÊ±³öbug
+            }
+            
+            if (findPath) {
+
+                for (int k = 0; k < newEdge.size(); ++k) {
+
+                    if (newEdgePathId[k] == i + M) {    // É¾È¥¶ÔÓ¦±ß
+                        newEdge.erase(newEdge.begin() + k);
+                        newEdgePathId.erase(newEdgePathId.begin() + k);
+                        break;
+                    }
+
+                }
+
+                for (int k = 0; k < P; ++k) {   // ¸Ã±ßÒÑÉ¾³ı£¬¾ÍÓ¦¶ÔÆä½øĞĞ·âËø
+                    edge[trueEdgeId].Pile[k] = T;
+                    edge[trueEdgeId + 1].Pile[k] = T;   // Å¼Êı+1
+                }
+
+                eraseEdge.push_back(i + M);     // ¼ÇÏÂÉ¾±ßµÄ±àºÅ
+
+                for (int k = 0; k < busCnt; ++k) {
+
+                    vector<int> nullVector;
+                    buses[lastBusIds[k]].mutiplierId.swap(nullVector);
+                    buses[lastBusIds[k]].curA = D;
+
+                    int curNode = buses[lastBusIds[k]].start, trueNextEdgeId;
+                    for (int i = 0; i < buses[lastBusIds[k]].path.size(); ++i) {
+
+                        if (edge[buses[lastBusIds[k]].path[i] * 2].from == curNode)
+                            trueNextEdgeId = buses[lastBusIds[k]].path[i] * 2;
+                        else
+                            trueNextEdgeId = buses[lastBusIds[k]].path[i] * 2 + 1;
+                        curNode = edge[trueNextEdgeId].to;
+
+                        if (buses[lastBusIds[k]].curA >= edge[trueNextEdgeId].trueD) {
+                            buses[lastBusIds[k]].curA -= edge[trueNextEdgeId].trueD;
+                        }
+                        else {
+                            node[edge[trueNextEdgeId].from].Multiplier[buses[lastBusIds[k]].pileId] = buses[lastBusIds[k]].pileId;
+                            buses[lastBusIds[k]].curA = D;
+                            buses[lastBusIds[k]].curA -= edge[trueNextEdgeId].trueD;
+                            buses[lastBusIds[k]].mutiplierId.push_back(edge[trueNextEdgeId].from);
+                        }
+                    }
+
+                }
+
+            }
+            else {
+
+                for (int k = 0; k < stopK; ++k) {   // °ÑÊÔÍ¼Ñ°Â·Ê±£¬Ôì³ÉµÄ¶ÔÍøÂçµÄÓ°ÏìÏû³ı
+                    reCoverNetwork(lastBusIds[k], tmpLastPileIds[k]);
+                }
+
+                for (int k = 0; k < busCnt; ++k) {  // ÖØĞÂ¼ÓÔØËùÓĞµÄ±ß
+                    vector<int> nullVector, nullPath1, nullPath2;
+                    buses[lastBusIds[k]].mutiplierId.swap(nullVector);
+                    buses[lastBusIds[k]].path.swap(nullPath1);
+                    buses[lastBusIds[k]].pathTmp.swap(nullPath2);
+
+                    buses[lastBusIds[k]].pileId = -1;
+                    buses[lastBusIds[k]].curA = D;
+                    reloadBus(lastBusIds[k], lastPileIds[k], pathTmp[k]);
+                }
+            }
+
+        }
+
+    }
+
+}
+
+// °ÑÒµÎñbusId¼ÓÔØµ½¹âÍøÂçÖĞ
 void loadBus(int busId) {
-    BFS1(buses[busId]);
     //dijkstra1(buses[busId]);
+    BFS1(buses[busId]);
     int curNode = buses[busId].start, trueNextEdgeId;
     for (int i = 0; i < buses[busId].path.size(); ++i) {
 
@@ -223,7 +304,8 @@ void loadBus(int busId) {
     }
 }
 
-void init() {   // ³õÊ¼»¯
+// ³õÊ¼»¯
+void init() {
 
     for (int i = 0; i < N; ++i) {
 
@@ -239,10 +321,12 @@ void init() {   // ³õÊ¼»¯
 
 }
 
-void addEdge(int s, int t, int d) {    // ¼Ó±ßº¯Êı£¬sÆğµã£¬tÖÕµã£¬d¾àÀë
+// ¼Ó±ßº¯Êı£¬sÆğµã£¬tÖÕµã£¬d¾àÀë
+void addEdge(int s, int t, int d) {
     edge[cntEdge].from = s; // Æğµã
     edge[cntEdge].to = t;   // ÖÕµã
     edge[cntEdge].d = 1;    // ¾àÀë
+    //edge[cntEdge].d = d;    // ¾àÀë
     edge[cntEdge].trueD = d;    // ¾àÀë
     edge[cntEdge].next = head[s];   // Á´Ê½Ç°Ïò¡£ÒÔsÎªÆğµãÏÂÒ»Ìõ±ßµÄ±àºÅ£¬head[s]´ú±íµÄÊÇµ±Ç°ÒÔsÎªÆğµãµÄÔÚÂß¼­ÉÏµÄµÚÒ»Ìõ±ßÔÚ±ß¼¯Êı×éµÄÎ»ÖÃ£¨±àºÅ£©
     for (int i = 0; i < P; ++i)
@@ -253,293 +337,22 @@ void addEdge(int s, int t, int d) {    // ¼Ó±ßº¯Êı£¬sÆğµã£¬tÖÕµã£¬d¾àÀë
         minDist[make_pair(s, t)] = d;
 }
 
-void addBus(int start, int end) {   // ¼ÓÒµÎñº¯Êı
+// ¼ÓÒµÎñº¯Êı
+void addBus(int start, int end) {
     buses[cntBus].start = start;
     buses[cntBus].end = end;
     buses[cntBus].busId = cntBus;
     vector<int>().swap(buses[cntBus].path);
     vector<int>().swap(buses[cntBus].pathTmp);
     vector<int>().swap(buses[cntBus].mutiplierId);
-    
     ++cntBus;
-}
-
-// ¿¼ÂÇÒ»±ß¶àÍ¨µÀµÄÇé¿öÏÂ£¬Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµãµÄÂ·¾¶£¨²»Ò»¶¨ÊÇ×îÉÙ±ßÊıÂ·¾¶£¬ÒòÎªÓĞ¿ÉÄÜ±ßµÄÍ¨µÀ±»ÍêÈ«Õ¼ÓÃ£©
-void BFS1(Business& bus) {
-
-    int start = bus.start, end = bus.end, p = 0;
-
-    bool findPath = false;
-    int minPathDist = INF;
-    int choosenP = -1;
-    vector<int> tmpOKPath;
-
-    // ÓÃÓÚÓÅ»¯µ¥¸öÒµÎñµÄ¼Ó±ß²ßÂÔ£¬µ«È«¾ÖÀ´¿´Ğ§¹û²»ºÃ
-    for (int i = 0; i < N; ++i) {
-        minDist2start[i] = INF;
-        vector<int>().swap(node[i].reachPile);
-    }
-    minDist2start[start] = 0;
-
-    for (; p < P; ++p) {
-        tmpOKPath.resize(N, -1);
-        for (int i = 0; i < N; ++i) { // ¸³³õÖµ
-            vis1[i] = false;
-        }
-        queue<pair<int, int>> null_queue;
-        bfsQ.swap(null_queue);
-        bfsQ.push(make_pair(start, 0));
-        vis1[start] = true;
-        int s = start;
-        int curLevel = 0;
-        bool getOutFlag = false;
-
-        while (!bfsQ.empty() && !getOutFlag) { // ¶ÓÁĞÎª¿Õ¼´£¬ËùÓĞµã¶¼±»¼ÓÈëµ½Éú³ÉÊ÷ÖĞÈ¥ÁË
-
-            s = bfsQ.front().first;
-            curLevel = bfsQ.front().second;
-            bfsQ.pop();
-
-            for (int i = head[s]; i != -1; i = edge[i].next) {
-
-                if (edge[i].Pile[p] == -1) {        // pileÎ´±»Õ¼ÓÃÊ±£¬²ÅÊÔÍ¼×ß¸Ã±ß
-                    int t = edge[i].to;
-                    if (vis1[t])
-                        continue;
-                    vis1[t] = true;
-                    tmpOKPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
-                    tmpDist2start[t] = curLevel + 1;
-                    if (tmpDist2start[t] < minDist2start[t]) {
-                        minDist2start[t] = tmpDist2start[t];
-                        node[t].reachPile.push_back(p);
-                    }
-                    if (t == end) {
-                        getOutFlag = true;
-                        s = t;
-                        curLevel += 1;
-                        break;
-                    }
-                    else {
-                        bfsQ.push(make_pair(t, curLevel + 1));
-                    }
-                }
-            }
-
-        }
-        if (s == end) {
-
-            //if (p == 0) {
-            //    choosenP = p;
-            //    findPath = true;
-            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-            //    break;
-            //}
-            int curNode = end, tmpDist = 0;
-            while (tmpOKPath[curNode] != -1) {
-                int edgeId = tmpOKPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
-                curNode = edge[edgeId].from;
-                tmpDist += edge[edgeId].d;
-                if (curNode == start)
-                    break;
-            }
-            if (tmpDist < minPathDist) {
-                minPathDist = tmpDist;
-                bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-                choosenP = p;
-            }
-            findPath = true;
-        }
-
-    }
-    if (findPath == false) {    // ÕÒ²»µ½Â·£¬ĞèÒª¹¹ÔìĞÂ±ß£¬ÒÔÏÂÌá¹©ÁËÁ½ÖÖ²ßÂÔ£¬Ê¹ÓÃÊ±ĞèÒª×¢ÊÍµôÆäÖĞÒ»¸ö
-
-        //findAddPath2(bus, dist2start); // ÓÃÓÚÓÅ»¯µ¥¸öÒµÎñµÄ¼Ó±ß²ßÂÔ£¬µ«È«¾ÖÀ´¿´Ğ§¹û²»ºÃ
-        BFS2(bus);       // ¾ÉµÄ¼Ó±ß²ßÂÔ£¬Ò»µ«¼Ó±ß£¬Õû¸öÂ·¾¶¶¼»á¼Ó£¬µ«È«¾ÖĞÔÄÜÊÇµ±Ç°×îºÃµÄ
-        return;
-    }
-
-    int curNode = end;
-    bus.pileId = choosenP;
-    while (bus.pathTmp[curNode] != -1) {
-        int edgeId = bus.pathTmp[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
-
-        bus.path.push_back(edgeId / 2); // edgeId / 2ÊÇÎªÁËÊÊÓ¦ÌâÄ¿ÒªÇó
-        edge[edgeId].Pile[choosenP] = bus.busId;
-
-        if (edgeId % 2) // ÆæÊı-1
-            edge[edgeId - 1].Pile[choosenP] = bus.busId;   // Ë«Ïò±ß£¬Á½±ßÒ»Æğ´¦Àí
-        else            // Å¼Êı+1
-            edge[edgeId + 1].Pile[choosenP] = bus.busId;
-
-        curNode = edge[bus.pathTmp[curNode]].from;
-    }
-    reverseArray(bus.path);
-
-}
-
-// Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµãµÄÂ·¾¶£¨²»¿¼ÂÇÍ¨µÀ¶ÂÈû£©£¬²¢¶ÔÂ·¾¶ÉÏµÄÃ¿Ò»Ìõ±ß¶¼Ö´ĞĞ¼Ó±ß²Ù×÷£¬È»ºó½»¸øBFS1²Ù×÷
-void BFS2(Business& bus) {
-
-    int start = bus.start, end = bus.end;
-
-    bus.trueMinPath.resize(N, -1);
-    for (int i = 0; i < N; ++i) { // ¸³³õÖµ
-        vis1[i] = false;
-    }
-
-    queue<pair<int, int>> null_queue;
-    bfsQ.swap(null_queue);
-    bfsQ.push(make_pair(start, 0));
-    vis1[start] = true;
-    int s = start;
-    int curLevel = 0;
-    bool getOutFlag = false;
-
-    while (!bfsQ.empty() && !getOutFlag) { // ¶ÓÁĞÎª¿Õ¼´£¬ËùÓĞµã¶¼±»¼ÓÈëµ½Éú³ÉÊ÷ÖĞÈ¥ÁË
-
-        s = bfsQ.front().first;
-        curLevel = bfsQ.front().second;
-        bfsQ.pop();
-
-        for (int i = head[s]; i != -1; i = edge[i].next) {
-            int t = edge[i].to;
-            if (vis1[t])
-                continue;
-            vis1[t] = true;
-            bus.trueMinPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
-            if (t == end) {
-                getOutFlag = true;
-                s = t;
-                curLevel += 1;
-                break;
-            }
-            else {
-                bfsQ.push(make_pair(t, curLevel + 1));
-            }
-        }
-
-    }
-
-    int curNode = end;
-    while (bus.trueMinPath[curNode] != -1) {
-        int edgeId = bus.trueMinPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
-
-        addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
-        addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
-
-        if (edge[edgeId].from < edge[edgeId].to)
-            newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
-        else
-            newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
-
-        curNode = edge[bus.trueMinPath[curNode]].from;
-    }
-    BFS1(bus);
-
-}
-
-// Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµã£¬ÔÚ²»¿¼ÂÇÍ¨µÀ¶ÂÈûÏÂµÄ×î¶ÌÂ·¾¶
-void BFS3(Business& bus) {
-
-    int start = bus.start, end = bus.end;
-
-    bus.trueMinPath.resize(N, -1);
-    for (int i = 0; i < N; ++i) { // ¸³³õÖµ
-        vis1[i] = false;
-    }
-
-    queue<pair<int, int>> null_queue;
-    bfsQ.swap(null_queue);
-    bfsQ.push(make_pair(start, 0));
-    vis1[start] = true;
-    int s = start;
-    int curLevel = 0;
-    bool getOutFlag = false;
-
-    while (!bfsQ.empty() && !getOutFlag) { // ¶ÓÁĞÎª¿Õ¼´£¬ËùÓĞµã¶¼±»¼ÓÈëµ½Éú³ÉÊ÷ÖĞÈ¥ÁË
-
-        s = bfsQ.front().first;
-        curLevel = bfsQ.front().second;
-        bfsQ.pop();
-
-        for (int i = head[s]; i != -1; i = edge[i].next) {
-            int t = edge[i].to;
-            if (vis1[t])
-                continue;
-            vis1[t] = true;
-            bus.trueMinPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
-            if (t == end) {
-                getOutFlag = true;
-                s = t;
-                curLevel += 1;
-                break;
-            }
-            else {
-                bfsQ.push(make_pair(t, curLevel + 1));
-            }
-        }
-
-    }
-
-}
-
-// Ñ°ÕÒ´Óstartµ½end£¬ÔÚÌØ¶¨Í¨µÀÏÂµÄ×î¶ÌÂ·¾¶
-void BFS4(int start, int end, int pileId, vector<int>& tmpOKPath) {
-
-    if (start == end)
-        return;
-    for (int i = 0; i < N; ++i) { // ¸³³õÖµ
-        vis1[i] = false;
-    }
-
-    tmpOKPath.resize(N, -1);
-    for (int i = 0; i < N; ++i) { // ¸³³õÖµ
-        vis1[i] = false;
-    }
-    queue<pair<int, int>> null_queue;
-    bfsQ.swap(null_queue);
-    bfsQ.push(make_pair(start, 0));
-    vis1[start] = true;
-    int s = start;
-    int curLevel = 0;
-    bool getOutFlag = false;
-
-    while (!bfsQ.empty() && !getOutFlag) { // ¶ÓÁĞÎª¿Õ¼´£¬ËùÓĞµã¶¼±»¼ÓÈëµ½Éú³ÉÊ÷ÖĞÈ¥ÁË
-
-        s = bfsQ.front().first;
-        curLevel = bfsQ.front().second;
-        bfsQ.pop();
-
-        for (int i = head[s]; i != -1; i = edge[i].next) {
-
-            if (edge[i].Pile[pileId] == -1) {        // pileÎ´±»Õ¼ÓÃÊ±£¬²ÅÊÔÍ¼×ß¸Ã±ß
-                int t = edge[i].to;
-                if (vis1[t])
-                    continue;
-                vis1[t] = true;
-                tmpOKPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
-                if (t == end) {
-                    getOutFlag = true;
-                    s = t;
-                    curLevel += 1;
-                    break;
-                }
-                else {
-                    bfsQ.push(make_pair(t, curLevel + 1));
-                }
-            }
-        }
-
-    }
-
 }
 
 // ¿¼ÂÇÒ»±ß¶àÍ¨µÀµÄÇé¿öÏÂ£¬Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµãµÄÂ·¾¶£¨²»Ò»¶¨ÊÇ×î¶ÌÂ·¾¶£¬ÒòÎªÓĞ¿ÉÄÜ±ßµÄÍ¨µÀ±»ÍêÈ«Õ¼ÓÃ£©
 void dijkstra1(Business& bus) {
 
-    //dijkstra3(bus);
     int start = bus.start, end = bus.end, p = 0;
-
+    
     bool findPath = false;
     int minPathDist = INF;
     int choosenP = -1;
@@ -548,11 +361,9 @@ void dijkstra1(Business& bus) {
     // ÓÃÓÚÓÅ»¯µ¥¸öÒµÎñµÄ¼Ó±ß²ßÂÔ£¬µ«È«¾ÖÀ´¿´Ğ§¹û²»ºÃ
     for (int i = 0; i < N; ++i) {
         vis2[i] = false;
-        minDist2start[i] = INF;
-        vector<int>().swap(node[i].reachPile);
+        vector<int>().swap(node[i].reachPile); 
     }
     vis2[start] = true;
-    minDist2start[start] = 0;
 
     for (; p < P; ++p) {
 
@@ -573,6 +384,7 @@ void dijkstra1(Business& bus) {
 
             if (s == end) { // µ±endÒÑ¾­¼ÓÈëµ½ÁËÉú³ÉÊ÷£¬Ôò½áÊøËÑË÷
                 break;
+                bus.pileId = p;
             }
 
             // Ã»ÓĞ±éÀú¹ı²ÅĞèÒª±éÀú
@@ -584,35 +396,20 @@ void dijkstra1(Business& bus) {
 
                 if (edge[i].Pile[p] == -1) {        // pileÎ´±»Õ¼ÓÃÊ±£¬²ÅÊÔÍ¼×ß¸Ã±ß
                     int t = edge[i].to;
-
                     vis2[t] = true;
+                    node[t].reachPile.push_back(p);
+                    
                     if (dis[t] > dis[s] + edge[i].d) {
                         tmpOKPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
                         dis[t] = dis[s] + edge[i].d;   // ËÉ³Ú²Ù×÷
                         q.push(Node1(dis[t], t));   // °ÑĞÂ±éÀúµ½µÄµã¼ÓÈë¶ÑÖĞ
-
-                        //vis2[t] = true;
-                        if (dis[t] < minDist2start[t]) {
-                            minDist2start[t] = dis[t];
-                            node[t].reachPile.push_back(p);
-                        }
-
                     }
-                }
-                else {
-
                 }
 
             }
         }
-        if (s == end) {
+        if (s == end) { // µ±endÒÑ¾­¼ÓÈëµ½ÁËÉú³ÉÊ÷£¬Ôò½áÊøËÑË÷
 
-            //if (p == 0) {
-            //    choosenP = p;
-            //    findPath = true;
-            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-            //    break;
-            //}
             int curNode = end, tmpDist = 0;
             while (tmpOKPath[curNode] != -1) {
                 int edgeId = tmpOKPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
@@ -628,40 +425,12 @@ void dijkstra1(Business& bus) {
             }
             findPath = true;
 
-            ////µ±×ßpÍ¨µÀµÄÂ·¾¶ÊÇÊÂÊµÉÏµÄ×î¶ÌÂ·¾¶Ê±£¬Ôò½áÊøpµÄÑ­»·
-            //int curNode = end, tmpDist = 0;
-            //bool breakFlag = true;
-            //while (tmpOKPath[curNode] != -1) {
-
-            //    if (bus.trueMinPath[curNode] != tmpOKPath[curNode]) {   // Óë×î¶ÌÂ·¾¶ÉÔÓĞ²»Í¬£¬¾Í²»ÖĞ¶ÏÍùÏÂÒ»¸öÍ¨µÀµÄËÑË÷
-            //        breakFlag = false;
-            //    }
-            //    int edgeId = tmpOKPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
-            //    curNode = edge[edgeId].from;
-            //    tmpDist += edge[edgeId].d;
-            //    if (curNode == start)
-            //        break;
-            //}
-            //if (breakFlag) {
-            //    choosenP = p;
-            //    findPath = true;
-            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-            //    break;
-            //}
-            //if (tmpDist < minPathDist) {
-            //    minPathDist = tmpDist;
-            //    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-            //    choosenP = p;
-            //}
-            //findPath = true;
-
         }
     }
 
     if (findPath == false) {    // ÕÒ²»µ½Â·£¬ĞèÒª¹¹ÔìĞÂ±ß£¬ÒÔÏÂÌá¹©ÁËÁ½ÖÖ²ßÂÔ£¬Ê¹ÓÃÊ±ĞèÒª×¢ÊÍµôÆäÖĞÒ»¸ö
-
-        findAddPath1(bus, vis2); // ÓÃÓÚÓÅ»¯µ¥¸öÒµÎñµÄ¼Ó±ß²ßÂÔ£¬µ«È«¾ÖÀ´¿´Ğ§¹û²»ºÃ
-        //dijkstra2(bus);       // ¾ÉµÄ¼Ó±ß²ßÂÔ£¬Ò»µ«¼Ó±ß£¬Õû¸öÂ·¾¶¶¼»á¼Ó£¬µ«È«¾ÖĞÔÄÜÊÇµ±Ç°×îºÃµÄ
+        //findAddPath(bus, vis2); // ÓÃÓÚÓÅ»¯µ¥¸öÒµÎñµÄ¼Ó±ß²ßÂÔ£¬µ«È«¾ÖÀ´¿´Ğ§¹û²»ºÃ
+        dijkstra2(bus);       // ¾ÉµÄ¼Ó±ß²ßÂÔ£¬Ò»µ«¼Ó±ß£¬Õû¸öÂ·¾¶¶¼»á¼Ó£¬µ«È«¾ÖĞÔÄÜÊÇµ±Ç°×îºÃµÄ
         return;
     }
 
@@ -687,7 +456,7 @@ void dijkstra1(Business& bus) {
 // Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµãµÄÂ·¾¶£¬²¢¶ÔÂ·¾¶ÉÏµÄÃ¿Ò»Ìõ±ß¶¼Ö´ĞĞ¼Ó±ß²Ù×÷£¬È»ºó½»¸ødijkstra1²Ù×÷
 void dijkstra2(Business& bus) {
 
-    int start = bus.start, end = bus.end, p = 0;
+    int start = bus.start, end = bus.end;
 
     bus.trueMinPath.resize(N, -1);
     for (int i = 0; i < N; ++i) { // ¸³³õÖµ
@@ -706,7 +475,6 @@ void dijkstra2(Business& bus) {
         s = x.nodeId;   // µãsÊÇdijstraÉú³ÉÊ÷ÉÏµÄµã£¬Ô´µãµ½sµÄ×î¶Ì¾àÀëÒÑÈ·¶¨
 
         if (s == end) { // µ±endÒÑ¾­¼ÓÈëµ½ÁËÉú³ÉÊ÷£¬Ôò½áÊøËÑË÷
-            bus.pileId = p;
             break;
         }
 
@@ -728,14 +496,14 @@ void dijkstra2(Business& bus) {
     while (bus.trueMinPath[curNode] != -1) {
         int edgeId = bus.trueMinPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
 
-        addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
-        addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
-
-        if (edge[edgeId].from < edge[edgeId].to)
-            newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
-        else
-            newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
-
+            addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
+            addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
+            
+            if (edge[edgeId].from < edge[edgeId].to)
+                newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
+            else
+                newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
+            newEdgePathId.emplace_back(cntEdge / 2 - 1);
 
         curNode = edge[bus.trueMinPath[curNode]].from;
     }
@@ -828,6 +596,355 @@ void dijkstra4(int start, int end, int pileId, vector<int>& tmpOKPath) {
 
 }
 
+// ¿¼ÂÇÒ»±ß¶àÍ¨µÀµÄÇé¿öÏÂ£¬Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµãµÄÂ·¾¶£¬µ«Óöµ½ĞèÒª¼Ó±ßµÄÇé¿ö£¬²»×ö´¦Àí£¬Ö±½Ó·µ»Ø
+bool dijkstra5(Business& bus, int blockEdge) {
+
+    int start = bus.start, end = bus.end, p = 0;
+
+    bool findPath = false;
+    int minPathDist = INF;
+    int choosenP = -1;
+    vector<int> tmpOKPath;
+
+    for (; p < P; ++p) {
+
+        tmpOKPath.resize(N, -1);
+        for (int i = 0; i < N; ++i) { // ¸³³õÖµ
+            dis[i] = INF;
+            vis1[i] = false;
+        }
+        dis[start] = 0;  // Ô´µãµ½Ô´µãµÄ¾àÀëÎª0
+        priority_queue<Node1> null_queue; // ¶¨ÒåÒ»¸ö¿ÕµÄpriority_queue¶ÔÏó
+        q.swap(null_queue);
+        q.push(Node1(0, start));
+        int s = -1;
+        while (!q.empty()) {   // ¶ÑÎª¿Õ¼´£¬ËùÓĞµã¶¼±»¼ÓÈëµ½Éú³ÉÊ÷ÖĞÈ¥ÁË
+            Node1 x = q.top();  // ¼ÇÂ¼¶Ñ¶¥£¨¶ÑÄÚ×îĞ¡µÄ±ß£©²¢½«Æäµ¯³ö
+            q.pop();
+            s = x.nodeId;   // µãsÊÇdijstraÉú³ÉÊ÷ÉÏµÄµã£¬Ô´µãµ½sµÄ×î¶Ì¾àÀëÒÑÈ·¶¨
+
+            if (s == end) { // µ±endÒÑ¾­¼ÓÈëµ½ÁËÉú³ÉÊ÷£¬Ôò½áÊøËÑË÷
+                break;
+                bus.pileId = p;
+            }
+
+            // Ã»ÓĞ±éÀú¹ı²ÅĞèÒª±éÀú
+            if (vis1[s])
+                continue;
+
+            vis1[s] = true;
+            for (int i = head[s]; i != -1; i = edge[i].next) { // ËÑË÷¶Ñ¶¥ËùÓĞÁ¬±ß
+
+                if (i / 2 == blockEdge)
+                    continue;
+
+                if (edge[i].Pile[p] == -1) {        // pileÎ´±»Õ¼ÓÃÊ±£¬²ÅÊÔÍ¼×ß¸Ã±ß
+                    int t = edge[i].to;
+                    if (dis[t] > dis[s] + edge[i].d) {
+                        tmpOKPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
+                        dis[t] = dis[s] + edge[i].d;   // ËÉ³Ú²Ù×÷
+                        q.push(Node1(dis[t], t));   // °ÑĞÂ±éÀúµ½µÄµã¼ÓÈë¶ÑÖĞ
+                    }
+                }
+
+            }
+        }
+        if (s == end) { // µ±endÒÑ¾­¼ÓÈëµ½ÁËÉú³ÉÊ÷£¬Ôò½áÊøËÑË÷
+
+            int curNode = end, tmpDist = 0;
+            while (tmpOKPath[curNode] != -1) {
+                int edgeId = tmpOKPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+                curNode = edge[edgeId].from;
+                tmpDist += edge[edgeId].d;
+                if (curNode == start)
+                    break;
+            }
+            if (tmpDist < minPathDist) {
+                minPathDist = tmpDist;
+                bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+                choosenP = p;
+            }
+            findPath = true;
+
+        }
+    }
+
+    if (findPath == false) {    // ÕÒ²»µ½Â·£¬Ö±½Ó·µ»Ø
+        return false;
+    }
+
+    int curNode = end;
+    bus.pileId = choosenP;
+    while (bus.pathTmp[curNode] != -1) {
+        int edgeId = bus.pathTmp[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+
+        bus.path.push_back(edgeId / 2); // edgeId / 2ÊÇÎªÁËÊÊÓ¦ÌâÄ¿ÒªÇó
+        edge[edgeId].Pile[choosenP] = bus.busId;
+
+        if (edgeId % 2) // ÆæÊı-1
+            edge[edgeId - 1].Pile[choosenP] = bus.busId;   // Ë«Ïò±ß£¬Á½±ßÒ»Æğ´¦Àí
+        else            // Å¼Êı+1
+            edge[edgeId + 1].Pile[choosenP] = bus.busId;
+
+
+        curNode = edge[bus.pathTmp[curNode]].from;
+    }
+    reverseArray(bus.path);
+    return true;
+
+}
+
+// ¿¼ÂÇÒ»±ß¶àÍ¨µÀµÄÇé¿öÏÂ£¬Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµãµÄÂ·¾¶£¨²»Ò»¶¨ÊÇ×îÉÙ±ßÊıÂ·¾¶£¬ÒòÎªÓĞ¿ÉÄÜ±ßµÄÍ¨µÀ±»ÍêÈ«Õ¼ÓÃ£©
+void BFS1(Business& bus) {
+
+    int start = bus.start, end = bus.end, p = 0;
+
+    bool findPath = false;
+    int minPathDist = INF;
+    int choosenP = -1;
+    vector<int> tmpOKPath;
+
+    for (; p < P; ++p) {
+        tmpOKPath.resize(N, -1);
+        for (int i = 0; i < N; ++i) { // ¸³³õÖµ
+            vis1[i] = false;
+        }
+        queue<pair<int, int>> bfsQ;
+        bfsQ.push(make_pair(start, 0));
+        vis1[start] = true;
+        int s = start;
+        int curLevel = 0;
+        bool getOutFlag = false;
+
+        while (!bfsQ.empty() && !getOutFlag) { // ¶ÓÁĞÎª¿Õ¼´£¬ËùÓĞµã¶¼±»¼ÓÈëµ½Éú³ÉÊ÷ÖĞÈ¥ÁË
+
+            s = bfsQ.front().first;
+            curLevel = bfsQ.front().second;
+            bfsQ.pop();
+
+            for (int i = head[s]; i != -1; i = edge[i].next) {
+
+                if (edge[i].Pile[p] == -1) {        // pileÎ´±»Õ¼ÓÃÊ±£¬²ÅÊÔÍ¼×ß¸Ã±ß
+                    int t = edge[i].to;
+                    if (vis1[t])
+                        continue;
+                    vis1[t] = true;
+                    tmpOKPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
+
+                    if (t == end) {
+                        getOutFlag = true;
+                        s = t;
+                        break;
+                    }
+                    else {
+                        bfsQ.push(make_pair(t, curLevel + 1));
+                    }
+
+                }
+            }
+
+        }
+        if (s == end) {
+
+            int curNode = end, tmpDist = 0;
+            while (tmpOKPath[curNode] != -1) {
+                int edgeId = tmpOKPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+                curNode = edge[edgeId].from;
+                tmpDist += edge[edgeId].d;
+                if (curNode == start)
+                    break;
+            }
+            if (tmpDist < minPathDist) {
+                minPathDist = tmpDist;
+                bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+                choosenP = p;
+            }
+            findPath = true;
+        }
+
+    }
+    if (findPath == false) {    // ÕÒ²»µ½Â·£¬ĞèÒª¹¹ÔìĞÂ±ß
+        BFS2(bus);       // ¾ÉµÄ¼Ó±ß²ßÂÔ£¬Ò»µ«¼Ó±ß£¬Õû¸öÂ·¾¶¶¼»á¼Ó£¬µ«È«¾ÖĞÔÄÜÊÇµ±Ç°×îºÃµÄ
+        return;
+    }
+
+    int curNode = end;
+    bus.pileId = choosenP;
+    while (bus.pathTmp[curNode] != -1) {
+        int edgeId = bus.pathTmp[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+
+        bus.path.push_back(edgeId / 2); // edgeId / 2ÊÇÎªÁËÊÊÓ¦ÌâÄ¿ÒªÇó
+        edge[edgeId].Pile[choosenP] = bus.busId;
+
+        if (edgeId % 2) // ÆæÊı-1
+            edge[edgeId - 1].Pile[choosenP] = bus.busId;   // Ë«Ïò±ß£¬Á½±ßÒ»Æğ´¦Àí
+        else            // Å¼Êı+1
+            edge[edgeId + 1].Pile[choosenP] = bus.busId;
+
+        curNode = edge[bus.pathTmp[curNode]].from;
+    }
+    reverseArray(bus.path);
+    if (bus.busId == 6)
+        int a = 1;
+
+}
+
+// Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµãµÄÂ·¾¶£¨²»¿¼ÂÇÍ¨µÀ¶ÂÈû£©£¬²¢¶ÔÂ·¾¶ÉÏµÄÃ¿Ò»Ìõ±ß¶¼Ö´ĞĞ¼Ó±ß²Ù×÷£¬È»ºó½»¸øBFS1²Ù×÷
+void BFS2(Business& bus) {
+
+    int start = bus.start, end = bus.end;
+
+    bus.trueMinPath.resize(N, -1);
+    for (int i = 0; i < N; ++i) { // ¸³³õÖµ
+        vis1[i] = false;
+    }
+
+    queue<pair<int, int>> bfsQ;
+    bfsQ.push(make_pair(start, 0));
+    vis1[start] = true;
+    int s = start;
+    int curLevel = 0;
+    bool getOutFlag = false;
+
+    while (!bfsQ.empty() && !getOutFlag) { // ¶ÓÁĞÎª¿Õ¼´£¬ËùÓĞµã¶¼±»¼ÓÈëµ½Éú³ÉÊ÷ÖĞÈ¥ÁË
+
+        s = bfsQ.front().first;
+        curLevel = bfsQ.front().second;
+        bfsQ.pop();
+
+        for (int i = head[s]; i != -1; i = edge[i].next) {
+            int t = edge[i].to;
+            if (vis1[t])
+                continue;
+            vis1[t] = true;
+            bus.trueMinPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
+            if (t == end) {
+                getOutFlag = true;
+                s = t;
+                break;
+            }
+            else {
+                bfsQ.push(make_pair(t, curLevel + 1));
+            }
+        }
+
+    }
+
+    int curNode = end;
+    while (bus.trueMinPath[curNode] != -1) {
+        int edgeId = bus.trueMinPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+
+        addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
+        addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
+
+        if (edge[edgeId].from < edge[edgeId].to)
+            newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
+        else
+            newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
+        newEdgePathId.emplace_back(cntEdge / 2 - 1);
+
+        curNode = edge[bus.trueMinPath[curNode]].from;
+    }
+    BFS1(bus);
+
+}
+
+// ¿¼ÂÇÒ»±ß¶àÍ¨µÀµÄÇé¿öÏÂ£¬Ñ°ÕÒÒµÎñbusµÄÆğµãµ½ÖÕµãµÄÂ·¾¶£¬µ«Óöµ½ĞèÒª¼Ó±ßµÄÇé¿ö£¬²»×ö´¦Àí£¬Ö±½Ó·µ»Ø
+bool BFS5(Business& bus, int blockEdge) {
+
+    int start = bus.start, end = bus.end, p = 0;
+
+    bool findPath = false;
+    int minPathDist = INF;
+    int choosenP = -1;
+    vector<int> tmpOKPath;
+
+    for (; p < P; ++p) {
+        tmpOKPath.resize(N, -1);
+        for (int i = 0; i < N; ++i) { // ¸³³õÖµ
+            vis1[i] = false;
+        }
+        queue<pair<int, int>> bfsQ;
+        bfsQ.push(make_pair(start, 0));
+        vis1[start] = true;
+        int s = start;
+        int curLevel = 0;
+        bool getOutFlag = false;
+
+        while (!bfsQ.empty() && !getOutFlag) { // ¶ÓÁĞÎª¿Õ¼´£¬ËùÓĞµã¶¼±»¼ÓÈëµ½Éú³ÉÊ÷ÖĞÈ¥ÁË
+
+            s = bfsQ.front().first;
+            curLevel = bfsQ.front().second;
+            bfsQ.pop();
+
+            for (int i = head[s]; i != -1; i = edge[i].next) {
+
+                if (i / 2 == blockEdge)
+                    continue;
+
+                if (edge[i].Pile[p] == -1) {        // pileÎ´±»Õ¼ÓÃÊ±£¬²ÅÊÔÍ¼×ß¸Ã±ß
+                    int t = edge[i].to;
+                    if (vis1[t])
+                        continue;
+                    vis1[t] = true;
+                    tmpOKPath[t] = i;    // ¼ÇÂ¼ÏÂµÖ´ïÂ·¾¶µãtµÄ±ßµÄ±àºÅi
+
+                    if (t == end) {
+                        getOutFlag = true;
+                        s = t;
+                        break;
+                    }
+                    else {
+                        bfsQ.push(make_pair(t, curLevel + 1));
+                    }
+
+                }
+            }
+
+        }
+        if (s == end) {
+
+            int curNode = end, tmpDist = 0;
+            while (tmpOKPath[curNode] != -1) {
+                int edgeId = tmpOKPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+                curNode = edge[edgeId].from;
+                tmpDist += edge[edgeId].d;
+                if (curNode == start)
+                    break;
+            }
+            if (tmpDist < minPathDist) {
+                minPathDist = tmpDist;
+                bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+                choosenP = p;
+            }
+            findPath = true;
+        }
+
+    }
+    if (findPath == false) {    // ÕÒ²»µ½Â·£¬ĞèÒª¹¹ÔìĞÂ±ß
+        return false;
+    }
+
+    int curNode = end;
+    bus.pileId = choosenP;
+    while (bus.pathTmp[curNode] != -1) {
+        int edgeId = bus.pathTmp[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+
+        bus.path.push_back(edgeId / 2); // edgeId / 2ÊÇÎªÁËÊÊÓ¦ÌâÄ¿ÒªÇó
+        edge[edgeId].Pile[choosenP] = bus.busId;
+
+        if (edgeId % 2) // ÆæÊı-1
+            edge[edgeId - 1].Pile[choosenP] = bus.busId;   // Ë«Ïò±ß£¬Á½±ßÒ»Æğ´¦Àí
+        else            // Å¼Êı+1
+            edge[edgeId + 1].Pile[choosenP] = bus.busId;
+
+        curNode = edge[bus.pathTmp[curNode]].from;
+    }
+    reverseArray(bus.path);
+    return true;
+}
+
+// ·´×ªÊı×é
 void reverseArray(vector<int>& arr) {
 
     int tmp, n = arr.size();
@@ -839,13 +956,9 @@ void reverseArray(vector<int>& arr) {
 
 }
 
+// ½«½á¹ûÊä³ö
 void outPut() {
     cout << newEdge.size() << endl;
-
-    //int totNewEdge = newEdge.size();
-    //int totPathSize = 0;
-    //int totMultiplier = 0;
-
     for (int i = 0; i < newEdge.size(); ++i) {
         cout << newEdge[i].first << " " << newEdge[i].second << endl;
     }
@@ -853,13 +966,19 @@ void outPut() {
         int pSize = buses[i].path.size();
         int mSize = buses[i].mutiplierId.size();
 
-        //totPathSize += pSize;
-        //totMultiplier += mSize;
-
         cout << buses[i].pileId << " " << pSize << " "
             << mSize << " ";
         for (int j = 0; j < pSize; ++j) {
-            cout << buses[i].path[j];
+
+            int pathID = buses[i].path[j];
+            int modify = 0; // ¼ÇÏÂpathId´óÓÚ±»É¾³ıµÄ±ßµÄ±àºÅµÄÊıÄ¿
+
+            for (int k = 0; k < eraseEdge.size(); ++k) {
+                if (pathID > eraseEdge[k])
+                    ++modify;
+            }
+
+            cout << pathID - modify;
             if (mSize == 0 && j == pSize - 1 && i != T - 1) {
                 cout << endl;
             }
@@ -875,10 +994,6 @@ void outPut() {
                 cout << endl;
         }
     }
-
-    //allNewEdgeCnt[testTime] = totNewEdge;
-    //allPathCnt[testTime] = totPathSize;
-    //allMultiplierCnt[testTime] = totMultiplier;
 }
 
 // ²âÊÔstartÓëendÁ½µãÖ®¼äµÄÁ¬Í¨ĞÔ£¬Á¬Í¨Ôò·µ»Øtrue
@@ -913,7 +1028,7 @@ bool bfsTestConnection(int start, int end) {
 }
 
 // ÔÚÒòÍ¨µÀ¶ÂÈû¶øÌí¼Ó²»ÁËÒµÎñÊ±£¬Ñ°ÕÒºÏÊÊµÄÎ»ÖÃ½øĞĞ¼Ó±ß²Ù×÷£¬²¢ÔÙ´ÎÑ°Â·
-void findAddPath1(Business& bus, bool* vis2) {
+void findAddPath(Business& bus, bool* vis2) {
 
     int end = bus.end;  // endµãÔÚ´ËÖ®Ç°±£Ö¤²»¿É´ï
     vector<bool> vis3(N, false);
@@ -938,50 +1053,11 @@ void findAddPath1(Business& bus, bool* vis2) {
             tmpOKPath[t] = i;
 
             if (vis2[t]) {
-
                 firstOKPoint = t;
                 if (t == bus.start)
                     OKPile = 0;
-                else {
-
-                    int curMinDist = minDist2start[t];
-                    OKPile = node[t].reachPile[node[t].reachPile.size() - 1];
-                    if (!q.empty())
-                        q.pop();
-
-                    while (!q.empty()) {
-
-                        t = q.front();      // tÓë
-                        q.pop();
-                        if (!vis2[t]) {
-
-                            for (int j = head[t]; j != -1; j = edge[j].next) {
-                                int newT = edge[j].to;
-                                if (vis2[newT] && newT != bus.start) {
-                                    if (minDist2start[newT] < curMinDist) {
-                                        tmpOKPath[newT] = j;
-                                        curMinDist = minDist2start[newT];
-                                        firstOKPoint = newT;
-                                        OKPile = node[newT].reachPile[node[newT].reachPile.size() - 1];
-                                    }
-                                }
-                            }
-                            continue;
-                        }
-                            
-                        if (t == bus.start)
-                            break;
-                        
-                        if (minDist2start[t] < curMinDist) {
-                            curMinDist = minDist2start[t];
-                            firstOKPoint = t;
-                            OKPile = node[t].reachPile[node[t].reachPile.size() - 1];
-                        }
-
-                    }
-
-                }
-
+                else
+                    OKPile = node[t].reachPile[0];
                 getOutFlag = true;
                 break;
             }
@@ -1012,6 +1088,7 @@ void findAddPath1(Business& bus, bool* vis2) {
                 newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
             else
                 newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
+            newEdgePathId.emplace_back(cntEdge / 2 - 1);
 
             bus.path.push_back((cntEdge - 1) / 2); // edgeId / 2ÊÇÎªÁËÊÊÓ¦ÌâÄ¿ÒªÇó
             edge[(cntEdge - 1)].Pile[OKPile] = bus.busId;
@@ -1037,98 +1114,99 @@ void findAddPath1(Business& bus, bool* vis2) {
     }
 }
 
-// ÔÚÒòÍ¨µÀ¶ÂÈû¶øÌí¼Ó²»ÁËÒµÎñÊ±£¬Ñ°ÕÒºÏÊÊµÄÎ»ÖÃ½øĞĞ¼Ó±ß²Ù×÷£¬²¢ÔÙ´ÎÑ°Â·
-void findAddPath2(Business& bus, int* dist2start) {
+// ÏÈÇå¿ÕÔ­À´µÄÒµÎñ¶ÔÍøÂçµÄÓ°Ïì
+void reCoverNetwork(int lastBusID, int lastPileId) {
 
-    int end = bus.end;  // endµãÔÚ´ËÖ®Ç°±£Ö¤²»¿É´ï
-    vector<bool> vis3(N, false);
-    vis3[end] = true;
-    queue<int> q;
-    q.push(end);
-    int firstOKPoint = bus.start;
-    int OKPile = -1;
-    vector<int> tmpOKPath(N, -1);   // ´æ´¢Â·¾¶£¬ÄÚÈİÊÇµ½Ã¿Ò»¸öµãµÄÇ°Ò»Ìõ±ßµÄ±àºÅ
+    ///////////////////////////////////////////////////////////////////////
+    // Çå¿Õ¶ÔÑ°Â·µÄÓ°Ïì
+    vector<int> pathTmp = buses[lastBusID].pathTmp;
+    int curNode = buses[lastBusID].end;
+    while (pathTmp[curNode] != -1) {
+        int edgeId = pathTmp[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+        edge[edgeId].Pile[lastPileId] = -1;
 
-    bool getOutFlag = false;
-    while (!q.empty() && !getOutFlag) {    // Ñ°ÕÒendµ½µÚÒ»¸ö¿É´ïµãµÄÂ·¾¶
+        if (edgeId % 2) // ÆæÊı-1
+            edge[edgeId - 1].Pile[lastPileId] = -1;   // Ë«Ïò±ß£¬Á½±ßÒ»Æğ´¦Àí
+        else            // Å¼Êı+1
+            edge[edgeId + 1].Pile[lastPileId] = -1;
 
-        int curNode = q.front();
-        q.pop();
-        for (int i = head[curNode]; i != -1; i = edge[i].next) {
-
-            int t = edge[i].to;
-            if (vis3[t])
-                continue;
-            vis3[t] = true;
-            tmpOKPath[t] = i;
-
-            if (dist2start[t] >= 0) {
-
-                firstOKPoint = t;
-                if (t == bus.start) {
-                    OKPile = 0;
-                    getOutFlag = true;
-                    break;
-                }
-                else {
-
-                    // Ò»µ©ËÑË÷µ½ÓĞ¿ÉĞĞµã£¬Ôò²»ÔÙ½øĞĞq.push²Ù×÷
-                    // ¶øÊÇÔÚÓàÏÂµÄ¶¥µãÀï£¬Ñ°ÕÒ¾àÀëÆğµã×î½üµÄ
-
-                    OKPile = node[t].reachPile[node[t].reachPile.size() - 1];
-                    getOutFlag = true;
-                    break;
-                }
-
-            }
-            else {  // ËµÃ÷tµãÒ²ÊÇ²»¿É´ïµã
-                q.push(t);
-            }
-
-        }
+        curNode = edge[pathTmp[curNode]].from;
     }
 
-    BFS4(firstOKPoint, bus.start, OKPile, tmpOKPath);  // tmpOKPath´æ´¢µÄÂ·¾¶ÊÇ´ÓÖÕµãµ½ÆğµãµÄÂ·¾¶£¬Ê¹ÓÃÊ±Òª×¢Òâ
+    ////////////////////////////////////////////////////////////////////////
+    // Çå¿Õ¶Ô¼Ó·Å´óÆ÷µÄÓ°Ïì
+    buses[lastBusID].curA = D;
+    curNode = buses[lastPileId].start;
+    int trueNextEdgeId;
+    for (int i = 0; i < buses[lastPileId].path.size(); ++i) {
 
-    int curNode = bus.start;
-    bus.pileId = OKPile;
-    bool addEdgeFlag = false;
-    while (tmpOKPath[curNode] != -1) {
-        int edgeId = tmpOKPath[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+        if (edge[buses[lastPileId].path[i] * 2].from == curNode)
+            trueNextEdgeId = buses[lastPileId].path[i] * 2;
+        else
+            trueNextEdgeId = buses[lastPileId].path[i] * 2 + 1;
+        curNode = edge[trueNextEdgeId].to;
 
-        if (curNode == firstOKPoint) {
-            addEdgeFlag = true;
+        if (buses[lastPileId].curA >= edge[trueNextEdgeId].trueD) {
+            buses[lastPileId].curA -= edge[trueNextEdgeId].trueD;
         }
-
-        if (addEdgeFlag) {
-            addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
-            addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
-
-            if (edge[edgeId].from < edge[edgeId].to)
-                newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
-            else
-                newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
-
-            bus.path.push_back((cntEdge - 1) / 2); // edgeId / 2ÊÇÎªÁËÊÊÓ¦ÌâÄ¿ÒªÇó
-            edge[(cntEdge - 1)].Pile[OKPile] = bus.busId;
-
-            if ((cntEdge - 1) % 2) // ÆæÊı-1
-                edge[(cntEdge - 1) - 1].Pile[OKPile] = bus.busId;   // Ë«Ïò±ß£¬Á½±ßÒ»Æğ´¦Àí
-            else            // Å¼Êı+1
-                edge[(cntEdge - 1) + 1].Pile[OKPile] = bus.busId;
+        else {
+            node[edge[trueNextEdgeId].from].Multiplier[buses[lastPileId].pileId] = -1;
+            buses[lastBusID].curA = D;
+            buses[lastBusID].curA -= edge[trueNextEdgeId].trueD;
         }
+    }
+    
+    //////////////////////////////////////////////////////////////////////
+    vector<int> nullVector, nullPath1, nullPath2;
+    buses[lastBusID].mutiplierId.swap(nullVector);
+    buses[lastBusID].path.swap(nullPath1);
+    buses[lastBusID].pathTmp.swap(nullPath2);
 
-        if (!addEdgeFlag) {
-            bus.path.push_back(edgeId / 2); // edgeId / 2ÊÇÎªÁËÊÊÓ¦ÌâÄ¿ÒªÇó
-            edge[edgeId].Pile[OKPile] = bus.busId;
+    buses[lastBusID].pileId = -1;
+    buses[lastBusID].curA = D;
+}
 
-            if (edgeId % 2) // ÆæÊı-1
-                edge[edgeId - 1].Pile[OKPile] = bus.busId;   // Ë«Ïò±ß£¬Á½±ßÒ»Æğ´¦Àí
-            else            // Å¼Êı+1
-                edge[edgeId + 1].Pile[OKPile] = bus.busId;
+// ÖØĞÂ¼ÓÔØÒµÎñµ½ÍøÂçÉÏ
+void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp) {
+
+    // ÖØĞÂÉèÖÃÂ·¾¶   
+    int curNode = buses[lastBusID].end;
+    buses[lastBusID].pileId = lastPileId;
+    buses[lastBusID].pathTmp = vector<int>(pathTmp.begin(), pathTmp.end());
+    while (buses[lastBusID].pathTmp[curNode] != -1) {
+        int edgeId = buses[lastBusID].pathTmp[curNode];  // ´æ´¢ÓÚedgeÊı×éÖĞÕæÕıµÄ±ßµÄId
+
+        buses[lastBusID].path.push_back(edgeId / 2); // edgeId / 2ÊÇÎªÁËÊÊÓ¦ÌâÄ¿ÒªÇó
+        edge[edgeId].Pile[lastPileId] = buses[lastBusID].busId;
+
+        if (edgeId % 2) // ÆæÊı-1
+            edge[edgeId - 1].Pile[lastPileId] = buses[lastBusID].busId;   // Ë«Ïò±ß£¬Á½±ßÒ»Æğ´¦Àí
+        else            // Å¼Êı+1
+            edge[edgeId + 1].Pile[lastPileId] = buses[lastBusID].busId;
+
+        curNode = edge[buses[lastBusID].pathTmp[curNode]].from;
+    }
+    reverseArray(buses[lastBusID].path);
+
+    // ÖØĞÂÉèÖÃ·Å´óÆ÷
+    curNode = buses[lastBusID].start;
+    int trueNextEdgeId;
+    for (int i = 0; i < buses[lastBusID].path.size(); ++i) {
+
+        if (edge[buses[lastBusID].path[i] * 2].from == curNode)
+            trueNextEdgeId = buses[lastBusID].path[i] * 2;
+        else
+            trueNextEdgeId = buses[lastBusID].path[i] * 2 + 1;
+        curNode = edge[trueNextEdgeId].to;
+
+        if (buses[lastBusID].curA >= edge[trueNextEdgeId].trueD) {
+            buses[lastBusID].curA -= edge[trueNextEdgeId].trueD;
         }
-
-        curNode = edge[edgeId].from;
-
+        else {
+            node[edge[trueNextEdgeId].from].Multiplier[buses[lastBusID].pileId] = buses[lastBusID].pileId;
+            buses[lastBusID].curA = D;
+            buses[lastBusID].curA -= edge[trueNextEdgeId].trueD;
+            buses[lastBusID].mutiplierId.push_back(edge[trueNextEdgeId].from);
+        }
     }
 }
