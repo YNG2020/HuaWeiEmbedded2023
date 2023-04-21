@@ -757,7 +757,6 @@ bool dijkstra5(Business& bus, int blockEdge) {
         else            // 偶数+1
             edge[edgeId + 1].Pile[choosenP] = bus.busId;
 
-
         curNode = edge[bus.pathTmp[curNode]].from;
     }
     reverseArray(bus.path);
@@ -805,6 +804,7 @@ void BFS1(Business& bus) {
                     if (t == end) {
                         getOutFlag = true;
                         s = t;
+                        ++curLevel;
                         break;
                     }
                     else {
@@ -817,14 +817,7 @@ void BFS1(Business& bus) {
         }
         if (s == end) {
 
-            int curNode = end, tmpDist = 0;
-            while (tmpOKPath[curNode] != -1) {
-                int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
-                curNode = edge[edgeId].from;
-                tmpDist += edge[edgeId].d;
-                if (curNode == start)
-                    break;
-            }
+            int curNode = end, tmpDist = curLevel;
             if (tmpDist < minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
@@ -855,8 +848,6 @@ void BFS1(Business& bus) {
         curNode = edge[bus.pathTmp[curNode]].from;
     }
     reverseArray(bus.path);
-    if (bus.busId == 6)
-        int a = 1;
 
 }
 
@@ -963,6 +954,7 @@ bool BFS5(Business& bus, int blockEdge) {
                     if (t == end) {
                         getOutFlag = true;
                         s = t;
+                        ++curLevel;
                         break;
                     }
                     else {
@@ -975,14 +967,7 @@ bool BFS5(Business& bus, int blockEdge) {
         }
         if (s == end) {
 
-            int curNode = end, tmpDist = 0;
-            while (tmpOKPath[curNode] != -1) {
-                int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
-                curNode = edge[edgeId].from;
-                tmpDist += edge[edgeId].d;
-                if (curNode == start)
-                    break;
-            }
+            int curNode = end, tmpDist = curLevel;
             if (tmpDist < minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
