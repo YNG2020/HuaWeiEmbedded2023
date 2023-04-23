@@ -146,7 +146,7 @@ int main() {
     allocateBus();
     //reAllocateBus();
     tryDeleteEdge();
-    //tryDeleteEdge();
+    tryDeleteEdge();
     outPut();
 
     return 0;
