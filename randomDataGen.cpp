@@ -29,9 +29,6 @@ int main() {
 	rP = rand() % (PMAX - PMIN + 1) + PMIN;  // 生成随机数  
 	rD = rand() % (DMAX - DMIN + 1) + DMIN;  // 生成随机数
 
-	int rM1 = min(MMAX, 3 * rN);
-	rM = rM1 + rN - 1;
-
 	rEdge.resize(rM);
 	for (auto& one : rEdge) {
 		one.resize(3);
