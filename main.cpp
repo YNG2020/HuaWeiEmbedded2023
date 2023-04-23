@@ -75,6 +75,7 @@ struct Equalfunc_t {
 };
 
 unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minDist;   // 记录两个节点间的最短边的距离
+unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;   // 记录两个节点间的最短路径长度
 
 class Node1 {
 public:
@@ -100,7 +101,7 @@ void dijkstra2(Business& bus);
 void dijkstra3(Business& bus);
 void dijkstra4(int start, int end, int pileId, vector<int>& tmpOKPath);
 bool dijkstra5(Business& bus, int blockEdge);
-void BFS1(Business& bus);
+void BFS1(Business& bus, bool ifLoadNewEdge);
 void BFS2(Business& bus);
 bool BFS5(Business& bus, int blockEdge);
 bool BFS6(Business& bus, int blockEdge);
@@ -145,7 +146,7 @@ int main() {
     allocateBus();
     //reAllocateBus();
     tryDeleteEdge();
-    tryDeleteEdge();
+    //tryDeleteEdge();
     outPut();
 
     return 0;
@@ -170,7 +171,8 @@ void allocateBus() {
         //}
         //int gap = max(int(ceil(0.01 * T)), 60);
         //if (i % gap == gap - 1)
-        if (i > 0.5 * T && i % 70 == 69)  // 6.32kw
+        //if (i > 0.5 * T && i % 70 == 69)  // 6.32kw
+        if (i % 75 == 74)  // 6.32kw
             tryDeleteEdge();
     }
 
@@ -357,7 +359,7 @@ void tryDeleteEdge() {
 // 把业务busId加载到光网络中
 void loadBus(int busId, bool ifLoadRemain) {
     //dijkstra1(buses[busId]);
-    BFS1(buses[busId]);
+    BFS1(buses[busId], false);
 
     int curNode = buses[busId].start, trueNextEdgeId;
     for (int i = 0; i < buses[busId].path.size(); ++i) {
@@ -819,7 +821,7 @@ bool dijkstra5(Business& bus, int blockEdge) {
 }
 
 // 考虑一边多通道的情况下，寻找业务bus的起点到终点的路径（不一定是最少边数路径，因为有可能边的通道被完全占用）
-void BFS1(Business& bus) {
+void BFS1(Business& bus, bool ifLoadNewEdge) {
 
     int start = bus.start, end = bus.end, p = 0;
 
@@ -870,6 +872,22 @@ void BFS1(Business& bus) {
 
         }
         if (s == end) {
+
+            if (minPathSize.find(make_pair(start, end)) == minPathSize.end())   // 键不存在
+                minPathSize[make_pair(start, end)] = curLevel;
+            else if (minPathSize[make_pair(start, end)] > curLevel) {
+                minPathSize[make_pair(start, end)] = curLevel;
+            }
+
+            if (ifLoadNewEdge) {    // 如果BFS1在调用前已经添加了新边，则可以一遍过
+                bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+                choosenP = p;
+                findPath = true;
+                break;
+            }
+
+            if (curLevel > 3 * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
+                continue;
 
             int curNode = end, tmpDist = curLevel;
             if (tmpDist < minPathDist) {
@@ -961,7 +979,7 @@ void BFS2(Business& bus) {
 
         curNode = edge[bus.trueMinPath[curNode]].from;
     }
-    BFS1(bus);
+    BFS1(bus, true);
 
 }
 
