@@ -171,8 +171,8 @@ void allocateBus() {
         //}
         //int gap = max(int(ceil(0.01 * T)), 60);
         //if (i % gap == gap - 1)
-        //if (i > 0.5 * T && i % 70 == 69)  // 6.17kw
-        if (i > 0.5 * T && i % 70 == 69)  // 6.17kw
+        if (i > 0.5 * T && i % 71 == 70)  // 6.15kw
+        //if (i % 75 == 74)
             tryDeleteEdge();
     }
 
@@ -1038,6 +1038,9 @@ bool BFS5(Business& bus, int blockEdge) {
 
         }
         if (s == end) {
+
+            if (curLevel > 3 * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
+                continue;
 
             int curNode = end, tmpDist = curLevel;
             if (tmpDist < minPathDist) {
