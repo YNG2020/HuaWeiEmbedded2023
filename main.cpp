@@ -4,6 +4,7 @@
 #include <queue>
 #include <algorithm>
 #include <unordered_map>
+#include <math.h>
 #define INF 2147483647
 
 using namespace std;
@@ -59,7 +60,7 @@ bool vis1[maxN];  // 标识该点有无被访问过
 bool vis2[maxN]; // 标识该点有无在添加某业务时，被路径搜索访问过
 vector<pair<int, int>> newEdge; // 记录新添加的边的起点和终点
 vector<int> newEdgePathId;   // 记录新边在边集中的位置（计数时，双向边视为同一边）
-vector<int> eraseEdge;  // 记录下被清除掉的新边的编号
+vector<int> remainBus;  // 记录下初次分配时，因路径堵塞而无法分配边的业务的编号
 
 struct HashFunc_t {
     size_t operator() (const pair<int, int>& key) const {
@@ -74,6 +75,7 @@ struct Equalfunc_t {
 };
 
 unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minDist;   // 记录两个节点间的最短边的距离
+unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;   // 记录两个节点间的最短路径长度
 
 class Node1 {
 public:
@@ -99,12 +101,14 @@ void dijkstra2(Business& bus);
 void dijkstra3(Business& bus);
 void dijkstra4(int start, int end, int pileId, vector<int>& tmpOKPath);
 bool dijkstra5(Business& bus, int blockEdge);
-void BFS1(Business& bus);
+void BFS1(Business& bus, bool ifLoadNewEdge);
 void BFS2(Business& bus);
 bool BFS5(Business& bus, int blockEdge);
-void loadBus(int busId);
+bool BFS6(Business& bus, int blockEdge);
+void loadBus(int busId, bool ifLoadRemain);
 void allocateBus();
-void reAllocateBus();
+void reAllocateBus(int HLim);
+void tryDeleteEdge();
 void reverseArray(vector<int>& arr);
 void outPut();
 bool bfsTestConnection(int start, int end);
@@ -115,6 +119,8 @@ void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 int testTime = 0;
 int maxTestTime = 10;
 
+int lastStart = -1, lastEnd = -1, gapCnt = 0;
+
 // 主函数
 int main() {
 
@@ -123,8 +129,10 @@ int main() {
     int s = 0, t = 0, d = 0;
     for (int i = 0; i < M; ++i) {
         cin >> s >> t >> d;
-        minDist[make_pair(s, t)] = INF;
-        minDist[make_pair(t, s)] = INF;
+        if (minDist.find(make_pair(s, t)) == minDist.end()) { // 键不存在
+            minDist[make_pair(s, t)] = INF;
+            minDist[make_pair(t, s)] = INF;
+        }
         addEdge(s, t, d);
         addEdge(t, s, d);   // 添加双向边
     }
@@ -136,7 +144,9 @@ int main() {
     }
 
     allocateBus();
-    reAllocateBus();
+    //reAllocateBus();
+    tryDeleteEdge();
+    tryDeleteEdge();
     outPut();
 
     return 0;
@@ -145,21 +155,97 @@ int main() {
 // 将所有的业务分配到光网络中
 void allocateBus() {
     for (int i = 0; i < T; ++i) {
-        loadBus(i);
-        if (i % 100 == 99)
-            reAllocateBus();
+
+        //if (gapCnt >= 80 && (buses[i].start != lastStart || buses[i].end != lastEnd)) {
+        //    gapCnt = 0;
+        //    reAllocateBus();
+        //}
+        //else
+        //    ++gapCnt;
+
+        //lastStart = buses[i].start;
+        //lastEnd = buses[i].end;
+        loadBus(i, false);
+        //if (i % 600 == 599) {
+        //    reAllocateBus(i);
+        //}
+        //int gap = max(int(ceil(0.01 * T)), 60);
+        //if (i % gap == gap - 1)
+        if (i > 0.5 * T && i % 71 == 70)  // 6.15kw
+        //if (i % 75 == 74)
+            tryDeleteEdge();
     }
+
+    //int nT = remainBus.size(); 
+    //for (int i = 0; i < nT; ++i) {  // 分配剩余的业务
+    //    int gap = max(int(0.035 * nT), 10);
+    //    loadBus(remainBus[i], true);
+    //    if (i % gap == gap - 1)
+    //        reAllocateBus();
+    //}
 }
 
-// 试图重新分配业务到光网络中
-void reAllocateBus() {
+// 试图重新分配业务到光网络中（暂时无用）
+void reAllocateBus(int HLim) {
+
+    int gap = max((int)0.01 * T, 20);
+    for (int i = 0; i < HLim; i = i + gap) {
+
+        int oriEdgeNum = 0;
+        
+        vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
+        vector<int> pileTmp1(gap, -1);
+        for (int j = i; j < i + gap && j < HLim; ++j) {
+            oriEdgeNum += buses[j].path.size();
+            pathTmp1[j - i] = buses[j].pathTmp;
+            pileTmp1[j - i] = buses[j].pileId;
+            reCoverNetwork(j, buses[j].pileId);
+        }
+
+        int curEdgeNum = 0;
+        bool findPath = false;
+        vector<vector<int>> pathTmp2(gap, vector<int>());     // 用于此后重新加载边
+        vector<int> pileTmp2(gap, -1);
+        for (int j = i; j < i + gap && j < HLim; ++j) {
+            loadBus(j, false);
+            pathTmp2[j - i] = buses[j].pathTmp;
+            pileTmp2[j - i] = buses[j].pileId;
+            curEdgeNum += buses[j].path.size();
+        }
+
+        if (curEdgeNum + max((int)0.001 * T, 2) < oriEdgeNum) {  // 总体的边数减少，直接返回
+            return;
+        }
+        else {  // 否则，回复原状态
+            for (int j = i; j < i + gap && j < HLim; ++j) {   // 把试图寻路时，造成的对网络的影响消除
+                reCoverNetwork(j, pileTmp2[j - i]);
+            }
+
+            for (int j = i; j < i + gap && j < HLim; ++j) {  // 重新加载所有的边
+                vector<int> nullVector, nullPath1, nullPath2;
+                buses[j].mutiplierId.swap(nullVector);
+                buses[j].path.swap(nullPath1);
+                buses[j].pathTmp.swap(nullPath2);
+
+                buses[j].pileId = -1;
+                buses[j].curA = D;
+                reloadBus(j, pileTmp1[j - i], pathTmp1[j - i]);
+            }
+        }
+
+    }
+
+
+}
+
+// 试图删除新边
+void tryDeleteEdge() {
 
     int n = newEdge.size(), trueEdgeId;
     for (int idx = 0; idx < n; ++idx) {
-    //for (int i = n - 1; i >= 0; --i) {
-        int i = newEdgePathId[idx]; // i为边在边集数组的编号（计数时，双向边视作同一边）
-
-        trueEdgeId = i * 2;
+        int idxEdge = newEdgePathId[idx]; // idxEdge为边在边集数组的编号（计数时，双向边视作同一边）  
+            
+        trueEdgeId = idxEdge * 2;
         int busCnt = 0;
         vector<int> lastBusIds, lastPileIds;
 
@@ -169,27 +255,19 @@ void reAllocateBus() {
                 lastBusIds.push_back(edge[trueEdgeId].Pile[j]);
                 lastPileIds.push_back(j);
             }
-         
-        bool findPath = false;
 
         if (busCnt == 0) {      // 如果该新边上，一条业务都没有承载，直接删边
 
-            for (int k = 0; k < newEdge.size(); ++k) {
+            int iter = find(newEdgePathId.begin(), newEdgePathId.end(), idxEdge) - newEdgePathId.begin();
+            newEdge.erase(newEdge.begin() + iter);
+            newEdgePathId.erase(newEdgePathId.begin() + iter);
+            --idx;
+            --n;
 
-                if (newEdgePathId[k] == i) {        // 删去对应边
-                    newEdge.erase(newEdge.begin() + k);
-                    newEdgePathId.erase(newEdgePathId.begin() + k);
-                    --idx;
-                    --n;
-                    break;
-                }
-
-            }
             for (int k = 0; k < P; ++k) {   // 该边已删除，就应对其进行封锁
                 edge[trueEdgeId].Pile[k] = T;
                 edge[trueEdgeId + 1].Pile[k] = T;   // 偶数+1
             }
-            //eraseEdge.push_back(i + M);     // 记下删边的编号
         }
         else {  // 如果该新边上，承载了多条业务，则对该边上的所有业务重新分配，看能否不依赖该新边
 
@@ -199,11 +277,12 @@ void reAllocateBus() {
                 reCoverNetwork(lastBusIds[k], lastPileIds[k]);
             }
 
+            bool findPath = false;
             int stopK = -1;
             vector<int> tmpLastPileIds;
             for (int k = 0; k < busCnt; ++k) {
-                //findPath = dijkstra5(buses[lastBusIds[k]], i);
-                findPath = BFS5(buses[lastBusIds[k]], i);
+                //findPath = dijkstra5(buses[lastBusIds[k]], idxEdge);
+                findPath = BFS5(buses[lastBusIds[k]], idxEdge);
                 if (findPath == false) {
                     stopK = k;
                     break;
@@ -213,24 +292,16 @@ void reAllocateBus() {
             
             if (findPath) {
 
-                for (int k = 0; k < newEdge.size(); ++k) {
-
-                    if (newEdgePathId[k] == i) {    // 删去对应边
-                        newEdge.erase(newEdge.begin() + k);
-                        newEdgePathId.erase(newEdgePathId.begin() + k);
-                        --idx;
-                        --n;
-                        break;
-                    }
-
-                }
+                int iter = find(newEdgePathId.begin(), newEdgePathId.end(), idxEdge) - newEdgePathId.begin();
+                newEdge.erase(newEdge.begin() + iter);
+                newEdgePathId.erase(newEdgePathId.begin() + iter);
+                --idx;
+                --n;
 
                 for (int k = 0; k < P; ++k) {   // 该边已删除，就应对其进行封锁
                     edge[trueEdgeId].Pile[k] = T;
                     edge[trueEdgeId + 1].Pile[k] = T;   // 偶数+1
                 }
-
-                //eraseEdge.push_back(i + M);     // 记下删边的编号
 
                 for (int k = 0; k < busCnt; ++k) {
 
@@ -286,9 +357,10 @@ void reAllocateBus() {
 }
 
 // 把业务busId加载到光网络中
-void loadBus(int busId) {
+void loadBus(int busId, bool ifLoadRemain) {
     //dijkstra1(buses[busId]);
-    BFS1(buses[busId]);
+    BFS1(buses[busId], false);
+
     int curNode = buses[busId].start, trueNextEdgeId;
     for (int i = 0; i < buses[busId].path.size(); ++i) {
 
@@ -308,6 +380,55 @@ void loadBus(int busId) {
             buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
         }
     }
+
+    //if (!ifLoadRemain) {
+    //    bool findPath = false;
+    //    findPath = BFS5(buses[busId], -1);
+    //    //findPath = dijkstra5(buses[busId], -1);
+    //    if (findPath) {
+    //        int curNode = buses[busId].start, trueNextEdgeId;
+    //        for (int i = 0; i < buses[busId].path.size(); ++i) {
+    //            if (edge[buses[busId].path[i] * 2].from == curNode)
+    //                trueNextEdgeId = buses[busId].path[i] * 2;
+    //            else
+    //                trueNextEdgeId = buses[busId].path[i] * 2 + 1;
+    //            curNode = edge[trueNextEdgeId].to;
+    //            if (buses[busId].curA >= edge[trueNextEdgeId].trueD) {
+    //                buses[busId].curA -= edge[trueNextEdgeId].trueD;
+    //            }
+    //            else {
+    //                node[edge[trueNextEdgeId].from].Multiplier[buses[busId].pileId] = buses[busId].pileId;
+    //                buses[busId].curA = D;
+    //                buses[busId].curA -= edge[trueNextEdgeId].trueD;
+    //                buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
+    //            }
+    //        }
+    //    }
+    //    else
+    //        remainBus.push_back(busId);
+    //}
+    //else {
+    //    BFS1(buses[busId]);
+    //    //dijkstra1(buses[busId]);
+    //    int curNode = buses[busId].start, trueNextEdgeId;
+    //    for (int i = 0; i < buses[busId].path.size(); ++i) {
+    //        if (edge[buses[busId].path[i] * 2].from == curNode)
+    //            trueNextEdgeId = buses[busId].path[i] * 2;
+    //        else
+    //            trueNextEdgeId = buses[busId].path[i] * 2 + 1;
+    //        curNode = edge[trueNextEdgeId].to;
+    //        if (buses[busId].curA >= edge[trueNextEdgeId].trueD) {
+    //            buses[busId].curA -= edge[trueNextEdgeId].trueD;
+    //        }
+    //        else {
+    //            node[edge[trueNextEdgeId].from].Multiplier[buses[busId].pileId] = buses[busId].pileId;
+    //            buses[busId].curA = D;
+    //            buses[busId].curA -= edge[trueNextEdgeId].trueD;
+    //            buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
+    //        }
+    //    }
+    //}
+
 }
 
 // 初始化
@@ -692,7 +813,6 @@ bool dijkstra5(Business& bus, int blockEdge) {
         else            // 偶数+1
             edge[edgeId + 1].Pile[choosenP] = bus.busId;
 
-
         curNode = edge[bus.pathTmp[curNode]].from;
     }
     reverseArray(bus.path);
@@ -701,7 +821,7 @@ bool dijkstra5(Business& bus, int blockEdge) {
 }
 
 // 考虑一边多通道的情况下，寻找业务bus的起点到终点的路径（不一定是最少边数路径，因为有可能边的通道被完全占用）
-void BFS1(Business& bus) {
+void BFS1(Business& bus, bool ifLoadNewEdge) {
 
     int start = bus.start, end = bus.end, p = 0;
 
@@ -740,6 +860,7 @@ void BFS1(Business& bus) {
                     if (t == end) {
                         getOutFlag = true;
                         s = t;
+                        ++curLevel;
                         break;
                     }
                     else {
@@ -752,14 +873,23 @@ void BFS1(Business& bus) {
         }
         if (s == end) {
 
-            int curNode = end, tmpDist = 0;
-            while (tmpOKPath[curNode] != -1) {
-                int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
-                curNode = edge[edgeId].from;
-                tmpDist += edge[edgeId].d;
-                if (curNode == start)
-                    break;
+            if (minPathSize.find(make_pair(start, end)) == minPathSize.end())   // 键不存在
+                minPathSize[make_pair(start, end)] = curLevel;
+            else if (minPathSize[make_pair(start, end)] > curLevel) {
+                minPathSize[make_pair(start, end)] = curLevel;
             }
+
+            if (ifLoadNewEdge) {    // 如果BFS1在调用前已经添加了新边，则可以一遍过
+                bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+                choosenP = p;
+                findPath = true;
+                break;
+            }
+
+            if (curLevel > 3 * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
+                continue;
+
+            int curNode = end, tmpDist = curLevel;
             if (tmpDist < minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
@@ -790,8 +920,6 @@ void BFS1(Business& bus) {
         curNode = edge[bus.pathTmp[curNode]].from;
     }
     reverseArray(bus.path);
-    if (bus.busId == 6)
-        int a = 1;
 
 }
 
@@ -851,7 +979,7 @@ void BFS2(Business& bus) {
 
         curNode = edge[bus.trueMinPath[curNode]].from;
     }
-    BFS1(bus);
+    BFS1(bus, true);
 
 }
 
@@ -898,6 +1026,7 @@ bool BFS5(Business& bus, int blockEdge) {
                     if (t == end) {
                         getOutFlag = true;
                         s = t;
+                        ++curLevel;
                         break;
                     }
                     else {
@@ -910,14 +1039,10 @@ bool BFS5(Business& bus, int blockEdge) {
         }
         if (s == end) {
 
-            int curNode = end, tmpDist = 0;
-            while (tmpOKPath[curNode] != -1) {
-                int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
-                curNode = edge[edgeId].from;
-                tmpDist += edge[edgeId].d;
-                if (curNode == start)
-                    break;
-            }
+            if (curLevel > 3 * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
+                continue;
+
+            int curNode = end, tmpDist = curLevel;
             if (tmpDist < minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
@@ -950,6 +1075,65 @@ bool BFS5(Business& bus, int blockEdge) {
     return true;
 }
 
+// 考虑一边多通道的情况下，寻找业务bus的起点到终点的路径，但遇到需要加边的情况，不做处理，直接返回，找到路径后，也直接返回，不作其它处理
+bool BFS6(Business& bus, int blockEdge) {
+
+    int start = bus.start, end = bus.end, p = 0;
+
+    bool findPath = false;
+    int minPathDist = INF;
+    int choosenP = -1;
+    vector<int> tmpOKPath;
+
+    for (; p < P; ++p) {
+        tmpOKPath.resize(N, -1);
+        for (int i = 0; i < N; ++i) { // 赋初值
+            vis1[i] = false;
+        }
+        queue<pair<int, int>> bfsQ;
+        bfsQ.push(make_pair(start, 0));
+        vis1[start] = true;
+        int s = start;
+        int curLevel = 0;
+        bool getOutFlag = false;
+
+        while (!bfsQ.empty() && !getOutFlag) { // 队列为空即，所有点都被加入到生成树中去了
+
+            s = bfsQ.front().first;
+            curLevel = bfsQ.front().second;
+            bfsQ.pop();
+
+            for (int i = head[s]; i != -1; i = edge[i].next) {
+
+                if (i / 2 == blockEdge)
+                    continue;
+
+                if (edge[i].Pile[p] == -1) {        // pile未被占用时，才试图走该边
+                    int t = edge[i].to;
+                    if (vis1[t])
+                        continue;
+                    vis1[t] = true;
+                    tmpOKPath[t] = i;    // 记录下抵达路径点t的边的编号i
+
+                    if (t == end) {
+                        getOutFlag = true;
+                        s = t;
+                        return true;
+                        ++curLevel;
+                        break;
+                    }
+                    else
+                        bfsQ.push(make_pair(t, curLevel + 1));
+
+                }
+            }
+
+        }
+
+    }
+
+}
+
 // 反转数组
 void reverseArray(vector<int>& arr) {
 
@@ -973,7 +1157,6 @@ void outPut() {
             newEdgeMap[newEdgePathId[i]] = newEdgeMap[newEdgePathId[i - 1]] + 1;
         }
     }
-
 
     cout << newEdge.size() << endl;
     for (int i = 0; i < newEdge.size(); ++i) {
