@@ -172,7 +172,7 @@ void allocateBus() {
         //int gap = max(int(ceil(0.01 * T)), 60);
         //if (i % gap == gap - 1)
         //if (i > 0.5 * T && i % 71 == 70)  // 6.11kw
-        if (i > 0.5 * T && i % 71 == 70)  // 6.11kw
+        if (i > 0.5 * T && i % 70 == 69)  // 6.10kw
         //if (i % 75 == 74)
             tryDeleteEdge();
     }
