@@ -116,11 +116,6 @@ void findAddPath(Business& bus, bool* vis2);
 void reCoverNetwork(int lastBusID, int lastPileId);
 void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 
-int testTime = 0;
-int maxTestTime = 10;
-
-int lastStart = -1, lastEnd = -1, gapCnt = 0;
-
 // 主函数
 int main() {
 
@@ -156,34 +151,29 @@ int main() {
 void allocateBus() {
     for (int i = 0; i < T; ++i) {
 
-        //if (gapCnt >= 80 && (buses[i].start != lastStart || buses[i].end != lastEnd)) {
-        //    gapCnt = 0;
-        //    reAllocateBus();
-        //}
-        //else
-        //    ++gapCnt;
-
-        //lastStart = buses[i].start;
-        //lastEnd = buses[i].end;
         loadBus(i, false);
-        //if (i % 600 == 599) {
-        //    reAllocateBus(i);
-        //}
-        //int gap = max(int(ceil(0.01 * T)), 60);
-        //if (i % gap == gap - 1)
-        //if (i > 0.5 * T && i % 71 == 70)  // 6.11kw
-        if (i > 0.5 * T && i % 70 == 69)  // 6.10kw
-        //if (i % 75 == 74)
-            tryDeleteEdge();
-    }
 
-    //int nT = remainBus.size(); 
-    //for (int i = 0; i < nT; ++i) {  // 分配剩余的业务
-    //    int gap = max(int(0.035 * nT), 10);
-    //    loadBus(remainBus[i], true);
-    //    if (i % gap == gap - 1)
-    //        reAllocateBus();
-    //}
+        if (T > 6000) {                 // 有分布
+            if (i > 0.5 * T && i % 70 == 69)  // 6.05kw
+                tryDeleteEdge();
+        }
+        else if (T > 5000 && T <= 6000) {
+            if (i > 0.5 * T && i % 70 == 69)  // 6.05kw
+                tryDeleteEdge();
+        }
+        else if (T > 4000 && T <= 5000) {   // 无分布
+            if (i % 70 == 69)  // 6.05kw
+                tryDeleteEdge();
+        }
+        else if (T > 3500 && T <= 4000) {   // 有一个特别大运算量的
+            if (i > 0.5 * T && i % 70 == 69)  // 6.05kw
+                tryDeleteEdge();
+        }
+        else if (T <= 3500) {
+            if (i % 35 == 34)  // 6.05kw
+                tryDeleteEdge();
+        }
+    }
 }
 
 // 试图重新分配业务到光网络中（暂时无用）
