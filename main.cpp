@@ -146,7 +146,7 @@ int main() {
     allocateBus();
     //reAllocateBus();
     tryDeleteEdge();
-    tryDeleteEdge();
+    //tryDeleteEdge();
     outPut();
 
     return 0;
@@ -171,7 +171,8 @@ void allocateBus() {
         //}
         //int gap = max(int(ceil(0.01 * T)), 60);
         //if (i % gap == gap - 1)
-        if (i > 0.5 * T && i % 71 == 70)  // 6.15kw
+        //if (i > 0.5 * T && i % 71 == 70)  // 6.11kw
+        if (i > 0.5 * T && i % 71 == 70)  // 6.11kw
         //if (i % 75 == 74)
             tryDeleteEdge();
     }
@@ -890,7 +891,7 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
                 continue;
 
             int curNode = end, tmpDist = curLevel;
-            if (tmpDist < minPathDist) {
+            if (tmpDist <= minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
                 choosenP = p;
@@ -1043,7 +1044,7 @@ bool BFS5(Business& bus, int blockEdge) {
                 continue;
 
             int curNode = end, tmpDist = curLevel;
-            if (tmpDist < minPathDist) {
+            if (tmpDist <= minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
                 choosenP = p;
