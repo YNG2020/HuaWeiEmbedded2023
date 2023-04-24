@@ -16,6 +16,9 @@ int DMAX = 1000, DMIN = 2;
 
 int main() {
 
+	double pressureBus = 0.5;
+	cout << "请输入业务压力值： （默认为0.5） ";
+	cin >> pressureBus;
 	vector<vector<int>> rEdge, rBus;
 	int rN, rM, rT, rP, rD;
 	srand(time(NULL) + rand() % 1000);  // 设置随机数种子  
@@ -44,8 +47,8 @@ int main() {
 
 	for (int i = 0; i + rN - 1 < rM; ++i) {
 
-		int s = rand() % rN;  // 生成随机数 1
-		int t = rand() % rN;   // 生成随机数 2  
+		int s = rand() % rN;	// 生成随机数 1
+		int t = rand() % rN;	// 生成随机数 2  
 
 		while (true) {   // 如果两个随机数相同，则重新生成 
 			if (s != t)
@@ -62,8 +65,12 @@ int main() {
 	}
 
 	rBus.resize(rT);
-	for (auto& one : rBus) {
+	int cnt = 0;
+	for (auto& one : rBus) 
 		one.resize(2);
+
+	for (int i = 0; i < rT; ++i) {
+		int repeatBusCnt = max(1, int(pressureBus * (rand() % rP + 1)));
 
 		int S = rand() % rN;  // 生成随机数 1
 		int T = rand() % rN;   // 生成随机数 2  
@@ -73,23 +80,22 @@ int main() {
 				break;
 			T = rand() % rN;
 		} while (true);
-
 		if (S > T)
 			swap(S, T);
-
-		one[0] = S;
-		one[1] = T;
+		for (int j = 0; j < repeatBusCnt && i + j < rT; ++j) {
+			rBus[i + j][0] = S;
+			rBus[i + j][1] = T;
+		}
+		i = i + repeatBusCnt - 1;
 
 	}
 
 	ofstream outfile("data.txt");
 	outfile << rN << " " << rM << " " << rT << " " << rP << " " << rD << endl;
-	for (int i = 0; i < rM; ++i) {
+	for (int i = 0; i < rM; ++i)
 		outfile << rEdge[i][0] << " " << rEdge[i][1] << " " << rEdge[i][2] << endl;
-	}
-	for (int i = 0; i < rT; ++i) {
+	for (int i = 0; i < rT; ++i)
 		outfile << rBus[i][0] << " " << rBus[i][1] << endl;
-	}
 
 	outfile.close();
 	return 0;
