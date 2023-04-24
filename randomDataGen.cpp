@@ -14,7 +14,13 @@ int TMAX = 10000, TMIN = 2;
 int PMAX = 80, PMIN = 2;
 int DMAX = 1000, DMIN = 2;
 
+void randomDataGen();
+
 int main() {
+	randomDataGen();
+}
+
+void randomDataGen() {
 
 	double pressureBus = 0.5;
 	cout << "请输入业务压力值： （默认为0.5） ";
@@ -98,6 +104,5 @@ int main() {
 		outfile << rBus[i][0] << " " << rBus[i][1] << endl;
 
 	outfile.close();
-	return 0;
 
 }
