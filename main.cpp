@@ -116,11 +116,6 @@ void findAddPath(Business& bus, bool* vis2);
 void reCoverNetwork(int lastBusID, int lastPileId);
 void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 
-int testTime = 0;
-int maxTestTime = 10;
-
-int lastStart = -1, lastEnd = -1, gapCnt = 0;
-
 // 主函数
 int main() {
 
@@ -155,34 +150,8 @@ int main() {
 // 将所有的业务分配到光网络中
 void allocateBus() {
     for (int i = 0; i < T; ++i) {
-
-        //if (gapCnt >= 80 && (buses[i].start != lastStart || buses[i].end != lastEnd)) {
-        //    gapCnt = 0;
-        //    reAllocateBus();
-        //}
-        //else
-        //    ++gapCnt;
-
-        //lastStart = buses[i].start;
-        //lastEnd = buses[i].end;
         loadBus(i, false);
-        //if (i % 600 == 599) {
-        //    reAllocateBus(i);
-        //}
-        //int gap = max(int(ceil(0.01 * T)), 60);
-        //if (i % gap == gap - 1)
-        if (i > 0.5 * T && i % 71 == 70)  // 6.15kw
-        //if (i % 75 == 74)
-            tryDeleteEdge();
     }
-
-    //int nT = remainBus.size(); 
-    //for (int i = 0; i < nT; ++i) {  // 分配剩余的业务
-    //    int gap = max(int(0.035 * nT), 10);
-    //    loadBus(remainBus[i], true);
-    //    if (i % gap == gap - 1)
-    //        reAllocateBus();
-    //}
 }
 
 // 试图重新分配业务到光网络中（暂时无用）
@@ -824,7 +793,7 @@ bool dijkstra5(Business& bus, int blockEdge) {
 void BFS1(Business& bus, bool ifLoadNewEdge) {
 
     int start = bus.start, end = bus.end, p = 0;
-
+    static int addNewEdgeCnt = 0;  // 加边次数（不是边数）
     bool findPath = false;
     int minPathDist = INF;
     int choosenP = -1;
@@ -890,7 +859,7 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
                 continue;
 
             int curNode = end, tmpDist = curLevel;
-            if (tmpDist < minPathDist) {
+            if (tmpDist <= minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
                 choosenP = p;
@@ -900,6 +869,33 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
 
     }
     if (findPath == false) {    // 找不到路，需要构造新边
+        //先删边
+        //if (T > 6000) {                 // 有分布
+        //    if (++addNewEdgeCnt % 3 == 0)
+        //        tryDeleteEdge();
+        //}
+        //else if (T > 5000 && T <= 6000) {
+        //    if (++addNewEdgeCnt % 3 == 0)
+        //        tryDeleteEdge();
+        //}
+        //else if (T > 4000 && T <= 5000) {   // 无分布
+        //    if (++addNewEdgeCnt % 3 == 0)
+        //        tryDeleteEdge();
+        //}
+        //else if (T > 3500 && T <= 4000) {   // 有一个特别大运算量的
+        //    if (++addNewEdgeCnt % 5 == 0)
+        //        tryDeleteEdge();
+        //}
+        //else if (T <= 3500) {
+        //    if (++addNewEdgeCnt % 2 == 0)
+        //        tryDeleteEdge();
+        //}
+        if (T > 3500 && T <= 4000) {   // 有一个特别大运算量的特殊处理一下
+            if (++addNewEdgeCnt % 2 == 0)
+                tryDeleteEdge();
+        }
+        else
+            tryDeleteEdge();
         BFS2(bus);       // 旧的加边策略，一但加边，整个路径都会加，但全局性能是当前最好的
         return;
     }
@@ -920,7 +916,6 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
         curNode = edge[bus.pathTmp[curNode]].from;
     }
     reverseArray(bus.path);
-
 }
 
 // 寻找业务bus的起点到终点的路径（不考虑通道堵塞），并对路径上的每一条边都执行加边操作，然后交给BFS1操作
@@ -1043,7 +1038,7 @@ bool BFS5(Business& bus, int blockEdge) {
                 continue;
 
             int curNode = end, tmpDist = curLevel;
-            if (tmpDist < minPathDist) {
+            if (tmpDist <= minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
                 choosenP = p;
