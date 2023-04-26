@@ -101,6 +101,7 @@ void dijkstra2(Business& bus);
 void dijkstra3(Business& bus);
 void dijkstra4(int start, int end, int pileId, vector<int>& tmpOKPath);
 bool dijkstra5(Business& bus, int blockEdge);
+void dijkstra7(Business& bus);
 void BFS1(Business& bus, bool ifLoadNewEdge);
 void BFS2(Business& bus);
 bool BFS5(Business& bus, int blockEdge);
@@ -251,10 +252,10 @@ void tryDeleteEdge() {
             int stopK = -1;
             vector<int> tmpLastPileIds;
             for (int k = 0; k < busCnt; ++k) {
-                //if (T > 3500 && T <= 4000)
-                    findPath = BFS5(buses[lastBusIds[k]], idxEdge);
-                //else
-                //    findPath = dijkstra5(buses[lastBusIds[k]], idxEdge);
+
+                findPath = BFS5(buses[lastBusIds[k]], idxEdge);
+                //findPath = dijkstra5(buses[lastBusIds[k]], idxEdge);
+
                 if (findPath == false) {
                     stopK = k;
                     break;
@@ -330,10 +331,9 @@ void tryDeleteEdge() {
 
 // 把业务busId加载到光网络中
 void loadBus(int busId, bool ifLoadRemain) {
-    //if (T > 3500 && T <= 4000)
-        BFS1(buses[busId], false);
-    //else
-    //    dijkstra1(buses[busId]);
+    
+    BFS1(buses[busId], false);
+    //dijkstra1(buses[busId]);
 
     int curNode = buses[busId].start, trueNextEdgeId;
     for (int i = 0; i < buses[busId].path.size(); ++i) {
@@ -469,7 +469,7 @@ void dijkstra1(Business& bus) {
                 if (curNode == start)
                     break;
             }
-            if (tmpDist < minPathDist) {
+            if (tmpDist <= minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
                 choosenP = p;
@@ -501,13 +501,14 @@ void dijkstra1(Business& bus) {
         //    if (++addNewEdgeCnt % 2 == 0)
         //        tryDeleteEdge();
         //}
-        if (T > 3500 && T <= 4000) {   // 有一个特别大运算量的特殊处理一下
-            if (++addNewEdgeCnt % 2 == 0)
+        if (T > 3500 && T <= 4000) {
+            if (++addNewEdgeCnt % 2 == 0 && (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
                 tryDeleteEdge();
         }
         else
-            tryDeleteEdge();
-        dijkstra2(bus);       // 旧的加边策略，一但加边，整个路径都会加，但全局性能是当前最好的
+            if ((bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
+                tryDeleteEdge();
+        dijkstra7(bus);
         return;
     }
 
@@ -736,7 +737,7 @@ bool dijkstra5(Business& bus, int blockEdge) {
                 if (curNode == start)
                     break;
             }
-            if (tmpDist < minPathDist) {
+            if (tmpDist <= minPathDist) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
                 choosenP = p;
@@ -767,6 +768,101 @@ bool dijkstra5(Business& bus, int blockEdge) {
     }
     reverseArray(bus.path);
     return true;
+
+}
+
+// 不能加载业务时，寻找业务bus的起点到终点的路径（不考虑通道堵塞，全通道搜索），并对路径上的发生堵塞的边进行加边处理
+void dijkstra7(Business& bus) {
+
+    int start = bus.start, end = bus.end;
+    int minBlockEdge = INF;
+    int choosenP = -1;
+    vector<int> tmpOKPath;
+    tmpOKPath.resize(N, -1);
+    for (int i = 0; i < N; ++i) { // 赋初值
+        dis[i] = INF;
+        vis1[i] = false;
+    }
+    dis[start] = 0;  // 源点到源点的距离为0
+
+    priority_queue<Node1> null_queue; // 定义一个空的priority_queue对象
+    q.swap(null_queue);// 交换队列容器中的内容
+    q.push(Node1(0, start));
+    int s = -1;
+    while (!q.empty()) {   // 堆为空即，所有点都被加入到生成树中去了
+        Node1 x = q.top();  // 记录堆顶（堆内最小的边）并将其弹出
+        q.pop();
+        s = x.nodeId;   // 点s是dijstra生成树上的点，源点到s的最短距离已确定
+
+        if (s == end)   // 当end已经加入到了生成树，则结束搜索
+            break;
+
+        // 没有遍历过才需要遍历
+        if (vis1[s])
+            continue;
+        vis1[s] = true;
+        for (int i = head[s]; i != -1; i = edge[i].next) { // 搜索堆顶所有连边
+            int t = edge[i].to;
+            if (dis[t] > dis[s] + edge[i].d) {
+                tmpOKPath[t] = i;    // 记录下抵达路径点t的边的编号i
+                dis[t] = dis[s] + edge[i].d;   // 松弛操作
+                q.push(Node1(dis[t], t));   // 把新遍历到的点加入堆中  
+            }
+        }
+    }
+
+    for (int p = 0; p < P; ++p) {
+
+        int curNode = end, tmpBlockEdge = 0;
+        while (tmpOKPath[curNode] != -1) {
+            int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
+            if (edge[edgeId].Pile[p] != -1)
+                ++tmpBlockEdge;
+            curNode = edge[edgeId].from;
+        }
+
+        if (tmpBlockEdge < minBlockEdge) {   // 选需要加边数最少的通道
+            minBlockEdge = tmpBlockEdge;
+            bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+            choosenP = p;
+        }
+
+    }
+
+    int curNode = end;
+    bus.pileId = choosenP;
+    while (bus.pathTmp[curNode] != -1) {
+        int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+        int lastNode = curNode;
+        curNode = edge[bus.pathTmp[curNode]].from;
+
+        if (edge[edgeId].Pile[choosenP] == -1) {    // 无需加边
+            bus.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
+            edge[edgeId].Pile[choosenP] = bus.busId;
+
+            if (edgeId % 2) // 奇数-1
+                edge[edgeId - 1].Pile[choosenP] = bus.busId;   // 双向边，两边一起处理
+            else            // 偶数+1
+                edge[edgeId + 1].Pile[choosenP] = bus.busId;
+        }
+        else {      // 需要加边
+            addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
+            addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
+
+            if (edge[edgeId].from < edge[edgeId].to)
+                newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
+            else
+                newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
+            newEdgePathId.emplace_back(cntEdge / 2 - 1);
+
+            bus.path.push_back(cntEdge / 2 - 1); // edgeId / 2是为了适应题目要求
+            edge[cntEdge - 2].Pile[choosenP] = bus.busId;
+            edge[cntEdge - 1].Pile[choosenP] = bus.busId;   // 偶数+1
+            bus.pathTmp[lastNode] = cntEdge - 2;
+        }
+
+    }
+    reverseArray(bus.path);
 
 }
 
@@ -879,15 +975,16 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
         //else
         //    tryDeleteEdge();
         
-        //if (T > 3500 && T <= 4000) {
-        //    if (++addNewEdgeCnt % 2 == 0 && (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
-        //        tryDeleteEdge();
-        //}
-        //else
-        //    tryDeleteEdge();
+        if (T > 3500 && T <= 4000) {
+            if (++addNewEdgeCnt % 2 == 0 && (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
+                tryDeleteEdge();
+        }
+        else
+            if ((bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
+                tryDeleteEdge();
 
-        if (++addNewEdgeCnt % 2 == 0 && (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
-            tryDeleteEdge();
+        //if (++addNewEdgeCnt % 2 == 0 && (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
+        //    tryDeleteEdge();
 
         //BFS2(bus);       // 旧的加边策略，一但加边，整个路径都会加，但全局性能是当前最好的
         BFS7(bus);       // 新加边策略，只加最短路径上需要进行加边的边
