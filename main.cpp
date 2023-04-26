@@ -1239,7 +1239,7 @@ void BFS7(Business& bus) {
     bfsQ.push(make_pair(start, 0));
     vis1[start] = true;
     int s = start;
-    int curLevel = 0, endCurLevel = INF;
+    int curLevel = 0, maxCurLevel = INF;  //最大搜寻深度，用于缩短搜索时间，但可能会搜不到最优解，由第一次搜到终点后距离乘系数得出
     bool getOutFlag = false;
 
     while (!bfsQ.empty() && !getOutFlag) {
@@ -1255,10 +1255,10 @@ void BFS7(Business& bus) {
                 continue;
             tmpOKPath[t] = i;    // 记录下抵达路径点t的边的编号i
 
-            if (curLevel < endCurLevel) {  //正在搜寻终点层或未搜寻到终点，如果curLevl等于endCurLevel证明已经搜寻完了该层
+            if (curLevel < maxCurLevel) {  //小于最大搜寻深度才搜寻
                 if (t == end) {
-                    if (endCurLevel == INF)  //第一次找到
-                        endCurLevel = curLevel + 1;  //endCurLevel置为终点层，而搜寻时的curLevel为正在搜寻层的上一层
+                    if (maxCurLevel == INF)  //第一次找到
+                        maxCurLevel = 5 * (curLevel + 1);  //设置最大搜寻深度
                     //找最少加边数通道和路径
                     for (int p = 0; p < P; ++p) {
 
@@ -1279,12 +1279,12 @@ void BFS7(Business& bus) {
                 }
                 else {
                     vis1[t] = true;  //终点不会被标记已到达
-                    if (curLevel == endCurLevel - 1)  //正在搜寻终点层，没必要把终点层把下一层加入队列了
+                    if (curLevel == maxCurLevel - 1)  //正在搜寻最大搜寻深度的一层，那么下一层就没必要加入队列了
                         continue;
                     bfsQ.push(make_pair(t, curLevel + 1));
                 }
             }
-            else {  //搜寻到终点层下一层了
+            else {  //到达最大搜寻深度跳出
                 getOutFlag = true;
                 break;
             }
