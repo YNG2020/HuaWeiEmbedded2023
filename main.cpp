@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <math.h>
-#define INF 2147483647
+const int INF = 2147483647;
 
 using namespace std;
 
@@ -118,6 +118,8 @@ void findAddPath(Business& bus, bool* vis2);
 void reCoverNetwork(int lastBusID, int lastPileId);
 void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 
+bool ifLast = false;
+
 // 主函数
 int main() {
 
@@ -142,8 +144,9 @@ int main() {
 
     allocateBus();
     //reAllocateBus();
+    ifLast = true;
     tryDeleteEdge();
-    //tryDeleteEdge();
+    tryDeleteEdge();
     outPut();
 
     return 0;
@@ -1125,7 +1128,8 @@ bool BFS5(Business& bus, int blockEdge) {
         }
         if (s == end) {
 
-            if (curLevel > 3 * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
+            // 找到的路径长度太长，宁愿不要
+            if (!ifLast && (curLevel > 3 * minPathSize[make_pair(start, end)]))
                 continue;
 
             int curNode = end, tmpDist = curLevel;
