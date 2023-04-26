@@ -879,11 +879,14 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
         //else
         //    tryDeleteEdge();
         
-        if (T > 3500 && T <= 4000) {
-            if (++addNewEdgeCnt % 2 == 0 && (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
-                tryDeleteEdge();
-        }
-        else
+        //if (T > 3500 && T <= 4000) {
+        //    if (++addNewEdgeCnt % 2 == 0 && (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
+        //        tryDeleteEdge();
+        //}
+        //else
+        //    tryDeleteEdge();
+
+        if (++addNewEdgeCnt % 2 == 0 && (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end))
             tryDeleteEdge();
 
         //BFS2(bus);       // 旧的加边策略，一但加边，整个路径都会加，但全局性能是当前最好的
