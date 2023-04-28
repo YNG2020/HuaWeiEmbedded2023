@@ -174,7 +174,7 @@ int main() {
         while (leftTime > 3 * (tryDeleteUnitTime + reAllocateUnitTime)) {
 
             reAllocateTime = clock();
-            reAllocateBus(T);
+            reAllocateBus(0.5*T);
             curTime = clock();
             reAllocateUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
 
@@ -219,7 +219,7 @@ void reAllocateBus(int HLim) {
     for (int i = 0; i < T; ++i)
         totBusIdx[i] = i;
 
-    for (int i = 0; i + 19 < HLim; i = i + gap) {
+    for (int i = 0; i + gap < HLim; i = i + gap) {
 
         srand(time(NULL));  // 设置随机数种子  
         random_shuffle(totBusIdx.begin(), totBusIdx.end());
@@ -251,7 +251,7 @@ void reAllocateBus(int HLim) {
             curEdgeNum += buses[busId].path.size();
         }
 
-        if (1.025 * curEdgeNum < oriEdgeNum) {  // 总体的边数减少，接受迁移
+        if (1.05 * curEdgeNum < oriEdgeNum) {  // 总体的边数减少，接受迁移
             continue;
         }
         else {  // 否则，回复原状态
