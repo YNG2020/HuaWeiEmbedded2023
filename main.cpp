@@ -191,10 +191,11 @@ int main() {
     ifLast = true;
     if (T > 4000 || T <= 3500) {
         tryDeleteEdge();
+    }
+    else {
+        tryDeleteEdge();
         tryDeleteEdge();
     }
-    else
-        tryDeleteEdge();
     outPut();
 
     return 0;
@@ -250,7 +251,7 @@ void reAllocateBus(int HLim) {
             curEdgeNum += buses[busId].path.size();
         }
 
-        if (1.1 * curEdgeNum < oriEdgeNum) {  // 总体的边数减少，接受迁移
+        if (1.025 * curEdgeNum < oriEdgeNum) {  // 总体的边数减少，接受迁移
             continue;
         }
         else {  // 否则，回复原状态
