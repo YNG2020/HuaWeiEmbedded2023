@@ -1,10 +1,10 @@
-//#include "generateRandomNet.h"
 #include <iostream>
 #include <vector>
 #include <queue>
 #include <algorithm>
 #include <unordered_map>
 #include <math.h>
+#include <time.h>
 const int INF = 2147483647;
 
 using namespace std;
@@ -138,11 +138,13 @@ void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 
 bool ifLast = false;
 bool ifTryDeleteEdge = true;
-vector<int> pileIdx;
 
 // 主函数
 int main() {
 
+    clock_t startTime, curTime, reAllocateTime, tryDeleteTime;
+    double reAllocateUnitTime = 0, tryDeleteUnitTime = 0;
+    startTime = clock();
     cin >> N >> M >> T >> P >> D;
     init();
     int s = 0, t = 0, d = 0;
@@ -162,21 +164,37 @@ int main() {
         addBus(Sj, Tj); // 添加业务
     }
 
-    pileIdx.resize(P, 0);
-    for (int i = 0; i < P; ++i)
-        pileIdx[i] = i;
-
     allocateBus();
     ifTryDeleteEdge = false;
-    if (T <= 3500 || T > 4000) {
-        reAllocateBus(T);
-        reAllocateBus(T);
-        reAllocateBus(T);
+    curTime = clock();
+
+    double leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
+
+    if (T > 4000 || T <= 3500) {
+        while (leftTime > 3 * (tryDeleteUnitTime + reAllocateUnitTime)) {
+
+            reAllocateTime = clock();
+            reAllocateBus(T);
+            curTime = clock();
+            reAllocateUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
+
+            tryDeleteTime = clock();
+            tryDeleteEdge();
+            curTime = clock();
+            tryDeleteUnitTime = double(curTime - tryDeleteTime) / CLOCKS_PER_SEC;
+
+            leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
+        }
     }
+
         
     ifLast = true;
-    tryDeleteEdge();
-    tryDeleteEdge();
+    if (T > 4000 || T <= 3500) {
+        tryDeleteEdge();
+        tryDeleteEdge();
+    }
+    else
+        tryDeleteEdge();
     outPut();
 
     return 0;
@@ -192,7 +210,7 @@ void allocateBus() {
 // 试图重新分配业务到光网络中（暂时无用）
 void reAllocateBus(int HLim) {
 
-    int gap = max(int(0.05 * T), 20);
+    int gap = max(int(0.025 * T), 20);
     if (gap > T)
         return;
     vector<int> totBusIdx(T, 0);
@@ -200,17 +218,13 @@ void reAllocateBus(int HLim) {
     for (int i = 0; i < T; ++i)
         totBusIdx[i] = i;
 
-    for (int i = 0; i + 9 < HLim; i = i + gap) {
+    for (int i = 0; i + 19 < HLim; i = i + gap) {
 
         srand(time(NULL));  // 设置随机数种子  
         random_shuffle(totBusIdx.begin(), totBusIdx.end());
         for (int i = 0; i < gap; ++i) {
             busIdx[i] = totBusIdx[i];
         }        
-         
-        //for (int j = i; j < i + gap; ++j) {
-        //    busIdx[j - i] = j;
-        //}
 
         int oriEdgeNum = 0;
 
@@ -236,7 +250,7 @@ void reAllocateBus(int HLim) {
             curEdgeNum += buses[busId].path.size();
         }
 
-        if (1.05 * curEdgeNum < oriEdgeNum) {  // 总体的边数减少，接受迁移
+        if (1.1 * curEdgeNum < oriEdgeNum) {  // 总体的边数减少，接受迁移
             continue;
         }
         else {  // 否则，回复原状态
@@ -905,7 +919,6 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
     int start = bus.start, end = bus.end, p = 0;
     static int addNewEdgeCnt = 0;  // 加边次数（不是边数）
     static int addNewBus = 0;   // 加业务次数
-    //if (bus.start != buses[bus.busId - 1].start || bus.end != buses[bus.busId - 1].end)
     ++addNewBus;
     bool findPath = false;
     int minPathDist = INF;
