@@ -62,6 +62,7 @@ bool vis2[maxN]; // 标识该点有无在添加某业务时，被路径搜索访问过
 vector<pair<int, int>> newEdge; // 记录新添加的边的起点和终点
 vector<int> newEdgePathId;   // 记录新边在边集中的位置（计数时，双向边视为同一边）
 vector<int> remainBus;  // 记录下初次分配时，因路径堵塞而无法分配边的业务的编号
+vector<int> totBusIdx;  // 记录所有业务的Id
 
 struct HashFunc_t {
     size_t operator() (const pair<int, int>& key) const {
@@ -127,7 +128,8 @@ void BFS7(Business& bus);
 void BFS9(Business& bus);
 void loadBus(int busId, bool ifLoadRemain);
 void allocateBus();
-void reAllocateBus(int HLim);
+void reAllocateBus1(int HLim);
+void reAllocateBus2(int HLim);
 void tryDeleteEdge();
 void reverseArray(vector<int>& arr);
 void outPut();
@@ -144,8 +146,8 @@ int main() {
 
     clock_t startTime, curTime, reAllocateTime, tryDeleteTime;
     double reAllocateUnitTime = 0, tryDeleteUnitTime = 0;
-    startTime = clock();
     cin >> N >> M >> T >> P >> D;
+    startTime = clock();
     init();
     int s = 0, t = 0, d = 0;
     for (int i = 0; i < M; ++i) {
@@ -164,17 +166,23 @@ int main() {
         addBus(Sj, Tj); // 添加业务
     }
 
+    totBusIdx.resize(T, 0);
+    for (int i = 0; i < T; ++i)
+        totBusIdx[i] = i;
+
     allocateBus();
     ifTryDeleteEdge = false;
     curTime = clock();
+    //int tmpCnt = 0;
 
     double leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
 
     if (T > 4000 || T <= 3500) {
         while (leftTime > 3 * (tryDeleteUnitTime + reAllocateUnitTime)) {
-
+            //++tmpCnt;
             reAllocateTime = clock();
-            reAllocateBus(0.5*T);
+            reAllocateBus1(0.5*T);
+            //reAllocateBus2(0.5*T);
             curTime = clock();
             reAllocateUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
 
@@ -184,10 +192,12 @@ int main() {
             tryDeleteUnitTime = double(curTime - tryDeleteTime) / CLOCKS_PER_SEC;
 
             leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
+            //cout << "reAllocateUnitTime" << reAllocateUnitTime << endl;
+            //cout << "tryDeleteUnitTime" << tryDeleteUnitTime << endl;
         }
     }
-
-        
+    //cout << leftTime;
+    //cout << tmpCnt;
     ifLast = true;
     if (T > 4000 || T <= 3500) {
         tryDeleteEdge();
@@ -208,20 +218,18 @@ void allocateBus() {
     }
 }
 
-// 试图重新分配业务到光网络中（暂时无用）
-void reAllocateBus(int HLim) {
+// 试图重新分配业务到光网络中（允许在重分配的过程中加边）
+void reAllocateBus1(int HLim) {
 
     int gap = max(int(0.025 * T), 20);
     if (gap > T)
         return;
-    vector<int> totBusIdx(T, 0);
+
     vector<int> busIdx(gap, 0);
-    for (int i = 0; i < T; ++i)
-        totBusIdx[i] = i;
 
     for (int i = 0; i + gap < HLim; i = i + gap) {
 
-        srand(time(NULL));  // 设置随机数种子  
+        srand(42);  // 设置随机数种子  
         random_shuffle(totBusIdx.begin(), totBusIdx.end());
         for (int i = 0; i < gap; ++i) {
             busIdx[i] = totBusIdx[i];
@@ -261,6 +269,109 @@ void reAllocateBus(int HLim) {
             }
 
             for (int j = i, busId; j < i + gap; ++j) {  // 重新加载所有的边
+                vector<int> nullVector, nullPath1, nullPath2;
+                busId = busIdx[j - i];
+                buses[busId].mutiplierId.swap(nullVector);
+                buses[busId].path.swap(nullPath1);
+                buses[busId].pathTmp.swap(nullPath2);
+
+                buses[busId].pileId = -1;
+                buses[busId].curA = D;
+                reloadBus(busId, pileTmp1[j - i], pathTmp1[j - i]);
+            }
+        }
+
+    }
+
+
+}
+
+// 试图重新分配业务到光网络中（禁止在重分配的过程中加边）
+void reAllocateBus2(int HLim) {
+
+    int gap = max(int(0.05 * T), 20);
+    if (gap > T)
+        return;
+    vector<int> totBusIdx(T, 0);
+    vector<int> busIdx(gap, 0);
+    for (int i = 0; i < T; ++i)
+        totBusIdx[i] = i;
+
+    for (int i = 0; i + gap < HLim; i = i + gap) {
+
+        srand(time(NULL));  // 设置随机数种子  
+        random_shuffle(totBusIdx.begin(), totBusIdx.end());
+        for (int k = 0; k < gap; ++k) {
+            busIdx[k] = totBusIdx[k];
+        }
+
+        int oriEdgeNum = 0;
+
+        vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
+        vector<int> pileTmp1(gap, -1);
+        for (int j = i, busId; j < i + gap; ++j) {
+            busId = busIdx[j - i];
+            oriEdgeNum += buses[busId].path.size();
+            pathTmp1[j - i] = buses[busId].pathTmp;
+            pileTmp1[j - i] = buses[busId].pileId;
+            reCoverNetwork(busId, buses[busId].pileId);
+        }
+
+        int curEdgeNum = 0;
+        bool findPath = false;
+        vector<vector<int>> pathTmp2(gap, vector<int>());     // 用于此后重新加载边
+        vector<int> pileTmp2(gap, -1);
+
+        for (int j = i + gap - 1, busId; j >= i; --j) {
+
+            busId = busIdx[j - i];
+            findPath = BFS5(buses[busId], -1);
+            if (findPath) {
+                pathTmp2[j - i] = buses[busId].pathTmp;
+                pileTmp2[j - i] = buses[busId].pileId;
+                curEdgeNum += buses[busId].path.size();
+
+                int curNode = buses[busId].start, trueNextEdgeId;
+                for (int i = 0; i < buses[busId].path.size(); ++i) {
+
+                    if (edge[buses[busId].path[i] * 2].from == curNode)
+                        trueNextEdgeId = buses[busId].path[i] * 2;
+                    else
+                        trueNextEdgeId = buses[busId].path[i] * 2 + 1;
+                    curNode = edge[trueNextEdgeId].to;
+
+                    if (buses[busId].curA >= edge[trueNextEdgeId].trueD) {
+                        buses[busId].curA -= edge[trueNextEdgeId].trueD;
+                    }
+                    else {
+                        node[edge[trueNextEdgeId].from].Multiplier[buses[busId].pileId] = buses[busId].pileId;
+                        buses[busId].curA = D;
+                        buses[busId].curA -= edge[trueNextEdgeId].trueD;
+                        buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
+                    }
+                }
+
+            }
+            else {  // BFS5找不到路时，不会对网络和业务产生任何影响
+                findPath = false;
+                break;
+            }
+
+        }
+
+        if (findPath && 1.025 * curEdgeNum < oriEdgeNum) {  // 总体的边数减少，接受迁移
+            continue;
+        }
+        else {  // 否则，回复原状态
+            for (int j = i + gap - 1, busId; j >= i; --j) {   // 把试图寻路时，造成的对网络的影响消除     
+                if (pathTmp2[j - i].size() == 0)        // 该业务寻路失败，对网络不造成影响
+                    continue;
+                busId = busIdx[j - i];
+                reCoverNetwork(busId, pileTmp2[j - i]);
+            }
+
+            for (int j = i, busId; j < i + gap; ++j) {  // 重新加载所有的边
+
                 vector<int> nullVector, nullPath1, nullPath2;
                 busId = busIdx[j - i];
                 buses[busId].mutiplierId.swap(nullVector);
@@ -943,19 +1054,6 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
             if (p < 0)
                 break;
         }
-
-
-    //if (T > 3500 && T <= 4000 && addNewBus % 4) {
-    //    srand(time(NULL));  // 设置随机数种子  
-    //    random_shuffle(pileIdx.begin(), pileIdx.end());
-    //}
-    //else if (addNewBus % 2) {
-    //    srand(time(NULL));  // 设置随机数种子  
-    //    random_shuffle(pileIdx.begin(), pileIdx.end());
-    //}
-
-    //for (int k = 0; k < P; ++k) {
-    //    p = pileIdx[k];
 
         tmpOKPath.resize(N, -1);
         for (int i = 0; i < N; ++i) { // 赋初值
