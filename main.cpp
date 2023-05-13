@@ -395,16 +395,16 @@ void reAllocateBus2(int HLim) {
 
 }
 
-// 试图重新分配业务到光网络中（允许在重分配的过程中加边，按一定规则挑选重分配的业务）
+// 试图重新分配业务到光网络中（允许在重分配的过程中加边，挑选出的要重分配的业务尽可能是“不良好”分配的）
 void reAllocateBus3(int HLim) {
 
     int gap = max(int(0.025 * T), 20);
     if (gap > T)
         return;
 
-    double ratio = 0.5;     // 以ratio的概率，选择goodBusId中的业务进行重分配
-    vector<int> goodBusId;
-    vector<int> badBusId;
+    double ratio = 0.5;     // 以ratio的概率，选择不良好的业务进行分配
+    vector<int> goodBusId;  // 良好分配的业务，“良好”的定义是该业务所经过的路径长度小于最短路径长度*goofBadGap
+    vector<int> badBusId;   // 不良好分配的业务
     for (int i = 0; i < T; ++i)
         if (buses[i].isBusWellAllocate)
             goodBusId.push_back(i);
@@ -431,7 +431,7 @@ void reAllocateBus3(int HLim) {
                 continue;
             }
             double curRatio = (double)(rand()) / RAND_MAX;
-            if (curRatio < ratio)
+            if (curRatio < ratio)   // 以ratio的概率，选择不良好的业务进行分配
                 busIdx[j] = badBusId[m++];
             else
                 busIdx[j] = goodBusId[n++];
@@ -1182,7 +1182,7 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
         //int totUsedPileCnt = 0;
         bool getOutFlag = false;
 
-        while (!bfsQ.empty() && !getOutFlag) { // 队列为空即，所有点都被加入到生成树中去了
+        while (!bfsQ.empty() && !getOutFlag) {
 
             //Node2 tmpNode = bfsq.front();
             s = bfsQ.front().first;
@@ -1242,9 +1242,7 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
                 continue;
 
             int curNode = end, tmpDist = curLevel;
-            //double tmpValue = (0.5 * totUsedPileCnt + 0.0001) / curLevel;
             if (tmpDist < minPathDist) {
-                //if (tmpValue >= maxValue) {
                 minPathDist = tmpDist;
                 bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
                 choosenP = p;
@@ -1310,7 +1308,7 @@ void BFS2(Business& bus) {
     int curLevel = 0;
     bool getOutFlag = false;
 
-    while (!bfsQ.empty() && !getOutFlag) { // 队列为空即，所有点都被加入到生成树中去了
+    while (!bfsQ.empty() && !getOutFlag) {
 
         s = bfsQ.front().first;
         curLevel = bfsQ.front().second;
@@ -1373,7 +1371,7 @@ void BFS3(Business& bus) {
     int curLevel = 0;
     bool getOutFlag = false;
 
-    while (!bfsQ.empty() && !getOutFlag) { // 队列为空即，所有点都被加入到生成树中去了
+    while (!bfsQ.empty() && !getOutFlag) {
 
         s = bfsQ.front().first;
         curLevel = bfsQ.front().second;
@@ -1423,7 +1421,7 @@ bool BFS5(Business& bus, int blockEdge) {
         int curLevel = 0;
         bool getOutFlag = false;
 
-        while (!bfsQ.empty() && !getOutFlag) { // 队列为空即，所有点都被加入到生成树中去了
+        while (!bfsQ.empty() && !getOutFlag) {
 
             s = bfsQ.front().first;
             curLevel = bfsQ.front().second;
@@ -1526,7 +1524,7 @@ bool BFS6(Business& bus, int blockEdge) {
         int curLevel = 0;
         bool getOutFlag = false;
 
-        while (!bfsQ.empty() && !getOutFlag) { // 队列为空即，所有点都被加入到生成树中去了
+        while (!bfsQ.empty() && !getOutFlag) {
 
             s = bfsQ.front().first;
             curLevel = bfsQ.front().second;
@@ -1668,7 +1666,7 @@ void BFS7(Business& bus) {
     bus.isBusWellAllocate = true;
 }
 
-// 考虑一边多通道的情况下，寻找业务bus的起点到终点的路径（不一定是最少边数路径，因为有可能边的通道被完全占用）
+// 统计了路径上的边所使用的总通道数。但这个统计量没有使用到。考虑一边多通道的情况下，寻找业务bus的起点到终点的路径（不一定是最少边数路径，因为有可能边的通道被完全占用）
 void BFS9(Business& bus) {
 
     int start = bus.start, end = bus.end, p = 0;
@@ -1693,7 +1691,7 @@ void BFS9(Business& bus) {
         int totUsedPileCnt = 0;
         bool getOutFlag = false;
 
-        while (!bfsQ.empty() && !getOutFlag) { // 队列为空即，所有点都被加入到生成树中去了
+        while (!bfsQ.empty() && !getOutFlag) {
 
             Node2 tmpNode = bfsq.top();
             s = bfsQ.front().first;
