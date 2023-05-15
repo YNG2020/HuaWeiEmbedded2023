@@ -47,6 +47,7 @@ public:
     Business() {
         start = -1;
         end = -1;
+        pileId = -1;
     }
     int pileId; // 业务所占据的通道Id
     vector<int> pathTmp;   // 存储从起点到其它点的最短路径的末边的编号（考虑通道堵塞的最短）
@@ -143,6 +144,7 @@ bool bfsTestConnection(int start, int end);
 void findAddPath(Business& bus, bool* vis2);
 void reCoverNetwork(int lastBusID, int lastPileId);
 void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
+void addMultiplier(Business& bus, int busId);
 
 bool ifLast = false;
 bool ifTryDeleteEdge = true;
@@ -172,8 +174,6 @@ int main() {
         addBus(Sj, Tj); // 添加业务
         BFS3(buses[i]); // 计算最短路径
     }
-
-
 
     allocateBus();
     ifTryDeleteEdge = false;
@@ -507,7 +507,7 @@ void tryDeleteEdge() {
         int idxEdge = newEdgePathId[idx]; // idxEdge为边在边集数组的编号（计数时，双向边视作同一边）  
 
         trueEdgeId = idxEdge * 2;
-        int busCnt = 0;
+        int busCnt = 0;     // 记录边上承载的业务数
         vector<int> lastBusIds, lastPileIds;
 
         for (int j = 0; j < P; ++j)
@@ -572,25 +572,7 @@ void tryDeleteEdge() {
                     buses[lastBusIds[k]].mutiplierId.swap(nullVector);
                     buses[lastBusIds[k]].curA = D;
 
-                    int curNode = buses[lastBusIds[k]].start, trueNextEdgeId;
-                    for (int i = 0; i < buses[lastBusIds[k]].path.size(); ++i) {
-
-                        if (edge[buses[lastBusIds[k]].path[i] * 2].from == curNode)
-                            trueNextEdgeId = buses[lastBusIds[k]].path[i] * 2;
-                        else
-                            trueNextEdgeId = buses[lastBusIds[k]].path[i] * 2 + 1;
-                        curNode = edge[trueNextEdgeId].to;
-
-                        if (buses[lastBusIds[k]].curA >= edge[trueNextEdgeId].trueD) {
-                            buses[lastBusIds[k]].curA -= edge[trueNextEdgeId].trueD;
-                        }
-                        else {
-                            node[edge[trueNextEdgeId].from].Multiplier[buses[lastBusIds[k]].pileId] = buses[lastBusIds[k]].pileId;
-                            buses[lastBusIds[k]].curA = D;
-                            buses[lastBusIds[k]].curA -= edge[trueNextEdgeId].trueD;
-                            buses[lastBusIds[k]].mutiplierId.push_back(edge[trueNextEdgeId].from);
-                        }
-                    }
+                    addMultiplier(buses[lastBusIds[k]], lastBusIds[k]);
 
                 }
 
@@ -624,27 +606,7 @@ void loadBus(int busId, bool ifLoadRemain) {
 
     BFS1(buses[busId], false);
     //dijkstra1(buses[busId]);
-
-    int curNode = buses[busId].start, trueNextEdgeId;
-    for (int i = 0; i < buses[busId].path.size(); ++i) {
-
-        if (edge[buses[busId].path[i] * 2].from == curNode)
-            trueNextEdgeId = buses[busId].path[i] * 2;
-        else
-            trueNextEdgeId = buses[busId].path[i] * 2 + 1;
-        curNode = edge[trueNextEdgeId].to;
-
-        if (buses[busId].curA >= edge[trueNextEdgeId].trueD) {
-            buses[busId].curA -= edge[trueNextEdgeId].trueD;
-        }
-        else {
-            node[edge[trueNextEdgeId].from].Multiplier[buses[busId].pileId] = buses[busId].pileId;
-            buses[busId].curA = D;
-            buses[busId].curA -= edge[trueNextEdgeId].trueD;
-            buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
-        }
-    }
-
+    addMultiplier(buses[busId], busId);
 }
 
 // 初始化
@@ -1559,6 +1521,8 @@ bool BFS6(Business& bus, int blockEdge) {
 
     }
 
+    return false;
+
 }
 
 // 不能加载业务时，寻找业务bus的起点到终点的路径（不考虑通道堵塞，全通道搜索），并对路径上的发生堵塞的边进行加边处理
@@ -2050,24 +2014,31 @@ void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp) {
         buses[lastBusID].isBusWellAllocate = false;
 
     // 重新设置放大器
-    curNode = buses[lastBusID].start;
-    int trueNextEdgeId;
-    for (int i = 0; i < buses[lastBusID].path.size(); ++i) {
+    addMultiplier(buses[lastBusID], lastBusID);
 
-        if (edge[buses[lastBusID].path[i] * 2].from == curNode)
-            trueNextEdgeId = buses[lastBusID].path[i] * 2;
+}
+
+// 为分配好的业务添加放大器
+void addMultiplier(Business& bus, int busId) {
+
+    int curNode = buses[busId].start, trueNextEdgeId;
+    for (int i = 0; i < buses[busId].path.size(); ++i) {
+
+        if (edge[buses[busId].path[i] * 2].from == curNode)
+            trueNextEdgeId = buses[busId].path[i] * 2;
         else
-            trueNextEdgeId = buses[lastBusID].path[i] * 2 + 1;
+            trueNextEdgeId = buses[busId].path[i] * 2 + 1;
         curNode = edge[trueNextEdgeId].to;
 
-        if (buses[lastBusID].curA >= edge[trueNextEdgeId].trueD) {
-            buses[lastBusID].curA -= edge[trueNextEdgeId].trueD;
+        if (buses[busId].curA >= edge[trueNextEdgeId].trueD) {
+            buses[busId].curA -= edge[trueNextEdgeId].trueD;
         }
         else {
-            node[edge[trueNextEdgeId].from].Multiplier[buses[lastBusID].pileId] = buses[lastBusID].pileId;
-            buses[lastBusID].curA = D;
-            buses[lastBusID].curA -= edge[trueNextEdgeId].trueD;
-            buses[lastBusID].mutiplierId.push_back(edge[trueNextEdgeId].from);
+            node[edge[trueNextEdgeId].from].Multiplier[buses[busId].pileId] = buses[busId].pileId;
+            buses[busId].curA = D;
+            buses[busId].curA -= edge[trueNextEdgeId].trueD;
+            buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
         }
     }
+
 }
