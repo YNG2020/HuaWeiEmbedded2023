@@ -22,6 +22,7 @@ public:
     int NodeId;           // 实际上利用数组的下标就可以唯一标识Node，这里先做一个冗余
     int Multiplier[maxP]; // 该节点上存在的放大器，记录的是当前要放大的通道的编号，放大器不存在时值为-1
     vector<int> reachPile;  // 在单次dijkstra搜索中，可抵达该顶点的pile编号
+    double passBusCnt;     // 经过这一节点的业务数
 }node[maxN];
 
 class Edge {
@@ -58,7 +59,7 @@ public:
 }buses[maxBus];
 
 int head[maxN]; // head[i]，表示以i为起点的在逻辑上的第一条边在边集数组的位置（编号）
-int dis[maxN];  // dis[i]，表示以源点到i到距离
+double dis[maxN];  // dis[i]，表示以源点到i到距离
 bool vis1[maxN];  // 标识该点有无被访问过
 bool vis2[maxN]; // 标识该点有无在添加某业务时，被路径搜索访问过
 vector<pair<int, int>> newEdge; // 记录新添加的边的起点和终点
@@ -614,6 +615,7 @@ void init() {
 
         head[i] = -1;
         node[i].NodeId = i;
+        node[i].passBusCnt = 0;
         for (int j = 0; j < P; ++j)
             node[i].Multiplier[j] = -1;
     }
@@ -767,10 +769,12 @@ void dijkstra1(Business& bus) {
     bus.pileId = choosenP;
     while (bus.pathTmp[curNode] != -1) {
         int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+        ++node[curNode].passBusCnt;     // 经过节点的业务数加1
 
         bus.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
         edge[edgeId].Pile[choosenP] = bus.busId;
         ++edge[edgeId].usedPileCnt;
+        
 
         if (edgeId % 2) {   // 奇数-1
             edge[edgeId - 1].Pile[choosenP] = bus.busId;   // 双向边，两边一起处理
@@ -783,6 +787,7 @@ void dijkstra1(Business& bus) {
 
         curNode = edge[bus.pathTmp[curNode]].from;
     }
+    ++node[curNode].passBusCnt;     // 经过节点的业务数加1
     reverseArray(bus.path);
 }
 
@@ -1010,6 +1015,7 @@ bool dijkstra5(Business& bus, int blockEdge) {
     bus.pileId = choosenP;
     while (bus.pathTmp[curNode] != -1) {
         int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+        ++node[curNode].passBusCnt;     // 经过节点的业务数加1
 
         bus.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
         edge[edgeId].Pile[choosenP] = bus.busId;
@@ -1026,6 +1032,7 @@ bool dijkstra5(Business& bus, int blockEdge) {
 
         curNode = edge[bus.pathTmp[curNode]].from;
     }
+    ++node[curNode].passBusCnt;     // 经过节点的业务数加1
     reverseArray(bus.path);
     return true;
 
@@ -1093,6 +1100,7 @@ void dijkstra7(Business& bus) {
     while (bus.pathTmp[curNode] != -1) {
         int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
         int lastNode = curNode;
+        ++node[curNode].passBusCnt;     // 经过节点的业务数加1
         curNode = edge[bus.pathTmp[curNode]].from;
 
         if (edge[edgeId].Pile[choosenP] == -1) {    // 无需加边
@@ -1128,6 +1136,7 @@ void dijkstra7(Business& bus) {
         }
 
     }
+    ++node[curNode].passBusCnt;     // 经过节点的业务数加1
     reverseArray(bus.path);
     bus.isBusWellAllocate = true;
 
@@ -1267,6 +1276,7 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
     bus.pileId = choosenP;
     while (bus.pathTmp[curNode] != -1) {
         int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+        ++node[curNode].passBusCnt;     // 经过节点的业务数加1
 
         bus.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
         edge[edgeId].Pile[choosenP] = bus.busId;
@@ -1283,6 +1293,7 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
 
         curNode = edge[bus.pathTmp[curNode]].from;
     }
+    ++node[curNode].passBusCnt;     // 经过节点的业务数加1
     reverseArray(bus.path);
 }
 
@@ -1477,6 +1488,7 @@ bool BFS5(Business& bus, int blockEdge) {
     bus.pileId = choosenP;
     while (bus.pathTmp[curNode] != -1) {
         int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+        ++node[curNode].passBusCnt;     // 经过节点的业务数加1
 
         bus.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
         edge[edgeId].Pile[choosenP] = bus.busId;
@@ -1493,6 +1505,7 @@ bool BFS5(Business& bus, int blockEdge) {
 
         curNode = edge[bus.pathTmp[curNode]].from;
     }
+    ++node[curNode].passBusCnt;     // 经过节点的业务数加1
     reverseArray(bus.path);
     return true;
 }
@@ -1624,6 +1637,7 @@ void BFS7(Business& bus) {
     while (bus.pathTmp[curNode] != -1) {
         int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
         int lastNode = curNode;
+        ++node[curNode].passBusCnt;     // 经过节点的业务数加1
         curNode = edge[bus.pathTmp[curNode]].from;
 
         if (edge[edgeId].Pile[choosenP] == -1) {    // 无需加边
@@ -1659,6 +1673,7 @@ void BFS7(Business& bus) {
         }
 
     }
+    ++node[curNode].passBusCnt;     // 经过节点的业务数加1
     reverseArray(bus.path);
     bus.isBusWellAllocate = true;
 }
@@ -1763,6 +1778,7 @@ void BFS9(Business& bus) {
     bus.pileId = choosenP;
     while (bus.pathTmp[curNode] != -1) {
         int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+        ++node[curNode].passBusCnt;     // 经过节点的业务数加1
 
         bus.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
         edge[edgeId].Pile[choosenP] = bus.busId;
@@ -1779,6 +1795,7 @@ void BFS9(Business& bus) {
 
         curNode = edge[bus.pathTmp[curNode]].from;
     }
+    ++node[curNode].passBusCnt;     // 经过节点的业务数加1
     reverseArray(bus.path);
 }
 
@@ -1969,6 +1986,7 @@ void reCoverNetwork(int lastBusID, int lastPileId) {
         int edgeId = pathTmp[curNode];  // 存储于edge数组中真正的边的Id
         edge[edgeId].Pile[lastPileId] = -1;
         --edge[edgeId].usedPileCnt;
+        --node[curNode].passBusCnt;     // 经过节点的业务数减1
 
         if (edgeId % 2) { // 奇数-1
             edge[edgeId - 1].Pile[lastPileId] = -1;   // 双向边，两边一起处理
@@ -1982,6 +2000,7 @@ void reCoverNetwork(int lastBusID, int lastPileId) {
         curNode = edge[pathTmp[curNode]].from;
     }
 
+    --node[curNode].passBusCnt;     // 经过节点的业务数减1
     ////////////////////////////////////////////////////////////////////////
     // 清空对加放大器的影响
     buses[lastBusID].curA = D;
@@ -2024,6 +2043,7 @@ void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp) {
     buses[lastBusID].pathTmp = vector<int>(pathTmp.begin(), pathTmp.end());
     while (buses[lastBusID].pathTmp[curNode] != -1) {
         int edgeId = buses[lastBusID].pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+        ++node[curNode].passBusCnt;     // 经过节点的业务数加1
 
         buses[lastBusID].path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
         edge[edgeId].Pile[lastPileId] = buses[lastBusID].busId;
@@ -2040,6 +2060,7 @@ void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp) {
 
         curNode = edge[buses[lastBusID].pathTmp[curNode]].from;
     }
+    ++node[curNode].passBusCnt;     // 经过节点的业务数加1
     reverseArray(buses[lastBusID].path);
     if (minPathSize[make_pair(buses[lastBusID].start, buses[lastBusID].end)] * goodBadGap > buses[lastBusID].path.size())
         buses[lastBusID].isBusWellAllocate = true;
