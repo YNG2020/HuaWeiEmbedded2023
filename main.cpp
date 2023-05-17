@@ -3,6 +3,7 @@
 #include <queue>
 #include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
 #include <math.h>
 #include <time.h>
 const int INF = 2147483647;
@@ -95,7 +96,13 @@ public:
     }
     Node1() {}
     bool operator < (const Node1& x) const { // 重载运算符把最小的元素放在堆顶（大根堆）
-        return d > x.d;
+        if (d > x.d)
+            return true;
+        else if (d == x.d)
+            return node[nodeId].passBusCnt > node[x.nodeId].passBusCnt;
+        else
+            return false;
+        //return d > x.d;
     }
 };
 
@@ -136,6 +143,7 @@ void allocateBus();
 void reAllocateBus1(int HLim);
 void reAllocateBus2(int HLim);
 void reAllocateBus3(int HLim);
+void reAllocateBus4(int HLim);
 void tryDeleteEdge();
 void reverseArray(vector<int>& arr);
 void outPut();
@@ -144,6 +152,7 @@ void findAddPath(Business& bus, bool* vis2);
 void reCoverNetwork(int lastBusID, int lastPileId);
 void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 void addMultiplier(Business& bus, int busId);
+int testEdgeFull(const vector<int>& path, unordered_set<int>& mark);
 
 bool ifLast = false;
 bool ifTryDeleteEdge = true;
@@ -185,7 +194,7 @@ int main() {
         while (leftTime > 3 * (tryDeleteUnitTime + reAllocateUnitTime)) {
             ++tmpCnt;
             reAllocateTime = clock();
-            reAllocateBus1(0.5*T);
+            reAllocateBus4(0.5*T);
             //reAllocateBus2(0.5*T);
             //reAllocateBus3(0.5 * T);
             curTime = clock();
@@ -287,7 +296,6 @@ void reAllocateBus1(int HLim) {
         }
 
     }
-
 
 }
 
@@ -495,6 +503,73 @@ void reAllocateBus3(int HLim) {
 
     }
 
+}
+
+// 试图重新分配业务到光网络中（允许在重分配的过程中加边）
+void reAllocateBus4(int HLim) {
+
+    int gap = max(int(0.025 * T), 20);
+    if (gap > T)
+        return;
+
+    vector<int> busIdx(gap, 0);
+
+    for (int i = 0; i + gap < HLim; i = i + gap) {
+
+        srand(42);  // 设置随机数种子  
+        random_shuffle(totBusIdx.begin(), totBusIdx.end());
+        for (int i = 0; i < gap; ++i) {
+            busIdx[i] = totBusIdx[i];
+        }
+
+        int oriEdgeNum = 0, oriFullEdge = 0;
+        unordered_set<int> mark1;
+        vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
+        vector<int> pileTmp1(gap, -1);
+        for (int j = i, busId; j < i + gap; ++j) {
+            busId = busIdx[j - i];
+            oriEdgeNum += buses[busId].path.size();
+            oriFullEdge += testEdgeFull(buses[busId].path, mark1);
+            pathTmp1[j - i] = buses[busId].pathTmp;
+            pileTmp1[j - i] = buses[busId].pileId;
+            reCoverNetwork(busId, buses[busId].pileId);
+        }
+
+        int curEdgeNum = 0, curFullEdge = 0;
+        unordered_set<int> mark2;
+        bool findPath = false;
+        vector<int> pileTmp2(gap, -1);
+        for (int j = i + gap - 1, busId; j >= i; --j) {
+            busId = busIdx[j - i];
+            loadBus(busId, false);
+            pileTmp2[j - i] = buses[busId].pileId;
+            curEdgeNum += buses[busId].path.size();
+            curFullEdge += testEdgeFull(buses[busId].path, mark2);
+        }
+
+        if (1.1 * curFullEdge * oriEdgeNum > oriFullEdge * curEdgeNum) {  // 边的利用效率下降，接受迁移
+            continue;
+        }
+        else {  // 否则，回复原状态
+            for (int j = i + gap - 1, busId; j >= i; --j) {   // 把试图寻路时，造成的对网络的影响消除
+                busId = busIdx[j - i];
+                reCoverNetwork(busId, pileTmp2[j - i]);
+            }
+
+            for (int j = i, busId; j < i + gap; ++j) {  // 重新加载所有的边
+                vector<int> nullVector, nullPath1, nullPath2;
+                busId = busIdx[j - i];
+                buses[busId].mutiplierId.swap(nullVector);
+                buses[busId].path.swap(nullPath1);
+                buses[busId].pathTmp.swap(nullPath2);
+
+                buses[busId].pileId = -1;
+                buses[busId].curA = D;
+                reloadBus(busId, pileTmp1[j - i], pathTmp1[j - i]);
+            }
+        }
+
+    }
 
 }
 
@@ -603,8 +678,8 @@ void tryDeleteEdge() {
 // 把业务busId加载到光网络中
 void loadBus(int busId, bool ifLoadRemain) {
 
-    BFS1(buses[busId], false);
-    //dijkstra1(buses[busId]);
+    //BFS1(buses[busId], false);
+    dijkstra1(buses[busId]);
     addMultiplier(buses[busId], busId);
 }
 
@@ -775,7 +850,6 @@ void dijkstra1(Business& bus) {
         edge[edgeId].Pile[choosenP] = bus.busId;
         ++edge[edgeId].usedPileCnt;
         
-
         if (edgeId % 2) {   // 奇数-1
             edge[edgeId - 1].Pile[choosenP] = bus.busId;   // 双向边，两边一起处理
             ++edge[edgeId - 1].usedPileCnt;
@@ -2094,5 +2168,23 @@ void addMultiplier(Business& bus, int busId) {
             buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
         }
     }
+
+}
+
+// 统计出path中的边的利用效率达到某一ratio的数目
+int testEdgeFull(const vector<int>& path, unordered_set<int>& mark) {
+
+    double ratio = 0.8;
+    int n = path.size(), fullEdge = 0;
+    for (int i = 0, trueEdgeId; i < n; ++i) {
+        trueEdgeId = path[i] * 2;
+        //if (mark.find(trueEdgeId) != mark.end())      // 这个本来是用来避免重复计数的，但是注释了反而更好
+        //    continue;
+        //else
+        //    mark.emplace(trueEdgeId);
+        if (edge[trueEdgeId].usedPileCnt > ratio * P)
+            ++fullEdge;
+    }
+    return fullEdge;
 
 }
