@@ -524,19 +524,20 @@ void reAllocateBus4(int HLim) {
 
         int oriEdgeNum = 0, oriFullEdge = 0;
         unordered_set<int> mark1;
+        for (int j = i; j < i + gap; ++j)
+            oriFullEdge += testEdgeFull(buses[busIdx[j - i]].path, mark1);
+
         vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
         vector<int> pileTmp1(gap, -1);
         for (int j = i, busId; j < i + gap; ++j) {
             busId = busIdx[j - i];
             oriEdgeNum += buses[busId].path.size();
-            oriFullEdge += testEdgeFull(buses[busId].path, mark1);
             pathTmp1[j - i] = buses[busId].pathTmp;
             pileTmp1[j - i] = buses[busId].pileId;
             reCoverNetwork(busId, buses[busId].pileId);
         }
 
         int curEdgeNum = 0, curFullEdge = 0;
-        unordered_set<int> mark2;
         bool findPath = false;
         vector<int> pileTmp2(gap, -1);
         for (int j = i + gap - 1, busId; j >= i; --j) {
@@ -544,8 +545,10 @@ void reAllocateBus4(int HLim) {
             loadBus(busId, false);
             pileTmp2[j - i] = buses[busId].pileId;
             curEdgeNum += buses[busId].path.size();
-            curFullEdge += testEdgeFull(buses[busId].path, mark2);
         }
+        unordered_set<int> mark2;
+        for (int j = i; j < i + gap; ++j)
+            curFullEdge += testEdgeFull(buses[busIdx[j - i]].path, mark2);
 
         if (1.1 * curFullEdge * oriEdgeNum > oriFullEdge * curEdgeNum) {  // 边的利用效率下降，接受迁移
             continue;
