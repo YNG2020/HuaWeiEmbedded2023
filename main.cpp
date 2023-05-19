@@ -516,7 +516,7 @@ void reAllocateBus4(int HLim) {
 
     for (int i = 0; i + gap < HLim; i = i + gap) {
 
-        srand(42);  // 设置随机数种子  
+        srand(56);  // 设置随机数种子  
         random_shuffle(totBusIdx.begin(), totBusIdx.end());
         for (int i = 0; i < gap; ++i) {
             busIdx[i] = totBusIdx[i];
@@ -539,6 +539,7 @@ void reAllocateBus4(int HLim) {
             reCoverNetwork(busId, buses[busId].pileId);
         }
 
+        int oriCntEdge = cntEdge;
         int curEdgeNum = 0, curFullEdge = 0;
         bool findPath = false;
         vector<int> pileTmp2(gap, -1);
@@ -575,6 +576,20 @@ void reAllocateBus4(int HLim) {
                 buses[busId].curA = D;
                 reloadBus(busId, pileTmp1[j - i], pathTmp1[j - i]);
             }
+
+            // 在这里利用cntEdge的变化来及时删除无用新边
+            for (int j = oriCntEdge; j < cntEdge; j = j + 2) {
+
+                int iter = find(newEdgePathId.begin(), newEdgePathId.end(), j / 2) - newEdgePathId.begin();
+                newEdge.erase(newEdge.begin() + iter);
+                newEdgePathId.erase(newEdgePathId.begin() + iter);
+
+                for (int k = 0; k < P; ++k) {   // 该边已删除，就应对其进行封锁
+                    edge[j].Pile[k] = T;
+                    edge[j + 1].Pile[k] = T;   // 偶数+1
+                }
+            }
+
         }
 
     }
