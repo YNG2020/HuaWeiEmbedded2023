@@ -148,11 +148,11 @@ void tryDeleteEdge();
 void reverseArray(vector<int>& arr);
 void outPut();
 bool bfsTestConnection(int start, int end);
-void findAddPath(Business& bus, bool* vis2);
 void reCoverNetwork(int lastBusID, int lastPileId);
 void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
 void addMultiplier(Business& bus, int busId);
 int testEdgeFull(const vector<int>& path, unordered_set<int>& mark);
+int countEdgeNum(const vector<int>& path, unordered_set<int>& mark);
 
 bool ifLast = false;
 bool ifTryDeleteEdge = true;
@@ -524,14 +524,16 @@ void reAllocateBus4(int HLim) {
 
         int oriEdgeNum = 0, oriFullEdge = 0;
         unordered_set<int> mark1;
-        for (int j = i; j < i + gap; ++j)
-            oriFullEdge += testEdgeFull(buses[busIdx[j - i]].path, mark1);
+        unordered_set<int> mark2;
+        for (int j = i; j < i + gap; ++j) {
+            oriEdgeNum += countEdgeNum(buses[busIdx[j - i]].path, mark1);
+            oriFullEdge += testEdgeFull(buses[busIdx[j - i]].path, mark2);
+        }
 
         vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
         vector<int> pileTmp1(gap, -1);
         for (int j = i, busId; j < i + gap; ++j) {
             busId = busIdx[j - i];
-            oriEdgeNum += buses[busId].path.size();
             pathTmp1[j - i] = buses[busId].pathTmp;
             pileTmp1[j - i] = buses[busId].pileId;
             reCoverNetwork(busId, buses[busId].pileId);
@@ -546,11 +548,14 @@ void reAllocateBus4(int HLim) {
             pileTmp2[j - i] = buses[busId].pileId;
             curEdgeNum += buses[busId].path.size();
         }
-        unordered_set<int> mark2;
-        for (int j = i; j < i + gap; ++j)
-            curFullEdge += testEdgeFull(buses[busIdx[j - i]].path, mark2);
+        unordered_set<int> mark3;
+        unordered_set<int> mark4;
+        for (int j = i; j < i + gap; ++j) {
+            curEdgeNum += countEdgeNum(buses[busIdx[j - i]].path, mark3);
+            curFullEdge += testEdgeFull(buses[busIdx[j - i]].path, mark4);
+        }
 
-        if (1.1 * curFullEdge * oriEdgeNum > oriFullEdge * curEdgeNum) {  // 边的利用效率下降，接受迁移
+        if (curFullEdge * oriEdgeNum < oriFullEdge * curEdgeNum) {  // 边的利用效率下降，接受迁移
             continue;
         }
         else {  // 否则，回复原状态
@@ -1166,11 +1171,11 @@ void dijkstra7(Business& bus) {
 
         if (tmpBlockEdge < minBlockEdge) {   // 选需要加边数最少的通道
             minBlockEdge = tmpBlockEdge;
-            bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
             choosenP = p;
         }
 
     }
+    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());  // tmpOKPath固定，无须在多通道搜索中反复更新
 
     int curNode = end;
     bus.pileId = choosenP;
@@ -1344,7 +1349,7 @@ void BFS1(Business& bus, bool ifLoadNewEdge) {
                     tryDeleteEdge();
         }
 
-        //BFS2(bus);       // 旧的加边策略，一但加边，整个路径都会加，但全局性能是当前最好的
+        //BFS2(bus);       // 旧的加边策略，一但加边，整个路径都会加
         BFS7(bus);       // 新加边策略，只加最短路径上需要进行加边的边
         return;
     }
@@ -1703,11 +1708,11 @@ void BFS7(Business& bus) {
 
         if (tmpBlockEdge < minBlockEdge) {   // 选需要加边数最少的通道
             minBlockEdge = tmpBlockEdge;
-            bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
             choosenP = p;
         }
 
     }
+    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());  // tmpOKPath固定，无须在多通道搜索中反复更新
 
     int curNode = end;
     bus.pileId = choosenP;
@@ -1746,7 +1751,7 @@ void BFS7(Business& bus) {
             ++edge[cntEdge - 2].usedPileCnt;
             edge[cntEdge - 1].Pile[choosenP] = bus.busId;   // 偶数+1
             ++edge[cntEdge - 1].usedPileCnt;
-            bus.pathTmp[lastNode] = cntEdge - 2;
+            bus.pathTmp[lastNode] = cntEdge - 2;    // 更新抵达lastNode的边为新添加的边
         }
 
     }
@@ -1965,93 +1970,6 @@ bool bfsTestConnection(int start, int end) {
 
 }
 
-// 在因通道堵塞而添加不了业务时，寻找合适的位置进行加边操作，并再次寻路
-void findAddPath(Business& bus, bool* vis2) {
-
-    int end = bus.end;  // end点在此之前保证不可达
-    vector<bool> vis3(N, false);
-    vis3[end] = true;
-    queue<int> q;
-    q.push(end);
-    int firstOKPoint = bus.start;
-    int OKPile = -1;
-    vector<int> tmpOKPath(N, -1);   // 存储路径，内容是到每一个点的前一条边的编号
-
-    bool getOutFlag = false;
-    while (!q.empty() && !getOutFlag) {    // 寻找end到第一个可达点的路径
-
-        int curNode = q.front();
-        q.pop();
-        for (int i = head[curNode]; i != -1; i = edge[i].next) {
-
-            int t = edge[i].to;
-            if (vis3[t])
-                continue;
-            vis3[t] = true;
-            tmpOKPath[t] = i;
-
-            if (vis2[t]) {
-                firstOKPoint = t;
-                if (t == bus.start)
-                    OKPile = 0;
-                else
-                    OKPile = node[t].reachPile[0];
-                getOutFlag = true;
-                break;
-            }
-            else {  // 说明t点也是不可达点
-                q.push(t);
-            }
-
-        }
-    }
-
-    dijkstra4(firstOKPoint, bus.start, OKPile, tmpOKPath);  // tmpOKPath存储的路径是从终点到起点的路径，使用时要注意
-
-    int curNode = bus.start;
-    bus.pileId = OKPile;
-    bool addEdgeFlag = false;
-    while (tmpOKPath[curNode] != -1) {
-        int edgeId = tmpOKPath[curNode];  // 存储于edge数组中真正的边的Id
-
-        if (curNode == firstOKPoint) {
-            addEdgeFlag = true;
-        }
-
-        if (addEdgeFlag) {
-            addEdge(edge[edgeId].to, edge[edgeId].from, minDist[make_pair(edge[edgeId].to, edge[edgeId].from)]);
-            addEdge(edge[edgeId].from, edge[edgeId].to, minDist[make_pair(edge[edgeId].from, edge[edgeId].to)]);
-
-            if (edge[edgeId].from < edge[edgeId].to)
-                newEdge.emplace_back(edge[edgeId].from, edge[edgeId].to);
-            else
-                newEdge.emplace_back(edge[edgeId].to, edge[edgeId].from);
-            newEdgePathId.emplace_back(cntEdge / 2 - 1);
-
-            bus.path.push_back((cntEdge - 1) / 2); // edgeId / 2是为了适应题目要求
-            edge[(cntEdge - 1)].Pile[OKPile] = bus.busId;
-
-            if ((cntEdge - 1) % 2) // 奇数-1
-                edge[(cntEdge - 1) - 1].Pile[OKPile] = bus.busId;   // 双向边，两边一起处理
-            else            // 偶数+1
-                edge[(cntEdge - 1) + 1].Pile[OKPile] = bus.busId;
-        }
-
-        if (!addEdgeFlag) {
-            bus.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
-            edge[edgeId].Pile[OKPile] = bus.busId;
-
-            if (edgeId % 2) // 奇数-1
-                edge[edgeId - 1].Pile[OKPile] = bus.busId;   // 双向边，两边一起处理
-            else            // 偶数+1
-                edge[edgeId + 1].Pile[OKPile] = bus.busId;
-        }
-
-        curNode = edge[edgeId].from;
-
-    }
-}
-
 // 先清空原来的业务对网络的影响
 void reCoverNetwork(int lastBusID, int lastPileId) {
 
@@ -2078,6 +1996,7 @@ void reCoverNetwork(int lastBusID, int lastPileId) {
     }
 
     --node[curNode].passBusCnt;     // 经过节点的业务数减1
+
     ////////////////////////////////////////////////////////////////////////
     // 清空对加放大器的影响
     buses[lastBusID].curA = D;
@@ -2174,6 +2093,20 @@ void addMultiplier(Business& bus, int busId) {
 
 }
 
+int countEdgeNum(const vector<int>& path, unordered_set<int>& mark) {
+
+    int edgeNum = 0;
+    for (int i = 0, trueEdgeId; i < path.size(); ++i) {
+        trueEdgeId = path[i] * 2;
+        if (mark.find(trueEdgeId) != mark.end())      // 避免重复计数
+            continue;
+        else
+            mark.emplace(trueEdgeId);
+        ++edgeNum;
+    }
+    return edgeNum;
+}
+
 // 统计出path中的边的利用效率达到某一ratio的数目
 int testEdgeFull(const vector<int>& path, unordered_set<int>& mark) {
 
@@ -2181,10 +2114,10 @@ int testEdgeFull(const vector<int>& path, unordered_set<int>& mark) {
     int n = path.size(), fullEdge = 0;
     for (int i = 0, trueEdgeId; i < n; ++i) {
         trueEdgeId = path[i] * 2;
-        //if (mark.find(trueEdgeId) != mark.end())      // 这个本来是用来避免重复计数的，但是注释了反而更好
-        //    continue;
-        //else
-        //    mark.emplace(trueEdgeId);
+        if (mark.find(trueEdgeId) != mark.end())      // 避免重复计数
+            continue;
+        else
+            mark.emplace(trueEdgeId);
         if (edge[trueEdgeId].usedPileCnt > ratio * P)
             ++fullEdge;
     }
