@@ -4,25 +4,27 @@
 #include "global_struct.h"
 #include <iostream>
 #include <fstream>
+#include  <stdio.h> 
 
-// ¼Ó±ßº¯Êı£¬sÆğµã£¬tÖÕµã£¬d¾àÀë
+
+// åŠ è¾¹å‡½æ•°ï¼Œsèµ·ç‚¹ï¼Œtç»ˆç‚¹ï¼Œdè·ç¦»
 void addEdge(int s, int t, int d)
 {
-    edge[cntEdge].from = s; // Æğµã
-    edge[cntEdge].to = t;   // ÖÕµã
-    edge[cntEdge].d = 1;    // ¾àÀë
-    //edge[cntEdge].d = d;    // ¾àÀë
-    edge[cntEdge].trueD = d;    // ¾àÀë
-    edge[cntEdge].next = head[s];   // Á´Ê½Ç°Ïò¡£ÒÔsÎªÆğµãÏÂÒ»Ìõ±ßµÄ±àºÅ£¬head[s]´ú±íµÄÊÇµ±Ç°ÒÔsÎªÆğµãµÄÔÚÂß¼­ÉÏµÄµÚÒ»Ìõ±ßÔÚ±ß¼¯Êı×éµÄÎ»ÖÃ£¨±àºÅ£©
+    edge[cntEdge].from = s; // èµ·ç‚¹
+    edge[cntEdge].to = t;   // ç»ˆç‚¹
+    edge[cntEdge].d = 1;    // è·ç¦»
+    //edge[cntEdge].d = d;    // è·ç¦»
+    edge[cntEdge].trueD = d;    // è·ç¦»
+    edge[cntEdge].next = head[s];   // é“¾å¼å‰å‘ã€‚ä»¥sä¸ºèµ·ç‚¹ä¸‹ä¸€æ¡è¾¹çš„ç¼–å·ï¼Œhead[s]ä»£è¡¨çš„æ˜¯å½“å‰ä»¥sä¸ºèµ·ç‚¹çš„åœ¨é€»è¾‘ä¸Šçš„ç¬¬ä¸€æ¡è¾¹åœ¨è¾¹é›†æ•°ç»„çš„ä½ç½®ï¼ˆç¼–å·ï¼‰
     for (int i = 0; i < P; ++i)
         edge[cntEdge].Pile[i] = -1;
     edge[cntEdge].usedPileCnt = 0;
-    head[s] = cntEdge++;    // ¸üĞÂÒÔsÎªÆğµãµÄÔÚÂß¼­ÉÏµÄµÚÒ»Ìõ±ßÔÚ±ß¼¯Êı×éµÄÎ»ÖÃ£¨±àºÅ£©
+    head[s] = cntEdge++;    // æ›´æ–°ä»¥sä¸ºèµ·ç‚¹çš„åœ¨é€»è¾‘ä¸Šçš„ç¬¬ä¸€æ¡è¾¹åœ¨è¾¹é›†æ•°ç»„çš„ä½ç½®ï¼ˆç¼–å·ï¼‰
     if (d < minDist[make_pair(s, t)])
         minDist[make_pair(s, t)] = d;
 }
 
-// ¼ÓÒµÎñº¯Êı
+// åŠ ä¸šåŠ¡å‡½æ•°
 void addBus(int start, int end)
 {
     buses[cntBus].start = start;
@@ -35,12 +37,12 @@ void addBus(int start, int end)
     ++cntBus;
 }
 
-// ±ê×¼ÊäÈëÁ÷£¬ÓÃÓÚÅĞÌâÆ÷
+// æ ‡å‡†è¾“å…¥æµï¼Œç”¨äºåˆ¤é¢˜å™¨
 void inputFromJudger()
 {
     std::cin >> N >> M >> T >> P >> D;
     for (int i = 0; i < N; ++i)
-    {   // ³õÊ¼»¯Ò»Ğ©¶«Î÷
+    {   // åˆå§‹åŒ–ä¸€äº›ä¸œè¥¿
         head[i] = -1;
         for (int j = 0; j < P; ++j)
             node[i].Multiplier[j] = -1;
@@ -48,32 +50,33 @@ void inputFromJudger()
     int s = 0, t = 0, d = 0;
     for (int i = 0; i < M; ++i) {
         std::cin >> s >> t >> d;
-        if (minDist.find(make_pair(s, t)) == minDist.end()) { // ¼ü²»´æÔÚ
+        if (minDist.find(make_pair(s, t)) == minDist.end()) { // é”®ä¸å­˜åœ¨
             minDist[make_pair(s, t)] = Configure::INF;
             minDist[make_pair(t, s)] = Configure::INF;
         }
         addEdge(s, t, d);
-        addEdge(t, s, d);   // Ìí¼ÓË«Ïò±ß
+        addEdge(t, s, d);   // æ·»åŠ åŒå‘è¾¹
     }
 
     int Sj, Tj;
     for (int i = 0; i < T; ++i) {
         std::cin >> Sj >> Tj;
-        addBus(Sj, Tj); // Ìí¼ÓÒµÎñ
+        addBus(Sj, Tj); // æ·»åŠ ä¸šåŠ¡
     }
 }
 
-// ÎÄ¼şÊäÈëÁ÷£¬ÓÃÓÚÎÄ¼ş
+// æ–‡ä»¶è¾“å…¥æµï¼Œç”¨äºæ–‡ä»¶
 void inputFromFile()
 {
-    std::ifstream myCin("././MATLAB/dataMATLAB.txt"); // ´ò¿ªÎÄ¼ş
-    if (!cin)
+    //std::ifstream myCin(R"(.\.\MATLAB\dataMATLAB.txt)"); // cmdä¸‹
+    std::ifstream myCin("..\\..\\MATLAB\\dataMATLAB.txt"); // IDEä¸‹
+    if (!myCin)
     {
         std::cerr << "Error: Cannot open the file." << std::endl;
     }
     myCin >> N >> M >> T >> P >> D;
     for (int i = 0; i < N; ++i)
-    {   // ³õÊ¼»¯Ò»Ğ©¶«Î÷
+    {   // åˆå§‹åŒ–ä¸€äº›ä¸œè¥¿
         head[i] = -1;
         for (int j = 0; j < P; ++j)
             node[i].Multiplier[j] = -1;
@@ -81,22 +84,22 @@ void inputFromFile()
     int s = 0, t = 0, d = 0;
     for (int i = 0; i < M; ++i) {
         myCin >> s >> t >> d;
-        if (minDist.find(make_pair(s, t)) == minDist.end()) { // ¼ü²»´æÔÚ
+        if (minDist.find(make_pair(s, t)) == minDist.end()) { // é”®ä¸å­˜åœ¨
             minDist[make_pair(s, t)] = Configure::INF;
             minDist[make_pair(t, s)] = Configure::INF;
         }
         addEdge(s, t, d);
-        addEdge(t, s, d);   // Ìí¼ÓË«Ïò±ß
+        addEdge(t, s, d);   // æ·»åŠ åŒå‘è¾¹
     }
 
     int Sj, Tj;
     for (int i = 0; i < T; ++i) {
         myCin >> Sj >> Tj;
-        addBus(Sj, Tj); // Ìí¼ÓÒµÎñ
+        addBus(Sj, Tj); // æ·»åŠ ä¸šåŠ¡
     }
 }
 
-// ±ê×¼Êä³öÁ÷£¬ÓÃÓÚÅĞÌâÆ÷
+// æ ‡å‡†è¾“å‡ºæµï¼Œç”¨äºåˆ¤é¢˜å™¨
 void outputForJudger()
 {
     unordered_map<int, int> newEdgeMap;
@@ -147,7 +150,7 @@ void outputForJudger()
     }
 }
 
-// ÎÄ¼şÊä³öÁ÷£¬ÓÃÓÚÎÄ¼ş
+// æ–‡ä»¶è¾“å‡ºæµï¼Œç”¨äºæ–‡ä»¶
 void outputForFile()
 {
     ofstream myCout("./MATLAB/result.txt");
@@ -204,5 +207,5 @@ void outputForFile()
                 myCout << endl;
         }
     }
-    std::cerr << "Total Cost = " << n * 1000000 + totM * 100 + totP;
+    std::cerr << "Total Cost = " << n * 1000000 + totM * 100 + totP << "\n";
 }
