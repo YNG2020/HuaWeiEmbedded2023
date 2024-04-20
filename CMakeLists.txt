@@ -16,5 +16,8 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 # 声明一个可执行文件，并包含main.cpp、struct.cpp
 add_executable(main 
     ${CMAKE_SOURCE_DIR}/src/main.cpp
-    ${CMAKE_SOURCE_DIR}/src/struct.cpp
-    ${CMAKE_SOURCE_DIR}/src/global_var.cpp)
+    ${CMAKE_SOURCE_DIR}/src/global_struct.cpp
+    ${CMAKE_SOURCE_DIR}/src/global_var.cpp
+    ${CMAKE_SOURCE_DIR}/src/UtilityFunction.cpp
+    ${CMAKE_SOURCE_DIR}/src/Solution.cpp
+)

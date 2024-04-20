@@ -1,7 +1,7 @@
-#include "struct.h"
+#include "global_struct.h"
 
-Node node[configure::maxN];
-Edge edge[configure::maxM];
-Business buses[configure::maxBus];
+Node node[Configure::maxN];
+Edge edge[Configure::maxM];
+Business buses[Configure::maxBus];
 unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minDist;
 unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;

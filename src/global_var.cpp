@@ -4,8 +4,8 @@ int N, M, T, P, D = 0;
 int cntEdge = 0;
 int cntBus = 0;
 
-int head[configure::maxN];
-bool vis1[configure::maxN];
+int head[Configure::maxN];
+bool vis1[Configure::maxN];
 std::vector<std::pair<int, int>> newEdge;
 std::vector<int> newEdgePathId;
 std::vector<int> remainBus;
