@@ -8,6 +8,7 @@
 #include <fstream>
 #include "struct.h"
 #include "configure.h"
+#include <direct.h>
 const int INF = 2147483647;
 
 using namespace std;
@@ -44,6 +45,16 @@ bool ifTryDeleteEdge = true;
 // 主函数
 int main() {
 
+    //char cwd[256];
+    //_getcwd(cwd, 256);
+    //cout << cwd << endl;
+    //char* path;
+    //if ((path = _getcwd(NULL, 0)) == NULL) {
+    //    cerr << "Error message : _getcwd error" << endl;
+    //}
+    //else {
+    //    cout << path << endl;
+    //}
     //std::ifstream cin("dataMATLAB.txt"); // 打开文件
     //if (!cin) {
     //    std::cerr << "Error: Cannot open the file." << std::endl;
@@ -676,10 +687,10 @@ void reverseArray(vector<int>& arr) {
 // 将结果输出
 void outPut() {
 
-    ofstream cout("result.txt");
-    if (!cout.is_open()) {
-        cout << "Error opening file." << endl;
-    }
+    //ofstream cout("result.txt");
+    //if (!cout.is_open()) {
+    //    cout << "Error opening file." << endl;
+    //}
     unordered_map<int, int> newEdgeMap;
     int n = newEdge.size();
     if (n > 0) {
