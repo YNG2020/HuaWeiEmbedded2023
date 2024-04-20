@@ -1,1 +1,1 @@
-Judger\Judger.exe build\x64-Release\main.exe
+ build\x64-Release\main.exe

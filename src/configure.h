@@ -13,6 +13,6 @@ public:
 	static const int cntLimit = 20;	// 最大迭代次数
 
 	// 调试参数
-	static const bool isUseProblemFinder = true;
+	static const bool forIterOutput = true;
 
 };
