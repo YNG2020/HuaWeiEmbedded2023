@@ -17,4 +17,4 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable(main 
     ${CMAKE_SOURCE_DIR}/src/main.cpp
     ${CMAKE_SOURCE_DIR}/src/struct.cpp
-)
+    ${CMAKE_SOURCE_DIR}/src/global_var.cpp)

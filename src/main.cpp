@@ -8,19 +8,9 @@
 #include <fstream>
 #include "struct.h"
 #include "configure.h"
-const int INF = 2147483647;
+#include "global_var.h"
 
 using namespace std;
-
-int N, M, T, P, D; // 节点数量N，连边数量M，业务数量T，单边通道数量P、最大衰减距离D
-int cntEdge = 0;    // 当前边集数组所存储的边的数目
-int cntBus = 0;     // 当前业务数组所存储业务的数目
-
-int head[configure::maxN]; // head[i]，表示以i为起点的在逻辑上的第一条边在边集数组的位置（编号）
-bool vis1[configure::maxN];  // 标识该点有无被访问过
-vector<pair<int, int>> newEdge; // 记录新添加的边的起点和终点
-vector<int> newEdgePathId;   // 记录新边在边集中的位置（计数时，双向边视为同一边）
-vector<int> remainBus;  // 记录下初次分配时，因路径堵塞而无法分配边的业务的编号
 
 void init();
 void addEdge(int s, int t, int d);
@@ -43,7 +33,8 @@ bool ifTryDeleteEdge = true;
 
 // 主函数
 int main() {
-    std::ifstream cin("../../MATLAB/dataMATLAB.txt"); // 打开文件
+    std::ifstream cin("././MATLAB/dataMATLAB.txt"); // 打开文件
+    //std::ifstream cin("dataMATLAB.txt"); // 打开文件
     if (!cin) {
         std::cerr << "Error: Cannot open the file." << std::endl;
         return 1;
@@ -55,8 +46,8 @@ int main() {
     for (int i = 0; i < M; ++i) {
         cin >> s >> t >> d;
         if (minDist.find(make_pair(s, t)) == minDist.end()) { // 键不存在
-            minDist[make_pair(s, t)] = INF;
-            minDist[make_pair(t, s)] = INF;
+            minDist[make_pair(s, t)] = configure::INF;
+            minDist[make_pair(t, s)] = configure::INF;
         }
         addEdge(s, t, d);
         addEdge(t, s, d);   // 添加双向边
@@ -352,7 +343,7 @@ void BFS_loadBus(Business& bus, bool ifLoadNewEdge) {
     static int addNewBus = 0;   // 加业务次数
     ++addNewBus;
     bool findPath = false;
-    int minPathDist = INF;
+    int minPathDist = configure::INF;
     int choosenP = -1;
     vector<int> tmpOKPath;
     double maxValue = -1;
@@ -464,7 +455,7 @@ bool BFS_detectPath(Business& bus, int blockEdge) {
     int start = bus.start, end = bus.end;
 
     bool findPath = false;
-    int minPathDist = INF;
+    int minPathDist = configure::INF;
     int choosenP = -1;
     vector<int> tmpOKPath;
 
@@ -560,7 +551,7 @@ bool BFS_detectPath(Business& bus, int blockEdge) {
 void BFS_addNewEdge(Business& bus) {
 
     int start = bus.start, end = bus.end;
-    int minBlockEdge = INF;
+    int minBlockEdge = configure::INF;
     int choosenP = -1;
     vector<int> tmpOKPath;
     tmpOKPath.resize(N, -1);

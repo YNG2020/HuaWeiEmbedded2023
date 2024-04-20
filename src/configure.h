@@ -15,4 +15,6 @@ public:
 	// 调试参数
 	static const bool forIterOutput = true;
 
+	static const int INF = 2147483647;
+
 };
