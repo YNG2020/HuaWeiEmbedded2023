@@ -6,19 +6,19 @@
 using namespace std;
 class Node {
 public:
-    int NodeId;           // Êµ¼ÊÉÏÀûÓÃÊı×éµÄÏÂ±ê¾Í¿ÉÒÔÎ¨Ò»±êÊ¶Node£¬ÕâÀïÏÈ×öÒ»¸öÈßÓà
-    int Multiplier[configure::maxP]; // ¸Ã½ÚµãÉÏ´æÔÚµÄ·Å´óÆ÷£¬¼ÇÂ¼µÄÊÇµ±Ç°Òª·Å´óµÄÍ¨µÀµÄ±àºÅ£¬·Å´óÆ÷²»´æÔÚÊ±ÖµÎª-1
-    vector<int> reachPile;  // ÔÚµ¥´ÎdijkstraËÑË÷ÖĞ£¬¿ÉµÖ´ï¸Ã¶¥µãµÄpile±àºÅ
+    int NodeId;           // å®é™…ä¸Šåˆ©ç”¨æ•°ç»„çš„ä¸‹æ ‡å°±å¯ä»¥å”¯ä¸€æ ‡è¯†Nodeï¼Œè¿™é‡Œå…ˆåšä¸€ä¸ªå†—ä½™
+    int Multiplier[configure::maxP]; // è¯¥èŠ‚ç‚¹ä¸Šå­˜åœ¨çš„æ”¾å¤§å™¨ï¼Œè®°å½•çš„æ˜¯å½“å‰è¦æ”¾å¤§çš„é€šé“çš„ç¼–å·ï¼Œæ”¾å¤§å™¨ä¸å­˜åœ¨æ—¶å€¼ä¸º-1
+    vector<int> reachPile;  // åœ¨å•æ¬¡dijkstraæœç´¢ä¸­ï¼Œå¯æŠµè¾¾è¯¥é¡¶ç‚¹çš„pileç¼–å·
 };
 
 class Edge {
 public:
-    int from;   // Æğµã
-    int to;     // ÖÕµã
-    int d;      // ±ßµÄ³¤¶È£¨ÖÃ1Ê±£¬¿É±»ÓÃÓÚdijkstra£¬´ËÊ±Ïàµ±ÓÚBFS£©
-    int next;   // Í¬ÆğµãµÄÏÂÒ»Ìõ±ßÔÚedgeÖĞµÄ±àºÅ
-    int trueD;  // ±ßµÄÕæÕı³¤¶È£¬ÓÃÓÚ¼ÆËã±ßµÄËğºÄ£¬ÒÔÌí¼Ó·Å´óÆ÷
-    int Pile[configure::maxP]; // ¸Ã±ßÉÏ´æÔÚµÄÍ¨µÀ£¬¼ÇÂ¼µÄÊÇµ±Ç°³ĞÔØµÄÒµÎñµÄ±àºÅ£¬²»³ĞÔØÒµÎñÊ±ÖµÎª-1
+    int from;   // èµ·ç‚¹
+    int to;     // ç»ˆç‚¹
+    int d;      // è¾¹çš„é•¿åº¦ï¼ˆç½®1æ—¶ï¼Œå¯è¢«ç”¨äºdijkstraï¼Œæ­¤æ—¶ç›¸å½“äºBFSï¼‰
+    int next;   // åŒèµ·ç‚¹çš„ä¸‹ä¸€æ¡è¾¹åœ¨edgeä¸­çš„ç¼–å·
+    int trueD;  // è¾¹çš„çœŸæ­£é•¿åº¦ï¼Œç”¨äºè®¡ç®—è¾¹çš„æŸè€—ï¼Œä»¥æ·»åŠ æ”¾å¤§å™¨
+    int Pile[configure::maxP]; // è¯¥è¾¹ä¸Šå­˜åœ¨çš„é€šé“ï¼Œè®°å½•çš„æ˜¯å½“å‰æ‰¿è½½çš„ä¸šåŠ¡çš„ç¼–å·ï¼Œä¸æ‰¿è½½ä¸šåŠ¡æ—¶å€¼ä¸º-1
     int usedPileCnt;
     Edge() {
         from = -1;
@@ -27,23 +27,23 @@ public:
         next = -1;
     }
 
-};    // ±ß¼¯Êı×é
+};    // è¾¹é›†æ•°ç»„
 
 class Business {
 public:
-    int start;  // ÒµÎñÆğµã
-    int end;    // ÒµÎñÖÕµã
-    int busId;  // ÒµÎñId
-    int curA;   // µ±Ç°ĞÅºÅÇ¿¶È
+    int start;  // ä¸šåŠ¡èµ·ç‚¹
+    int end;    // ä¸šåŠ¡ç»ˆç‚¹
+    int busId;  // ä¸šåŠ¡Id
+    int curA;   // å½“å‰ä¿¡å·å¼ºåº¦
     Business() {
         start = -1;
         end = -1;
     }
-    int pileId; // ÒµÎñËùÕ¼¾İµÄÍ¨µÀId
-    vector<int> pathTmp;   // ´æ´¢´ÓÆğµãµ½ÆäËüµãµÄ×î¶ÌÂ·¾¶µÄÄ©±ßµÄ±àºÅ£¨¿¼ÂÇÍ¨µÀ¶ÂÈûµÄ×î¶Ì£©
-    vector<int> trueMinPath;   // ´æ´¢´ÓÆğµãµ½ÆäËüµãµÄ×î¶ÌÂ·¾¶µÄÄ©±ßµÄ±àºÅ£¨²»¿¼ÂÇÍ¨µÀ¶ÂÈûµÄ×î¶Ì£©
-    vector<int> path;   // ´æ´¢Â·¾¶Ëù¾­¹ıµÄ±ß
-    vector<int> mutiplierId;    // ´æ´¢Ëù¾­¹ıµÄ·Å´óÆ÷ËùÔÚ½ÚµãµÄ±àºÅ
+    int pileId; // ä¸šåŠ¡æ‰€å æ®çš„é€šé“Id
+    vector<int> pathTmp;   // å­˜å‚¨ä»èµ·ç‚¹åˆ°å…¶å®ƒç‚¹çš„æœ€çŸ­è·¯å¾„çš„æœ«è¾¹çš„ç¼–å·ï¼ˆè€ƒè™‘é€šé“å µå¡çš„æœ€çŸ­ï¼‰
+    vector<int> trueMinPath;   // å­˜å‚¨ä»èµ·ç‚¹åˆ°å…¶å®ƒç‚¹çš„æœ€çŸ­è·¯å¾„çš„æœ«è¾¹çš„ç¼–å·ï¼ˆä¸è€ƒè™‘é€šé“å µå¡çš„æœ€çŸ­ï¼‰
+    vector<int> path;   // å­˜å‚¨è·¯å¾„æ‰€ç»è¿‡çš„è¾¹
+    vector<int> mutiplierId;    // å­˜å‚¨æ‰€ç»è¿‡çš„æ”¾å¤§å™¨æ‰€åœ¨èŠ‚ç‚¹çš„ç¼–å·
 };
 
 struct HashFunc_t {
@@ -58,9 +58,9 @@ struct Equalfunc_t {
     }
 };
 
-extern Node node[configure::maxN]; // Ê¹ÓÃconfigure.hÖĞ¶¨ÒåµÄmaxN
-extern Edge edge[configure::maxM]; // Ê¹ÓÃconfigure.hÖĞ¶¨ÒåµÄmaxM
-extern Business buses[configure::maxBus]; // Ê¹ÓÃconfigure.hÖĞ¶¨ÒåµÄmaxBus
+extern Node node[configure::maxN]; // ä½¿ç”¨configure.hä¸­å®šä¹‰çš„maxN
+extern Edge edge[configure::maxM]; // ä½¿ç”¨configure.hä¸­å®šä¹‰çš„maxM
+extern Business buses[configure::maxBus]; // ä½¿ç”¨configure.hä¸­å®šä¹‰çš„maxBus
 
-extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minDist;   // ¼ÇÂ¼Á½¸ö½Úµã¼äµÄ×î¶Ì±ßµÄ³¤¶È
-extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;   // ¼ÇÂ¼Á½¸ö½Úµã¼äµÄ×î¶ÌÂ·¾¶³¤¶È
+extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minDist;   // è®°å½•ä¸¤ä¸ªèŠ‚ç‚¹é—´çš„æœ€çŸ­è¾¹çš„é•¿åº¦
+extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;   // è®°å½•ä¸¤ä¸ªèŠ‚ç‚¹é—´çš„æœ€çŸ­è·¯å¾„é•¿åº¦

@@ -3,16 +3,16 @@
 class configure {
 public:
 
-	// ¹æÄ£ÏŞÖÆ²ÎÊı
-	static const int maxM = 50000; // ±ßµÄ×î´óÊıÄ¿
-	static const int maxN = 5000;  // ½ÚµãµÄ×î´óÊıÄ¿
-	static const int maxBus = 10000;   // ÒµÎñµÄ×î´óÊıÄ¿
-	static const int maxP = 80;    // ×î´óµ¥±ßÍ¨µÀÊıÁ¿P
+	// è§„æ¨¡é™åˆ¶å‚æ•°
+	static const int maxM = 50000; // è¾¹çš„æœ€å¤§æ•°ç›®
+	static const int maxN = 5000;  // èŠ‚ç‚¹çš„æœ€å¤§æ•°ç›®
+	static const int maxBus = 10000;   // ä¸šåŠ¡çš„æœ€å¤§æ•°ç›®
+	static const int maxP = 80;    // æœ€å¤§å•è¾¹é€šé“æ•°é‡P
 
-	// µü´ú²ÎÊı
-	static const int cntLimit = 20;	// ×î´óµü´ú´ÎÊı
+	// è¿­ä»£å‚æ•°
+	static const int cntLimit = 20;	// æœ€å¤§è¿­ä»£æ¬¡æ•°
 
-	// µ÷ÊÔ²ÎÊı
+	// è°ƒè¯•å‚æ•°
 	static const bool forIterOutput = true;
 
 };
