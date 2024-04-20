@@ -44,11 +44,11 @@ bool ifTryDeleteEdge = true;
 // 主函数
 int main() {
 
-    std::ifstream cin("dataMATLAB.txt"); // 打开文件
-    if (!cin) {
-        std::cerr << "Error: Cannot open the file." << std::endl;
-        return 1;
-    }
+    //std::ifstream cin("dataMATLAB.txt"); // 打开文件
+    //if (!cin) {
+    //    std::cerr << "Error: Cannot open the file." << std::endl;
+    //    return 1;
+    //}
 
     cin >> N >> M >> T >> P >> D;
     init();
