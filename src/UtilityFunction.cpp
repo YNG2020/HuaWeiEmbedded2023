@@ -68,9 +68,9 @@ void inputFromJudger()
 // 文件输入流，用于文件
 void inputFromFile()
 {
-    std::ifstream myCin(R"(.\.\MATLAB\dataMATLAB.txt)"); // Windows cmd下
-    //std::ifstream myCin("../../MATLAB/dataMATLAB.txt"); // cmd下
-    //std::ifstream myCin("..\\..\\MATLAB\\dataMATLAB.txt"); // Windows IDE下
+    //std::ifstream myCin("././MATLAB/dataMATLAB.txt"); // cmd下
+    //std::ifstream myCin("..\\..\\MATLAB\\dataMATLAB.txt"); // VS IDE下
+    std::ifstream myCin("dataMATLAB.txt"); // MATLAB 调试下
     if (!myCin)
     {
         std::cerr << "Error: Cannot open the file." << std::endl;
@@ -154,7 +154,7 @@ void outputForJudger()
 // 文件输出流，用于文件
 void outputForFile()
 {
-    ofstream myCout("./MATLAB/result.txt");
+    ofstream myCout("result.txt");
     if (!myCout.is_open())
     {
         std::cerr << "Error opening file." << endl;

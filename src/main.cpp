@@ -26,13 +26,13 @@ int main()
     int cnt = 0;
 
     if (Configure::forIterOutput)
-        std::cout << "Original newEdge.size" << newEdge.size() << endl;
+        std::cout << "Original newEdge.size = " << newEdge.size() << endl;
     while (cnt < Configure::cntLimit) {
 
         solution.reAllocateBus(pow(2.71, -0.005 * cnt)*T);
         solution.tryDeleteEdge();
         if (Configure::forIterOutput)
-            std::cout << "newEdge.size" << newEdge.size() << endl;
+            std::cout << "newEdge.size = " << newEdge.size() << endl;
         cnt = cnt + 1;
     }
 
@@ -40,7 +40,7 @@ int main()
     solution.tryDeleteEdge();
     solution.tryDeleteEdge();
     if (Configure::forIterOutput)
-        std::cout << "newEdge.size" << newEdge.size() << endl;
+        std::cout << "newEdge.size = " << newEdge.size() << endl;
 
     if (Configure::forJudger)
         outputForJudger();
