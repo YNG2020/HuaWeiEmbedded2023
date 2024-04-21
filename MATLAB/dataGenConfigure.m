@@ -18,7 +18,7 @@ classdef dataGenConfigure < handle
         nodeAppearInCell = 0.4; % 在一个Cell中，每个Node的各自的出现的概率
 
         % 随机种子设置
-        randomSeed = 2;
+        randomSeed = 1;
 
         % 对光网络环化的参数
         nPathCell2Cell = 3;    % 光网络的一个cell
