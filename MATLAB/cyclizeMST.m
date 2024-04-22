@@ -93,17 +93,17 @@ function [neighborID] = getNeighborCell(args, centerCellID)
     neighborID = zeros(1, length(dirX));
     nXCell = (args.spaceLimX2 - args.spaceLimX1 - args.cellX) / (args.cellX + args.cellXGap) + 1;
     nYCell = (args.spaceLimY2 - args.spaceLimY1 - args.cellY) / (args.cellY + args.cellYGap) + 1;
-    xIdx = mod(centerCellID - 1, nXCell);
-    yIdx = floor((centerCellID - 1) / nXCell);
+    xIDx = mod(centerCellID - 1, nXCell);
+    yIDx = floor((centerCellID - 1) / nXCell);
 
     validNeighborCnt = 0;
     for i = 1 : length(dirX)
-        curXIdx = xIdx + dirX(i);
-        curYIdx = yIdx + dirY(i);
-        if curXIdx < 0 || curXIdx > nXCell - 1 || curYIdx < 0 || curYIdx > nYCell - 1
+        curXIDx = xIDx + dirX(i);
+        curYIDx = yIDx + dirY(i);
+        if curXIDx < 0 || curXIDx > nXCell - 1 || curYIDx < 0 || curYIDx > nYCell - 1
             continue;
         end
-        neighbor_id = curYIdx * nXCell + curXIdx + 1;
+        neighbor_id = curYIDx * nXCell + curXIDx + 1;
         validNeighborCnt = validNeighborCnt + 1;
         neighborID(validNeighborCnt) = neighbor_id;
     end

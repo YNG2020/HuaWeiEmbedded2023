@@ -28,11 +28,11 @@ void addBus(int start, int end)
 {
     buses[cntBus].start = start;
     buses[cntBus].end = end;
-    buses[cntBus].busId = cntBus;
+    buses[cntBus].busID = cntBus;
     buses[cntBus].curA = D;
     vector<int>().swap(buses[cntBus].path);
     vector<int>().swap(buses[cntBus].pathTmp);
-    vector<int>().swap(buses[cntBus].mutiplierId);
+    vector<int>().swap(buses[cntBus].mutiplierID);
     ++cntBus;
 }
 
@@ -106,10 +106,10 @@ void outputForJudger()
     int n = newEdge.size();
     if (n > 0)
     {
-        newEdgeMap[newEdgePathId[0]] = M;
+        newEdgeMap[newEdgePathID[0]] = M;
         for (int i = 1; i < n; ++i)
         {
-            newEdgeMap[newEdgePathId[i]] = newEdgeMap[newEdgePathId[i - 1]] + 1;
+            newEdgeMap[newEdgePathID[i]] = newEdgeMap[newEdgePathID[i - 1]] + 1;
         }
     }
 
@@ -120,9 +120,9 @@ void outputForJudger()
     }
     for (int i = 0; i < T; ++i) {
         int pSize = buses[i].path.size();
-        int mSize = buses[i].mutiplierId.size();
+        int mSize = buses[i].mutiplierID.size();
 
-        std::cout << buses[i].pileId << " " << pSize << " " << mSize << " ";
+        std::cout << buses[i].pileID << " " << pSize << " " << mSize << " ";
         for (int j = 0; j < pSize; ++j)
         {
             int pathID = buses[i].path[j];
@@ -141,8 +141,8 @@ void outputForJudger()
         }
         for (int j = 0; j < mSize; ++j)
         {
-            std::cout << buses[i].mutiplierId[j];
-            if (j < buses[i].mutiplierId.size() - 1)
+            std::cout << buses[i].mutiplierID[j];
+            if (j < buses[i].mutiplierID.size() - 1)
                 std::cout << " ";
             else if (j == mSize - 1 && i != T - 1)
                 std::cout << endl;
@@ -162,10 +162,10 @@ void outputForFile()
     int n = newEdge.size();
     if (n > 0)
     {
-        newEdgeMap[newEdgePathId[0]] = M;
+        newEdgeMap[newEdgePathID[0]] = M;
         for (int i = 1; i < n; ++i)
         {
-            newEdgeMap[newEdgePathId[i]] = newEdgeMap[newEdgePathId[i - 1]] + 1;
+            newEdgeMap[newEdgePathID[i]] = newEdgeMap[newEdgePathID[i - 1]] + 1;
         }
     }
 
@@ -177,11 +177,11 @@ void outputForFile()
     int totP = 0, totM = 0;
     for (int i = 0; i < T; ++i) {
         int pSize = buses[i].path.size();
-        int mSize = buses[i].mutiplierId.size();
+        int mSize = buses[i].mutiplierID.size();
         totP += pSize;
         totM += mSize;
 
-        myCout << buses[i].pileId << " " << pSize << " " << mSize << " ";
+        myCout << buses[i].pileID << " " << pSize << " " << mSize << " ";
         for (int j = 0; j < pSize; ++j)
         {
             int pathID = buses[i].path[j];
@@ -200,8 +200,8 @@ void outputForFile()
         }
         for (int j = 0; j < mSize; ++j)
         {
-            myCout << buses[i].mutiplierId[j];
-            if (j < buses[i].mutiplierId.size() - 1)
+            myCout << buses[i].mutiplierID[j];
+            if (j < buses[i].mutiplierID.size() - 1)
                 myCout << " ";
             else if (j == mSize - 1 && i != T - 1)
                 myCout << endl;

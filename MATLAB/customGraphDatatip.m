@@ -2,10 +2,10 @@ function output_txt = customGraphDatatip(~, event_obj, nodeArray, args)
     pos = get(event_obj, 'Position');
     x = pos(1);
     y = pos(2);
-    xIdx = floor((x - args.spaceLimX1) / (args.cellX + args.cellXGap)) + 1;
-    yIdx = floor((y - args.spaceLimY1) / (args.cellY + args.cellYGap)) + 1;
+    xIDx = floor((x - args.spaceLimX1) / (args.cellX + args.cellXGap)) + 1;
+    yIDx = floor((y - args.spaceLimY1) / (args.cellY + args.cellYGap)) + 1;
     nXCell = (args.spaceLimX2 - args.spaceLimX1 - args.cellX) / (args.cellX + args.cellXGap) + 1;
-    cellID = (yIdx - 1) * nXCell + xIdx;
+    cellID = (yIDx - 1) * nXCell + xIDx;
 
     for i = 1 : args.nNodeInCell
         if nodeArray{i, cellID}.nodeCreated

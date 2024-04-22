@@ -13,13 +13,13 @@ public:
 	void BFS_loadBus(Business& bus, bool ifTryDeleteEdge);
 	bool BFS_detectPath(Business& bus, int blockEdge);
 	void BFS_addNewEdge(Business& bus);
-	void loadBus(int busId, bool ifTryDeleteEdge);
-	void loadMultiplier(int busId);
+	void loadBus(int busID, bool ifTryDeleteEdge);
+	void loadMultiplier(int busID);
 	void preAllocateBus();
 	void reAllocateBus(int HLim);
 	void tryDeleteEdge();
-	void recoverNetwork(int lastBusID, int lastPileId);
-	void reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp);
+	void recoverNetwork(int lastBusID, int lastPileID);
+	void reloadBus(int lastBusID, int lastPileID, vector<int>& pathTmp);
 
 	float pathSizeLimRatio = 3.0;			// 限制找到的路径长度相对于理论上的最短路径长度的倍数
 	int cntLimit = 20;						// 最大迭代次数

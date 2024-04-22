@@ -51,44 +51,44 @@ void Solution::reAllocateBus(int HLim)
     int gap = max(int(0.025 * T), 20);       // (TODO，gap的机理需要被弄清楚)
     if (gap > T)
         return;
-    vector<int> totBusIdx(T, 0);
-    vector<int> busIdx(gap, 0);
+    vector<int> totBusIDx(T, 0);
+    vector<int> busIDx(gap, 0);
     for (int i = 0; i < T; ++i)
-        totBusIdx[i] = i;
+        totBusIDx[i] = i;
 
     for (int i = 0; i + gap < HLim; i = i + gap)
     {
         std::mt19937 rng(42); // 设置随机数种子  
-        random_shuffle(totBusIdx.begin(), totBusIdx.end());
+        random_shuffle(totBusIDx.begin(), totBusIDx.end());
         for (int i = 0; i < gap; ++i)
         {
-            busIdx[i] = totBusIdx[i];
+            busIDx[i] = totBusIDx[i];
         }
 
         int oriEdgeNum = 0;
 
         vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
         vector<int> pileTmp1(gap, -1);
-        for (int j = i, busId; j < i + gap; ++j)
+        for (int j = i, busID; j < i + gap; ++j)
         {
-            busId = busIdx[j - i];
-            oriEdgeNum += buses[busId].path.size();
-            pathTmp1[j - i] = buses[busId].pathTmp;
-            pileTmp1[j - i] = buses[busId].pileId;
-            recoverNetwork(busId, buses[busId].pileId);
+            busID = busIDx[j - i];
+            oriEdgeNum += buses[busID].path.size();
+            pathTmp1[j - i] = buses[busID].pathTmp;
+            pileTmp1[j - i] = buses[busID].pileID;
+            recoverNetwork(busID, buses[busID].pileID);
         }
 
         int curEdgeNum = 0;
         bool findPath = false;
         vector<vector<int>> pathTmp2(gap, vector<int>());     // 用于此后重新加载边
         vector<int> pileTmp2(gap, -1);
-        for (int j = i + gap - 1, busId; j >= i; --j)
+        for (int j = i + gap - 1, busID; j >= i; --j)
         {
-            busId = busIdx[j - i];
-            loadBus(busId, false);
-            pathTmp2[j - i] = buses[busId].pathTmp;
-            pileTmp2[j - i] = buses[busId].pileId;
-            curEdgeNum += buses[busId].path.size();
+            busID = busIDx[j - i];
+            loadBus(busID, false);
+            pathTmp2[j - i] = buses[busID].pathTmp;
+            pileTmp2[j - i] = buses[busID].pileID;
+            curEdgeNum += buses[busID].path.size();
         }
 
         if (oriEdgeNum > curEdgeNum)
@@ -96,23 +96,23 @@ void Solution::reAllocateBus(int HLim)
             continue;
         }
         else {  // 否则，回复原状态
-            for (int j = i + gap - 1, busId; j >= i; --j)
+            for (int j = i + gap - 1, busID; j >= i; --j)
             {   // 把试图寻路时，造成的对网络的影响消除
-                busId = busIdx[j - i];
-                recoverNetwork(busId, pileTmp2[j - i]);
+                busID = busIDx[j - i];
+                recoverNetwork(busID, pileTmp2[j - i]);
             }
 
-            for (int j = i, busId; j < i + gap; ++j)
+            for (int j = i, busID; j < i + gap; ++j)
             {   // 重新加载所有的边
                 vector<int> nullVector, nullPath1, nullPath2;
-                busId = busIdx[j - i];
-                buses[busId].mutiplierId.swap(nullVector);
-                buses[busId].path.swap(nullPath1);
-                buses[busId].pathTmp.swap(nullPath2);
+                busID = busIDx[j - i];
+                buses[busID].mutiplierID.swap(nullVector);
+                buses[busID].path.swap(nullPath1);
+                buses[busID].pathTmp.swap(nullPath2);
 
-                buses[busId].pileId = -1;
-                buses[busId].curA = D;
-                reloadBus(busId, pileTmp1[j - i], pathTmp1[j - i]);
+                buses[busID].pileID = -1;
+                buses[busID].curA = D;
+                reloadBus(busID, pileTmp1[j - i], pathTmp1[j - i]);
             }
         }
     }
@@ -121,35 +121,35 @@ void Solution::reAllocateBus(int HLim)
 // 试图删除新边
 void Solution::tryDeleteEdge()
 {
-    int n = newEdge.size(), trueEdgeId;
+    int n = newEdge.size(), trueEdgeID;
     for (int idx = 0; idx < n; ++idx)
     {
-        int idxEdge = newEdgePathId[idx]; // idxEdge为边在边集数组的编号（计数时，双向边视作同一边）  
+        int idxEdge = newEdgePathID[idx]; // idxEdge为边在边集数组的编号（计数时，双向边视作同一边）  
 
-        trueEdgeId = idxEdge * 2;
+        trueEdgeID = idxEdge * 2;
         int busCnt = 0;
-        vector<int> lastBusIds, lastPileIds;
+        vector<int> lastBusIDs, lastPileIDs;        // 存储将要被删除的边上承载的业务ID和通道ID
 
         for (int j = 0; j < P; ++j)
-            if (edge[trueEdgeId].Pile[j] != -1 && edge[trueEdgeId].Pile[j] != T)
+            if (edge[trueEdgeID].Pile[j] != -1 && edge[trueEdgeID].Pile[j] != T)
             {   // 说明在通道j上承载了该业务
                 ++busCnt;
-                lastBusIds.push_back(edge[trueEdgeId].Pile[j]);
-                lastPileIds.push_back(j);
+                lastBusIDs.push_back(edge[trueEdgeID].Pile[j]);
+                lastPileIDs.push_back(j);
             }
 
         if (busCnt == 0) 
         {   // 如果该新边上，一条业务都没有承载，直接删边
-            int iter = find(newEdgePathId.begin(), newEdgePathId.end(), idxEdge) - newEdgePathId.begin();
+            int iter = find(newEdgePathID.begin(), newEdgePathID.end(), idxEdge) - newEdgePathID.begin();
             newEdge.erase(newEdge.begin() + iter);
-            newEdgePathId.erase(newEdgePathId.begin() + iter);
+            newEdgePathID.erase(newEdgePathID.begin() + iter);
             --idx;
             --n;
 
             for (int k = 0; k < P; ++k)
             {   // 该边已删除，就应对其进行封锁
-                edge[trueEdgeId].Pile[k] = T;
-                edge[trueEdgeId + 1].Pile[k] = T;   // 偶数+1
+                edge[trueEdgeID].Pile[k] = T;
+                edge[trueEdgeID + 1].Pile[k] = T;   // 偶数+1
             }
         }
         else
@@ -157,120 +157,99 @@ void Solution::tryDeleteEdge()
             vector<vector<int>> pathTmp(busCnt, vector<int>());     // 用于此后重新加载边
             for (int k = 0; k < busCnt; ++k)
             {
-                pathTmp[k] = buses[lastBusIds[k]].pathTmp;
-                recoverNetwork(lastBusIds[k], lastPileIds[k]);
+                pathTmp[k] = buses[lastBusIDs[k]].pathTmp;
+                recoverNetwork(lastBusIDs[k], lastPileIDs[k]);
             }
 
             bool findPath = false;
             int stopK = -1;
-            vector<int> tmpLastPileIds;
+            vector<int> tmpLastPileIDs;                                 // 作用见该变量被使用时对应的注释
             for (int k = 0; k < busCnt; ++k)
             {
-                findPath = BFS_detectPath(buses[lastBusIds[k]], idxEdge);
+                findPath = BFS_detectPath(buses[lastBusIDs[k]], idxEdge);
                 if (findPath == false)
                 {
                     stopK = k;
                     break;
                 }
-                tmpLastPileIds.push_back(buses[lastBusIds[k]].pileId);   // 原本的pileId已改变，此处进行更新，以防止reCoverNetwork时出bug
+                tmpLastPileIDs.push_back(buses[lastBusIDs[k]].pileID);   // 原本的pileID已改变，此处进行更新，以防止reCoverNetwork时出bug
             }
 
             if (findPath)
-            {
-                int iter = find(newEdgePathId.begin(), newEdgePathId.end(), idxEdge) - newEdgePathId.begin();
+            {   // 成功删除新边
+                // 将原本新添加的边从newEdge中删除
+                int iter = find(newEdgePathID.begin(), newEdgePathID.end(), idxEdge) - newEdgePathID.begin();
                 newEdge.erase(newEdge.begin() + iter);
-                newEdgePathId.erase(newEdgePathId.begin() + iter);
+                newEdgePathID.erase(newEdgePathID.begin() + iter);
                 --idx;
                 --n;
 
                 for (int k = 0; k < P; ++k)
                 {   // 该边已删除，就应对其进行封锁
-                    edge[trueEdgeId].Pile[k] = T;
-                    edge[trueEdgeId + 1].Pile[k] = T;   // 偶数+1
+                    edge[trueEdgeID].Pile[k] = T;
+                    edge[trueEdgeID + 1].Pile[k] = T;   // 偶数+1
                 }
 
                 for (int k = 0; k < busCnt; ++k)
-                {
+                {   // 重新加载被迁移的业务的路径上的放大器设置
                     vector<int> nullVector;
-                    buses[lastBusIds[k]].mutiplierId.swap(nullVector);
-                    buses[lastBusIds[k]].curA = D;
-
-                    int curNode = buses[lastBusIds[k]].start, trueNextEdgeId;
-                    for (int i = 0; i < buses[lastBusIds[k]].path.size(); ++i)
-                    {
-                        if (edge[buses[lastBusIds[k]].path[i] * 2].from == curNode)
-                            trueNextEdgeId = buses[lastBusIds[k]].path[i] * 2;
-                        else
-                            trueNextEdgeId = buses[lastBusIds[k]].path[i] * 2 + 1;
-                        curNode = edge[trueNextEdgeId].to;
-
-                        if (buses[lastBusIds[k]].curA >= edge[trueNextEdgeId].trueD)
-                        {
-                            buses[lastBusIds[k]].curA -= edge[trueNextEdgeId].trueD;
-                        }
-                        else
-                        {
-                            node[edge[trueNextEdgeId].from].Multiplier[buses[lastBusIds[k]].pileId] = buses[lastBusIds[k]].pileId;
-                            buses[lastBusIds[k]].curA = D;
-                            buses[lastBusIds[k]].curA -= edge[trueNextEdgeId].trueD;
-                            buses[lastBusIds[k]].mutiplierId.push_back(edge[trueNextEdgeId].from);
-                        }
-                    }
+                    buses[lastBusIDs[k]].mutiplierID.swap(nullVector);
+                    buses[lastBusIDs[k]].curA = D;
+                    loadMultiplier(lastBusIDs[k]);
                 }
-
             }
             else
             {
                 for (int k = 0; k < stopK; ++k)
                 {   // 把试图寻路时，造成的对网络的影响消除
-                    recoverNetwork(lastBusIds[k], tmpLastPileIds[k]);
+                    recoverNetwork(lastBusIDs[k], tmpLastPileIDs[k]);
                 }
 
                 for (int k = 0; k < busCnt; ++k)
                 {   // 重新加载所有的边
                     vector<int> nullVector, nullPath1, nullPath2;
-                    buses[lastBusIds[k]].mutiplierId.swap(nullVector);
-                    buses[lastBusIds[k]].path.swap(nullPath1);
-                    buses[lastBusIds[k]].pathTmp.swap(nullPath2);
+                    buses[lastBusIDs[k]].mutiplierID.swap(nullVector);
+                    buses[lastBusIDs[k]].path.swap(nullPath1);
+                    buses[lastBusIDs[k]].pathTmp.swap(nullPath2);
 
-                    buses[lastBusIds[k]].pileId = -1;
-                    buses[lastBusIds[k]].curA = D;
-                    reloadBus(lastBusIds[k], lastPileIds[k], pathTmp[k]);
+                    buses[lastBusIDs[k]].pileID = -1;
+                    buses[lastBusIDs[k]].curA = D;
+                    reloadBus(lastBusIDs[k], lastPileIDs[k], pathTmp[k]);
                 }
             }
         }
     }
 }
 
-// 把业务busId加载到光网络中
-void Solution::loadBus(int busId, bool ifTryDeleteEdge)
+// 把业务busID加载到光网络中
+void Solution::loadBus(int busID, bool ifTryDeleteEdge)
 {
-    BFS_loadBus(buses[busId], ifTryDeleteEdge);
-    loadMultiplier(busId);
+    BFS_loadBus(buses[busID], ifTryDeleteEdge);
+    loadMultiplier(busID);
 }
 
 // 先清空原来的业务对网络的影响
-void Solution::recoverNetwork(int lastBusID, int lastPileId)
+void Solution::recoverNetwork(int busID, int pileID)
 {
     ///////////////////////////////////////////////////////////////////////
     // 清空对寻路的影响
-    vector<int> pathTmp = buses[lastBusID].pathTmp;
-    int curNode = buses[lastBusID].end;
+    vector<int> pathTmp = buses[busID].pathTmp;
+    int curNode = buses[busID].end;
     while (pathTmp[curNode] != -1)
     {
-        int edgeId = pathTmp[curNode];  // 存储于edge数组中真正的边的Id
-        edge[edgeId].Pile[lastPileId] = -1;
-        --edge[edgeId].usedPileCnt;
+        int edgeID = pathTmp[curNode];  // 存储于edge数组中真正的边的ID
+        edge[edgeID].Pile[pileID] = -1;
+        --edge[edgeID].usedPileCnt;
 
-        if (edgeId % 2)
+        if (edgeID % 2)
         {   // 奇数-1
-            edge[edgeId - 1].Pile[lastPileId] = -1;   // 双向边，两边一起处理
-            --edge[edgeId - 1].usedPileCnt;
+            edge[edgeID - 1].Pile[pileID] = -1;   // 双向边，两边一起处理
+            --edge[edgeID - 1].usedPileCnt;
         }
         else
         {   // 偶数+1
-            edge[edgeId + 1].Pile[lastPileId] = -1;
-            --edge[edgeId + 1].usedPileCnt;
+            edge[edgeID + 1].Pile[pileID] = -1;
+            --edge[edgeID + 1].usedPileCnt;
         }
 
         curNode = edge[pathTmp[curNode]].from;
@@ -278,67 +257,67 @@ void Solution::recoverNetwork(int lastBusID, int lastPileId)
 
     //////////////////////////////////////////////////////////////////////
     vector<int> nullVector, nullPath1, nullPath2;
-    buses[lastBusID].mutiplierId.swap(nullVector);
-    buses[lastBusID].path.swap(nullPath1);
-    buses[lastBusID].pathTmp.swap(nullPath2);
+    buses[busID].mutiplierID.swap(nullVector);
+    buses[busID].path.swap(nullPath1);
+    buses[busID].pathTmp.swap(nullPath2);
 
-    buses[lastBusID].pileId = -1;
-    buses[lastBusID].curA = D;
+    buses[busID].pileID = -1;
+    buses[busID].curA = D;
 }
 
 // 重新加载业务到网络上
-void Solution::reloadBus(int lastBusID, int lastPileId, vector<int>& pathTmp)
+void Solution::reloadBus(int busID, int pileID, vector<int>& pathTmp)
 {
     // 重新设置路径   
-    int curNode = buses[lastBusID].end;
-    buses[lastBusID].pileId = lastPileId;
-    buses[lastBusID].pathTmp = vector<int>(pathTmp.begin(), pathTmp.end());
-    while (buses[lastBusID].pathTmp[curNode] != -1) {
-        int edgeId = buses[lastBusID].pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+    int curNode = buses[busID].end;
+    buses[busID].pileID = pileID;
+    buses[busID].pathTmp = vector<int>(pathTmp.begin(), pathTmp.end());
+    while (buses[busID].pathTmp[curNode] != -1) {
+        int edgeID = buses[busID].pathTmp[curNode];  // 存储于edge数组中真正的边的ID
 
-        buses[lastBusID].path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
-        edge[edgeId].Pile[lastPileId] = buses[lastBusID].busId;
-        ++edge[edgeId].usedPileCnt;
+        buses[busID].path.push_back(edgeID / 2); // edgeID / 2是为了适应题目要求
+        edge[edgeID].Pile[pileID] = buses[busID].busID;
+        ++edge[edgeID].usedPileCnt;
 
-        if (edgeId % 2) {   // 奇数-1
-            edge[edgeId - 1].Pile[lastPileId] = buses[lastBusID].busId;   // 双向边，两边一起处理
-            ++edge[edgeId - 1].usedPileCnt;
+        if (edgeID % 2) {   // 奇数-1
+            edge[edgeID - 1].Pile[pileID] = buses[busID].busID;   // 双向边，两边一起处理
+            ++edge[edgeID - 1].usedPileCnt;
         }
         else {  // 偶数+1
-            edge[edgeId + 1].Pile[lastPileId] = buses[lastBusID].busId;
-            ++edge[edgeId + 1].usedPileCnt;
+            edge[edgeID + 1].Pile[pileID] = buses[busID].busID;
+            ++edge[edgeID + 1].usedPileCnt;
         }
 
-        curNode = edge[buses[lastBusID].pathTmp[curNode]].from;
+        curNode = edge[buses[busID].pathTmp[curNode]].from;
     }
-    std::reverse(buses[lastBusID].path.begin(), buses[lastBusID].path.end());
+    std::reverse(buses[busID].path.begin(), buses[busID].path.end());
 
     // 重新设置放大器
-    loadMultiplier(lastBusID);
+    loadMultiplier(busID);
 }
 
 // 加载放大器到业务上
-void Solution::loadMultiplier(int busId)
+void Solution::loadMultiplier(int busID)
 {
-    int curNode = buses[busId].start, trueNextEdgeId;
-    for (int i = 0; i < buses[busId].path.size(); ++i)
+    int curNode = buses[busID].start, trueNextEdgeID;
+    for (int i = 0; i < buses[busID].path.size(); ++i)
     {
-        if (edge[buses[busId].path[i] * 2].from == curNode)
-            trueNextEdgeId = buses[busId].path[i] * 2;
+        if (edge[buses[busID].path[i] * 2].from == curNode)
+            trueNextEdgeID = buses[busID].path[i] * 2;
         else
-            trueNextEdgeId = buses[busId].path[i] * 2 + 1;
-        curNode = edge[trueNextEdgeId].to;
+            trueNextEdgeID = buses[busID].path[i] * 2 + 1;
+        curNode = edge[trueNextEdgeID].to;
 
-        if (buses[busId].curA >= edge[trueNextEdgeId].trueD)
+        if (buses[busID].curA >= edge[trueNextEdgeID].trueD)
         {
-            buses[busId].curA -= edge[trueNextEdgeId].trueD;
+            buses[busID].curA -= edge[trueNextEdgeID].trueD;
         }
         else
         {
-            node[edge[trueNextEdgeId].from].Multiplier[buses[busId].pileId] = buses[busId].pileId;
-            buses[busId].curA = D;
-            buses[busId].curA -= edge[trueNextEdgeId].trueD;
-            buses[busId].mutiplierId.push_back(edge[trueNextEdgeId].from);
+            node[edge[trueNextEdgeID].from].Multiplier[buses[busID].pileID] = buses[busID].pileID;
+            buses[busID].curA = D;
+            buses[busID].curA -= edge[trueNextEdgeID].trueD;
+            buses[busID].mutiplierID.push_back(edge[trueNextEdgeID].from);
         }
     }
 }

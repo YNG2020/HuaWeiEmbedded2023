@@ -7,7 +7,7 @@ int cntBus = 0;
 int head[Configure::maxN];
 bool vis[Configure::maxN];
 std::vector<std::pair<int, int>> newEdge;
-std::vector<int> newEdgePathId;
+std::vector<int> newEdgePathID;
 std::vector<int> remainBus;
 Node node[Configure::maxN];
 Edge edge[Configure::maxM];
