@@ -61,8 +61,7 @@ struct Equalfunc_t {
 struct SimpleNode
 {
     int nodeID, dis;
-    SimpleNode* parent; // 指向父节点的指针
-    SimpleNode(int _id = 0, int _dis = 0, SimpleNode* p = nullptr) : nodeID(_id), dis(_dis), parent(p) {}
+    SimpleNode(int _id = -1, int _dis = 0) : nodeID(_id), dis(_dis) {}
     bool operator<(const SimpleNode other) const
     {
         return dis > other.dis; // 这里使用小于号，表示距离越小，优先级越高

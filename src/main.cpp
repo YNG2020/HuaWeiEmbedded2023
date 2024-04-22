@@ -18,6 +18,7 @@ int main()
         inputFromJudger();
     else
         inputFromFile();
+
     Solution solution;
     solution.allocateBus();
 
@@ -27,9 +28,9 @@ int main()
 
     if (Configure::forIterOutput && !Configure::forJudger)
         std::cout << "Original newEdge.size = " << newEdge.size() << endl;
-    while (cnt < Configure::cntLimit) {
-
-        solution.reAllocateBus(pow(2.71, -0.005 * cnt)*T);
+    while (cnt < solution.cntLimit)
+    {
+        solution.reAllocateBus(pow(solution.reAllocateBusNumFunBase, solution.reAllocateBusNumFunExpRatio * cnt) * T);
         solution.tryDeleteEdge();
         if (Configure::forIterOutput && !Configure::forJudger)
             std::cout << "newEdge.size = " << newEdge.size() << endl;
