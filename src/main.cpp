@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 #include <cmath>
 #include <time.h>
@@ -11,41 +10,19 @@
 
 using namespace std;
 
-// 主函数
 int main()
 {
-    if (Configure::forJudger)
+    if (Configure::forJudger)   // 用于评测
         inputFromJudger();
-    else
+    else                        // 用于本地测试
         inputFromFile();
 
     Solution solution;
-    solution.allocateBus();
+    solution.runStrategy();     // 运行总策略
 
-    solution.ifTryDeleteEdge = false;
-
-    int cnt = 0;
-
-    if (Configure::forIterOutput && !Configure::forJudger)
-        std::cout << "Original newEdge.size = " << newEdge.size() << endl;
-    while (cnt < solution.cntLimit)
-    {
-        solution.reAllocateBus(pow(solution.reAllocateBusNumFunBase, solution.reAllocateBusNumFunExpRatio * cnt) * T);
-        solution.tryDeleteEdge();
-        if (Configure::forIterOutput && !Configure::forJudger)
-            std::cout << "newEdge.size = " << newEdge.size() << endl;
-        cnt = cnt + 1;
-    }
-
-    solution.ifLast = true;
-    solution.tryDeleteEdge();
-    solution.tryDeleteEdge();
-    if (Configure::forIterOutput && !Configure::forJudger)
-        std::cout << "newEdge.size = " << newEdge.size() << endl;
-
-    if (Configure::forJudger)
+    if (Configure::forJudger)   // 用于评测
         outputForJudger();
-    else
+    else                        // 用于本地测试
         outputForFile();
 
     return 0;

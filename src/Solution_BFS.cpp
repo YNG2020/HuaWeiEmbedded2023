@@ -8,7 +8,7 @@
 #include <cstring>
 
 // 考虑一边多通道的情况下，寻找业务bus的起点到终点的路径（不一定是最少边数路径，因为有可能边的通道被完全占用）
-void Solution::BFS_loadBus(Business& bus)
+void Solution::BFS_loadBus(Business& bus, bool ifTryDeleteEdge)
 {
     int start = bus.start, end = bus.end;
     static int addNewEdgeCnt = 0;  // 加边次数（不是边数）
@@ -172,7 +172,7 @@ bool Solution::BFS_detectPath(Business& bus, int blockEdge)
         if (from == end)
         {
             // 找到的路径长度太长，宁愿不要
-            if (!ifLast && (curDis > pathSizeLimRatio * minPathSize[make_pair(start, end)]))
+            if (curDis > pathSizeLimRatio * minPathSize[make_pair(start, end)])
                 continue;
 
             int curNode = end, tmpDist = curDis;

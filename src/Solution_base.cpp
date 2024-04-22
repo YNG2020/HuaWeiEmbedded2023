@@ -2,6 +2,7 @@
 #include "UtilityFunction.h"
 #include "global_var.h"
 #include "global_struct.h"
+#include <iostream>
 #include <cmath>
 #include <queue>
 #include <algorithm>
@@ -14,12 +15,33 @@ Solution::Solution()
     tmpOKPath.resize(N);
 }
 
+// 光线扩容难题总策略
+void Solution::runStrategy()
+{
+    preAllocateBus();
+
+    if (Configure::forIterOutput && !Configure::forJudger)
+        std::cout << "Original newEdge.size = " << newEdge.size() << endl;
+    for (int cnt = 0; cnt < cntLimit; ++cnt)
+    {
+        reAllocateBus(pow(reAllocateBusNumFunBase, reAllocateBusNumFunExpRatio * cnt) * T);
+        tryDeleteEdge();
+        if (Configure::forIterOutput && !Configure::forJudger)
+            std::cout << "newEdge.size = " << newEdge.size() << endl;
+    }
+
+    tryDeleteEdge();
+    tryDeleteEdge();
+    if (Configure::forIterOutput && !Configure::forJudger)
+        std::cout << "newEdge.size = " << newEdge.size() << endl;
+}
+
 // 将所有的业务分配到光网络中
-void Solution::allocateBus()
+void Solution::preAllocateBus()
 {
     for (int i = 0; i < T; ++i)
     {
-        loadBus(i, false);
+        loadBus(i, true);
     }
 }
 
@@ -93,7 +115,6 @@ void Solution::reAllocateBus(int HLim)
                 reloadBus(busId, pileTmp1[j - i], pathTmp1[j - i]);
             }
         }
-
     }
 }
 
@@ -217,17 +238,14 @@ void Solution::tryDeleteEdge()
                     reloadBus(lastBusIds[k], lastPileIds[k], pathTmp[k]);
                 }
             }
-
         }
-
     }
-
 }
 
 // 把业务busId加载到光网络中
-void Solution::loadBus(int busId, bool ifLoadRemain)
+void Solution::loadBus(int busId, bool ifTryDeleteEdge)
 {
-    BFS_loadBus(buses[busId]);
+    BFS_loadBus(buses[busId], ifTryDeleteEdge);
     loadMultiplier(busId);
 }
 
