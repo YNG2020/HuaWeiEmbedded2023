@@ -6,7 +6,6 @@
 #include <fstream>
 #include  <stdio.h> 
 
-
 // 加边函数，s起点，t终点，d距离
 void addEdge(int s, int t, int d)
 {
@@ -68,9 +67,9 @@ void inputFromJudger()
 // 文件输入流，用于文件
 void inputFromFile()
 {
-    std::ifstream myCin(R"(.\.\MATLAB\dataMATLAB.txt)"); // Windows cmd下
-    //std::ifstream myCin("../../MATLAB/dataMATLAB.txt"); // cmd下
-    //std::ifstream myCin("..\\..\\MATLAB\\dataMATLAB.txt"); // Windows IDE下
+    //std::ifstream myCin("././MATLAB/dataMATLAB.txt"); // cmd下
+    std::ifstream myCin("..\\..\\MATLAB\\dataMATLAB.txt"); // VS IDE下
+    //std::ifstream myCin("dataMATLAB.txt"); // MATLAB 调试下
     if (!myCin)
     {
         std::cerr << "Error: Cannot open the file." << std::endl;

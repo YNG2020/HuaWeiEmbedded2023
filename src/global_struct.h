@@ -58,9 +58,13 @@ struct Equalfunc_t {
     }
 };
 
-extern Node node[Configure::maxN]; // 使用Configure.h中定义的maxN
-extern Edge edge[Configure::maxM]; // 使用Configure.h中定义的maxM
-extern Business buses[Configure::maxBus]; // 使用Configure.h中定义的maxBus
-
-extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minDist;   // 记录两个节点间的最短边的长度
-extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;   // 记录两个节点间的最短路径长度
+struct SimpleNode
+{
+    int nodeID, dis;
+    SimpleNode* parent; // 指向父节点的指针
+    SimpleNode(int _id = 0, int _dis = 0, SimpleNode* p = nullptr) : nodeID(_id), dis(_dis), parent(p) {}
+    bool operator<(const SimpleNode other) const
+    {
+        return dis > other.dis; // 这里使用小于号，表示距离越小，优先级越高
+    }
+};

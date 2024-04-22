@@ -10,7 +10,6 @@
 #include "Solution.h"
 
 using namespace std;
-Solution solution;
 
 // 主函数
 int main()
@@ -19,6 +18,7 @@ int main()
         inputFromJudger();
     else
         inputFromFile();
+    Solution solution;
     solution.allocateBus();
 
     solution.ifTryDeleteEdge = false;
@@ -49,4 +49,3 @@ int main()
 
     return 0;
 }
-
