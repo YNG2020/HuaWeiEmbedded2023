@@ -67,8 +67,7 @@ void inputFromJudger()
 // 文件输入流，用于文件
 void inputFromFile()
 {
-    //std::ifstream myCin("././MATLAB/dataMATLAB.txt"); // cmd下
-    //std::ifstream myCin("..\\..\\MATLAB\\dataMATLAB.txt"); // VS IDE下
+    //std::ifstream myCin("././MATLAB/dataMATLAB.txt"); // Linux or Win的cmd下
     std::ifstream myCin("dataMATLAB.txt"); // MATLAB 调试下
     if (!myCin)
     {
