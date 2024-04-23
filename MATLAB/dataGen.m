@@ -23,7 +23,7 @@ function [dataGenArgs] = dataGen()
     end
     %% 求得相应的最小生成树
     startNode = 0;
-    edge = Prim(args, flatNodeArray, startNode);
+    edge = Prim(args, flatNodeArray, startNode);    % edge数组的第i行存储第i条边的起点、终点、距离
 
     if args.isVisualization
         nEdge = size(edge, 1);
