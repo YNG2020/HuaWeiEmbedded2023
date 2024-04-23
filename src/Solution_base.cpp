@@ -224,11 +224,12 @@ void Solution::tryDeleteEdge()
 // 把业务busID加载到光网络中
 void Solution::loadBus(int busID, bool ifTryDeleteEdge)
 {
-    BFS_loadBus(buses[busID], ifTryDeleteEdge);
-    loadMultiplier(busID);
+    BFS_detectMinPathSize(buses[busID]);        // 先找到最短路径的长度，以便于后续的路径长度限制
+    BFS_loadBus(buses[busID], ifTryDeleteEdge); // 加载业务到光网络中
+    loadMultiplier(busID);                      // 加载放大器到业务上
 }
 
-// 先清空原来的业务对网络的影响
+// 清空原来的业务对网络的影响
 void Solution::recoverNetwork(int busID, int pileID)
 {
     ///////////////////////////////////////////////////////////////////////
@@ -265,17 +266,18 @@ void Solution::recoverNetwork(int busID, int pileID)
     buses[busID].curA = D;
 }
 
-// 重新加载业务到网络上
+// 重新将某单条业务加载到光网络上
 void Solution::reloadBus(int busID, int pileID, vector<int>& pathTmp)
 {
-    // 重新设置路径   
+    // 重新设置路径
+    buses[busID].pathTmp = vector<int>(pathTmp.begin(), pathTmp.end());
+
     int curNode = buses[busID].end;
     buses[busID].pileID = pileID;
-    buses[busID].pathTmp = vector<int>(pathTmp.begin(), pathTmp.end());
     while (buses[busID].pathTmp[curNode] != -1) {
-        int edgeID = buses[busID].pathTmp[curNode];  // 存储于edge数组中真正的边的ID
+        int edgeID = buses[busID].pathTmp[curNode];     // 存储于edge数组中真正的边的ID
 
-        buses[busID].path.push_back(edgeID / 2); // edgeID / 2是为了适应题目要求
+        buses[busID].path.push_back(edgeID / 2);        // edgeID / 2是为了适应题目要求
         edge[edgeID].Pile[pileID] = buses[busID].busID;
         ++edge[edgeID].usedPileCnt;
 
@@ -288,7 +290,7 @@ void Solution::reloadBus(int busID, int pileID, vector<int>& pathTmp)
             ++edge[edgeID + 1].usedPileCnt;
         }
 
-        curNode = edge[buses[busID].pathTmp[curNode]].from;
+        curNode = edge[edgeID].from;
     }
     std::reverse(buses[busID].path.begin(), buses[busID].path.end());
 
@@ -320,4 +322,31 @@ void Solution::loadMultiplier(int busID)
             buses[busID].mutiplierID.push_back(edge[trueNextEdgeID].from);
         }
     }
+}
+
+// 回溯路径，以构造出一条完整的路径
+void Solution::backtrackPath(Business& bus)
+{
+    int curNode = bus.end;
+    int choosenP = bus.pileID;
+    while (bus.pathTmp[curNode] != -1)
+    {
+        int edgeID = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的ID
+
+        bus.path.push_back(edgeID / 2); // edgeID / 2是为了适应题目要求
+        edge[edgeID].Pile[choosenP] = bus.busID;
+        ++edge[edgeID].usedPileCnt;
+
+        if (edgeID % 2) {   // 奇数-1
+            edge[edgeID - 1].Pile[choosenP] = bus.busID;   // 双向边，两边一起处理
+            ++edge[edgeID - 1].usedPileCnt;
+        }
+        else {  // 偶数+1
+            edge[edgeID + 1].Pile[choosenP] = bus.busID;
+            ++edge[edgeID + 1].usedPileCnt;
+        }
+
+        curNode = edge[bus.pathTmp[curNode]].from;
+    }
+    std::reverse(bus.path.begin(), bus.path.end());
 }
