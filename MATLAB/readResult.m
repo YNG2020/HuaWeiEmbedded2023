@@ -5,6 +5,7 @@ fileID = fopen('dataMATLAB.txt', 'r');
 firstLine = fscanf(fileID, '%d', 5);
 N = firstLine(1);
 M = firstLine(2);
+T = firstLine(3);
 P = firstLine(4);
 
 % 创建边集统计数组，第i行依次存储某条重边的起点、终点、重边上的业务数，重边数，边上通道的利用率
@@ -36,14 +37,19 @@ newEdges = newEdges';
 for i = 1 : newEdgesCnt
     startPoint = newEdges(i, 1);
     endPoint = newEdges(i, 2);
-    edgeID = find(edgeStat(:, 1) == startPoint & edgeStat(:, 2) == endPoint);
+    edgeID = find(edgeStat(:, 1) == startPoint & edgeStat(:, 2) == endPoint | ...
+                (edgeStat(:, 2) == startPoint & edgeStat(:, 1) == endPoint));
+    % edgeID = find(edgeStat(:, 1) == startPoint & edgeStat(:, 2) == endPoint);
+    if isempty(edgeID)
+        a = 1;
+    end
     edgeStat(edgeID, 4) = edgeStat(edgeID, 4) + 1;
 end
 
 totM = 0; totN = 0;
 
 % 读取 T 行，每行前三个整数𝑝𝑗、𝑚𝑗、𝑛𝑗，表示第 j 条业务的通道编号为𝑝𝑗、经过的边数量为𝑚𝑗、经过的放大器个数为𝑛𝑗
-for i = 1:dataGenArgs.T
+for i = 1 : T
     data = fscanf(fileID, '%d', 3); % 读取前三个整数
     p = data(1); % 通道编号
     m = data(2); % 经过的边数量
@@ -52,25 +58,31 @@ for i = 1:dataGenArgs.T
     totN = totN + n;
     edgePassed = fscanf(fileID, '%d', m); % 读取经过的边的编号
     for j = 1 : m
-        edgeID = edgePassed(j);
-        if edgeID > M
-            edgeID = edgeID - M;
+        edgeID = edgePassed(j);         % 此处边的编号从0开始，需要做适应MATLAB的适配
+        if edgeID >= M
+            edgeID = edgeID - M + 1;
             startPoint = newEdges(edgeID, 1);
             endPoint = newEdges(edgeID, 2);
-            edgeID = find(edgeStat(:, 1) == startPoint & edgeStat(:, 2) == endPoint);
-
+        else
+            edgeID = edgeID + 1;
+            startPoint = edgeStat(edgeID, 1);
+            endPoint = edgeStat(edgeID, 2);
         end
+        edgeID = find((edgeStat(:, 1) == startPoint & edgeStat(:, 2) == endPoint) | ...
+                (edgeStat(:, 2) == startPoint & edgeStat(:, 1) == endPoint));
         edgeStat(edgeID, 3) = edgeStat(edgeID, 3) + 1;
     end
     amplifiers_passed = fscanf(fileID, '%d', n); % 读取经过的放大器所在节点的编号
 end
-edgeStat(:, 5) = round(100 * edgeStat(:, 3) ./ (edgeStat(:, 4) * P));
+edgeStat(:, 5) = round(100 * edgeStat(:, 3) ./ (edgeStat(:, 4) * P));   % 通道利用率，用百分数表示
+totEdgeID = unique(totEdgeID);
 
 totCost = totM + totN * 100 + size(newEdges, 1) * 1000000;
 
 % 关闭文件
 fclose(fileID);
 
+load flatNodeArray.mat
 BusinessAllocation = figure("Name", "Edge Statistic");
 ax = axes('Parent', BusinessAllocation);
 for k = 1 : 3
@@ -103,3 +115,5 @@ for k = 1 : 3
     set(dcm, 'UpdateFcn', {@customGraphDatatip, nodeArray, args});
     set(gcf, 'Color', 'white');
 end
+
+sortedEdgeStat = sortrows(edgeStat, [-4 5 3 1 2]);

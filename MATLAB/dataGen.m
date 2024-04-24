@@ -3,6 +3,7 @@ function [dataGenArgs] = dataGen()
     args = dataGenConfigure();
     %% 生成随机节点
     [nodeArray, flatNodeArray] = nodeCreated(args);
+    save flatNodeArray.mat
     
     if args.isVisualization
         SelectedNodes = figure("Name", "Selected Nodes");
