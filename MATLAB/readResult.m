@@ -39,7 +39,6 @@ for i = 1 : newEdgesCnt
     endPoint = newEdges(i, 2);
     edgeID = find(edgeStat(:, 1) == startPoint & edgeStat(:, 2) == endPoint | ...
                 (edgeStat(:, 2) == startPoint & edgeStat(:, 1) == endPoint));
-    % edgeID = find(edgeStat(:, 1) == startPoint & edgeStat(:, 2) == endPoint);
     if isempty(edgeID)
         a = 1;
     end
@@ -75,7 +74,6 @@ for i = 1 : T
     amplifiers_passed = fscanf(fileID, '%d', n); % 读取经过的放大器所在节点的编号
 end
 edgeStat(:, 5) = round(100 * edgeStat(:, 3) ./ (edgeStat(:, 4) * P));   % 通道利用率，用百分数表示
-totEdgeID = unique(totEdgeID);
 
 totCost = totM + totN * 100 + size(newEdges, 1) * 1000000;
 
