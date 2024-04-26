@@ -9,6 +9,7 @@
 // 加边函数，s起点，t终点，d距离
 void addEdge(int s, int t, int d)
 {
+    edge[cntEdge].edgeID = cntEdge;  // 边的编号
     edge[cntEdge].from = s; // 起点
     edge[cntEdge].to = t;   // 终点
     edge[cntEdge].d = 1;    // 距离
@@ -207,4 +208,18 @@ void outputForFile()
         }
     }
     std::cerr << "Total Cost = " << n * 1000000 + totM * 100 + totP << "\n";
+}
+
+// 输出业务在网络上的分布的统计结果
+void outputStatistic()
+{
+	ofstream myCout("businessStatistic.txt");
+    if (!myCout.is_open())
+    {
+        return;
+	}
+    for (int i = 0; i < M; ++i)
+    {
+        myCout << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].statisticCnt << endl;
+	}
 }

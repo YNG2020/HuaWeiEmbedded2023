@@ -32,7 +32,7 @@ classdef dataGenConfigure < handle
         businessPressure = 0.5; % 业务压力系数，控制着相同业务的重复次数，必须大于0小于1
 
         % 控制是否展示对数据进行可视化
-        isVisualization = true;
+        isVisualization = false;
 
         % 控制是否保存图片
         isSaveFigure = false; 

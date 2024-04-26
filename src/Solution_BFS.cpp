@@ -313,3 +313,59 @@ void Solution::BFS_detectMinPathSize(Business& bus)
     }
     minPathSize[make_pair(start, end)] = curDis;
 }
+
+
+void Solution::BFS_busStatistic(Business& bus)
+{
+    int start = bus.start, end = bus.end;
+    // 相关寻路变量的初始化
+    std::fill(tmpOKPath.begin(), tmpOKPath.end(), -1);      // 存储路径的数组初始化
+    memset(vis, 0, sizeof(vis));                            // vis数组初始化
+    queue<SimpleNode> nodes;
+    nodes.emplace(start, 0);
+    vis[start] = true;
+    int from = start, to = -1, curDis = 0;
+
+    while (!nodes.empty() && to != end)
+    {   // 队列为空即，所有点都被加入到生成树中去了
+        from = nodes.front().nodeID;
+        curDis = nodes.front().dis;
+        nodes.pop();
+
+        for (int i = head[from]; i != -1; i = edge[i].next)
+        {
+            to = edge[i].to;
+            if (vis[to])
+                continue;
+            vis[to] = true;
+            tmpOKPath[to] = i;    // 记录下抵达路径点t的边的编号i
+
+            if (to == end)
+            {
+                ++curDis;
+                break;
+            }
+            else
+            {
+                nodes.emplace(to, curDis + 1);
+            }
+        }
+    }
+    bus.pathTmp = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
+
+    int curNode = end;
+    while (bus.pathTmp[curNode] != -1)
+    {
+        int edgeId = bus.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
+        bus.pathStatistic.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
+        curNode = edge[edgeId].from;
+    }
+    std::reverse(bus.pathStatistic.begin(), bus.pathStatistic.end());
+    for (int i = 0; i < bus.pathStatistic.size(); ++i)
+    {
+        int edgeId = bus.pathStatistic[i];
+        edgeId = edgeId * 2;
+		++edge[edgeId].statisticCnt;
+		++edge[edgeId + 1].statisticCnt;
+    }
+}

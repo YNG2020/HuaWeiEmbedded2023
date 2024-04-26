@@ -1,4 +1,4 @@
-function [totCost, edgeStat] = readResult()
+function [totCost, edgeStat, sortedEdgeStat] = readResult()
     % 读取原始光网络
     fileID = fopen('dataMATLAB.txt', 'r');
     
@@ -48,7 +48,7 @@ function [totCost, edgeStat] = readResult()
     newEdgeIdx = ones(M, max(edgeStat(:, 4))) * 1000000;     % 用于存储新边的编号，先初始化为一个不可能的值
     newEdgeTmpCnt = zeros(M, 1);                   % 与上述数组配套使用
     
-    edgeStat = [edgeStat zeros(M, max(edgeStat(:, 4) + 1))];     % 用于统计每一条重边上的业务量，并存储利用率最低的重边
+    edgeStat = [edgeStat zeros(M, max(edgeStat(:, 4) + 2))];     % 用于统计每一条重边上的业务量，并存储利用率最低的重边和第几次出现重边时利用率最低
     for i = 1 : T
         data = fscanf(fileID, '%d', 3); % 读取前三个整数
         p = data(1); % 通道编号
@@ -92,10 +92,12 @@ function [totCost, edgeStat] = readResult()
     for i = 1 : M
         edgeStat(i, 6 : 6 + size(newEdgeIdx, 2) - 1) = tmp(i, idx(i, :));
         minBusNum = 10000000;
+        edgeStat(i, 6 + size(newEdgeIdx, 2) + 1) = 1;
         for j = 1 : newEdgeTmpCnt(i)
             if minBusNum > edgeStat(i, 6 + j - 1)
                 minBusNum = edgeStat(i, 6 + j - 1);
-                edgeStat(i, 10) = minBusNum;
+                edgeStat(i, 6 + size(newEdgeIdx, 2)) = minBusNum;
+                edgeStat(i, 6 + size(newEdgeIdx, 2) + 1) = j;
             end
         end
         for j = 1 : size(newEdgeIdx, 2)
@@ -109,6 +111,6 @@ function [totCost, edgeStat] = readResult()
     
     % 关闭文件
     fclose(fileID);
-    % sortedEdgeStat = sortrows(edgeStat, [-4 5 3 1 2]);
+    sortedEdgeStat = sortrows(edgeStat, [-4 5 3 1 2]);
 end
 

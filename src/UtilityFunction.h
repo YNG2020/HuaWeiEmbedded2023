@@ -7,5 +7,5 @@ void inputFromJudger();
 void inputFromFile();
 void outputForJudger();
 void outputForFile();
-
+void outputStatistic();
 #endif

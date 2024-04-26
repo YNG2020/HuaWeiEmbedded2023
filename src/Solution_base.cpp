@@ -18,6 +18,11 @@ Solution::Solution()
 // 光线扩容难题总策略
 void Solution::runStrategy()
 {
+    if (Configure::forStatisticOutput && !Configure::forJudger)
+    {
+        runStatistic();
+        outputStatistic();
+    }
     preAllocateBus();
 
     if (Configure::forIterOutput && !Configure::forJudger)
@@ -34,6 +39,13 @@ void Solution::runStrategy()
     tryDeleteEdge();
     if (Configure::forIterOutput && !Configure::forJudger)
         std::cout << "newEdge.size = " << newEdge.size() << endl;
+}
+
+// 对业务路径在网络上的分布做一个统计（不考虑通道编号限制）
+void Solution::runStatistic()
+{
+    for (int i = 0; i < T; ++i)
+		BFS_busStatistic(buses[i]);
 }
 
 // 将所有的业务分配到光网络中

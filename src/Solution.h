@@ -10,10 +10,12 @@ public:
 
 	Solution();
 	void runStrategy();
+	void runStatistic();
 	void BFS_loadBus(Business& bus, bool ifTryDeleteEdge);
 	bool BFS_detectPath(Business& bus, int blockEdge);
 	void BFS_addNewEdge(Business& bus);
 	void BFS_detectMinPathSize(Business& bus);
+	void BFS_busStatistic(Business& bus);
 	void loadBus(int busID, bool ifTryDeleteEdge);
 	void loadMultiplier(int busID);
 	void backtrackPath(Business& bus);

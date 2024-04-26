@@ -12,6 +12,7 @@ public:
 	// 调试参数
 	static const bool forIterOutput = true;		// 是否在每次迭代过程中输出新增的边的总数
 	static const bool forJudger = false;		// 是否要被判题器检测
+	static const bool forStatisticOutput = true;		// 是否输出统计结果
 
 	static const int INF = 2147483647;
 
