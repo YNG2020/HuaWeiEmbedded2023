@@ -384,7 +384,7 @@ void Solution::backtrackPath(Business& bus)
 
 // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
 void Solution::sortBus()
-{
+{   // 在业务分配的后期，加边是一定要加的。应该思考，在需要加边时，如何优化加载业务的顺序，使得加边的数目最少。通道使用的混乱，TODO(需要对加边机制思考得更清楚)
     sortedBusIndices.resize(T);
     for (int i = 0; i < T; ++i)
         sortedBusIndices[i] = i;

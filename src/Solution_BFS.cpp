@@ -88,7 +88,7 @@ void Solution::BFS_loadBus(Business& bus, bool ifTryDeleteEdge)
     backtrackPath(bus);     // 回溯路径，以构造出一条完整的路径
 }
 
-// 考虑一边多通道的情况下，寻找业务bus的起点到终点的路径，但遇到需要加边的情况，不做处理，直接返回
+// 考虑一边多通道的情况下，寻找业务bus的起点到终点的路径，但遇到需要加边的情况，不做处理，直接返回，仅tryDeletegeEdge时使用
 bool Solution::BFS_detectPath(Business& bus, int blockEdge)
 {
     int start = bus.start, end = bus.end;
