@@ -18,25 +18,32 @@ Solution::Solution()
 // 光线扩容难题总策略
 void Solution::runStrategy()
 {
+    // 首先获取业务路径（不考虑通道堵塞）在光网络上的分布情况
+    runStatistic();
     if (Configure::forStatisticOutput && !Configure::forJudger)
-    {
-        runStatistic();
+    {   
         outputStatistic();
     }
+    sortBus();  // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
     preAllocateBus();
+    tryDeleteEdge();
 
-    if (Configure::forIterOutput && !Configure::forJudger)
-        std::cout << "Original newEdge.size = " << newEdge.size() << endl;
-    for (int cnt = 0; cnt < cntLimit; ++cnt)
+    if (forIter)
     {
-        reAllocateBus(pow(reAllocateBusNumFunBase, reAllocateBusNumFunExpRatio * cnt) * T);
-        tryDeleteEdge();
         if (Configure::forIterOutput && !Configure::forJudger)
-            std::cout << "newEdge.size = " << newEdge.size() << endl;
+            std::cout << "Original newEdge.size = " << newEdge.size() << endl;
+        for (int cnt = 0; cnt < cntLimit; ++cnt)
+        {
+            reAllocateBus(pow(reAllocateBusNumFunBase, reAllocateBusNumFunExpRatio * cnt) * T);
+            tryDeleteEdge();
+            if (Configure::forIterOutput && !Configure::forJudger)
+                std::cout << "newEdge.size = " << newEdge.size() << endl;
+        }
+
+        tryDeleteEdge();
+        tryDeleteEdge();
     }
 
-    tryDeleteEdge();
-    tryDeleteEdge();
     if (Configure::forIterOutput && !Configure::forJudger)
         std::cout << "newEdge.size = " << newEdge.size() << endl;
 }
@@ -46,6 +53,16 @@ void Solution::runStatistic()
 {
     for (int i = 0; i < T; ++i)
 		BFS_busStatistic(buses[i]);
+    for (int i = 0; i < T; ++i)
+    {
+        Business& bus = buses[i];
+        int pathSize = bus.pathStatistic.size();
+        for (int j = 0; j < pathSize; ++j)
+        {
+            bus.expectedAllocationPressure += (edge[bus.pathStatistic[j] * 2].statisticCnt % P);
+        }
+        //bus.expectedAllocationPressure = bus.pathStatistic.size();
+    }
 }
 
 // 将所有的业务分配到光网络中
@@ -53,7 +70,7 @@ void Solution::preAllocateBus()
 {
     for (int i = 0; i < T; ++i)
     {
-        loadBus(i, true);
+        loadBus(sortedBusIndices[i], true);
     }
 }
 
@@ -133,6 +150,8 @@ void Solution::reAllocateBus(int HLim)
 // 试图删除新边
 void Solution::tryDeleteEdge()
 {
+    if (!forTryDeleteEdge)
+		return;
     int n = newEdge.size(), trueEdgeID;
     for (int idx = 0; idx < n; ++idx)
     {
@@ -361,4 +380,25 @@ void Solution::backtrackPath(Business& bus)
         curNode = edge[bus.pathTmp[curNode]].from;
     }
     std::reverse(bus.path.begin(), bus.path.end());
+}
+
+// 根据 expectedAllocationPressure 对加载业务的顺序进行排序
+void Solution::sortBus()
+{
+    sortedBusIndices.resize(T);
+    for (int i = 0; i < T; ++i)
+        sortedBusIndices[i] = i;
+    if (!forSortBus)
+        return;
+    // 根据 expectedAllocationPressure 进行排序
+    sort(sortedBusIndices.begin(), sortedBusIndices.end(), [&](int a, int b) {
+        // 匿名 lambda 函数作为比较函数
+        return [&](int a, int b) {
+            // 如果 a 和 b 满足相邻条件，则优先满足相邻条件
+            if ((buses[a].start == buses[b].start && buses[a].end == buses[b].end) || (buses[a].start == buses[b].end && buses[a].end == buses[b].start))
+                return false; // 保持相邻
+            // 否则按照 expectedAllocationPressure 进行降序排序
+            return buses[a].expectedAllocationPressure > buses[b].expectedAllocationPressure;
+            }(a, b);
+        });
 }

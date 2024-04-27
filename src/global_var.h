@@ -19,5 +19,5 @@ extern Edge edge[Configure::maxM];					// 边集数组
 extern Business buses[Configure::maxBus];			// 业务数组
 extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minDist;		// 两个节点之间的最小距离
 extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;	// 两个节点之间经过的最下边数
-
+extern vector<int> sortedBusIndices;	// 业务按照期望分配压力排序后的索引
 #endif    

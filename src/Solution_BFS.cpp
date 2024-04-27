@@ -314,7 +314,7 @@ void Solution::BFS_detectMinPathSize(Business& bus)
     minPathSize[make_pair(start, end)] = curDis;
 }
 
-
+// 在不考虑通道堵塞的情况下，对业务Bus进行路径分配，以统计每条边的使用次数（edge[edgeId].statisticCnt）
 void Solution::BFS_busStatistic(Business& bus)
 {
     int start = bus.start, end = bus.end;
