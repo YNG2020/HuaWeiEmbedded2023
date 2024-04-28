@@ -207,7 +207,33 @@ void outputForFile()
                 myCout << endl;
         }
     }
+    myCout.close();
     std::cerr << "Total Cost = " << n * 1000000 + totM * 100 + totP << "\n";
+    // 以下输出边集数组的每条边（原有边和新加入的边）的通道分配情况
+    ofstream myCout1("businessInPile.txt");
+    if (!myCout1.is_open())
+    {
+        return;
+    }
+    for (int i = 0; i < M; ++i)
+    {
+        myCout1 << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].usedPileCnt << " ";
+        for (int j = 0; j < P; ++j)
+        {
+            myCout1 << edge[i * 2].Pile[j] << " ";
+        }
+        myCout1 << endl;
+    }
+    for (int i = 0; i < newEdge.size(); ++i)
+    {
+        myCout1 << edge[newEdgePathID[i] * 2].from << " " << edge[newEdgePathID[i] * 2].to << " " << edge[newEdgePathID[i] * 2].usedPileCnt << " ";
+        for (int j = 0; j < P; ++j)
+        {
+			myCout1 << edge[newEdgePathID[i] * 2].Pile[j] << " ";
+		}
+		myCout1 << endl;
+	}
+    myCout1.close();
 }
 
 // 输出业务在网络上的分布的统计结果
@@ -222,4 +248,31 @@ void outputStatistic()
     {
         myCout << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].statisticCnt << endl;
 	}
+	myCout.close();
+
+    ofstream myCout1("businessMinPath.txt");
+    if (!myCout1.is_open())
+    {
+        return;
+    }
+    for (int i = 0; i < T; ++i)
+    {
+        int pSize = buses[i].pathStatistic.size();
+        myCout1 << pSize << " ";
+        for (int j = 0; j < pSize; ++j)
+        {
+            int pathID = buses[i].pathStatistic[j];
+
+            myCout1 << pathID;
+            if (j == pSize - 1 && i != T - 1)
+            {
+                myCout1 << endl;
+            }
+            else if (j != pSize - 1)
+            {
+                myCout1 << " ";
+            }
+        }
+    }
+    myCout1.close();
 }

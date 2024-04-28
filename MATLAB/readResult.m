@@ -1,4 +1,4 @@
-function [totCost, edgeStat, sortedEdgeStat] = readResult()
+function [totCost, edgeStat, sortedEdgeStat, edgePile, businessPassEdgeID, businessMinPath] = readResult()
     % 读取原始光网络
     fileID = fopen('dataMATLAB.txt', 'r');
     
@@ -11,6 +11,9 @@ function [totCost, edgeStat, sortedEdgeStat] = readResult()
     % 创建边集统计数组，第i行依次存储某条重边的起点、终点、重边上的业务数，重边数，边上通道的利用率
     edgeStat = zeros(M, 5);
     edgeStat(:, 4) = 1;
+
+    % 记录每个业务经过的边的编号
+    businessPassEdgeID = cell(T, 1);
     
     % 读取每个业务的数据
     for j = 1 : M
@@ -57,6 +60,7 @@ function [totCost, edgeStat, sortedEdgeStat] = readResult()
         totM = totM + m;
         totN = totN + n;
         edgePassed = fscanf(fileID, '%d', m); % 读取经过的边的编号
+        businessPassEdgeID{i, 1} = edgePassed;
         for j = 1 : m
             edgeID = edgePassed(j);         % 此处边的编号从0开始，需要做适应MATLAB的适配
             oriEdgeID = edgeID;             % 记录边的原本的编号
@@ -112,5 +116,27 @@ function [totCost, edgeStat, sortedEdgeStat] = readResult()
     % 关闭文件
     fclose(fileID);
     sortedEdgeStat = sortrows(edgeStat, [-4 5 3 1 2]);
+
+    % 读取每条边上的通道的使用情况，前三个数是边的起点，终点，使用的边数，剩下的P个数是占用某个通道的业务编号
+    edgePile = zeros(M + newEdgesCnt, 3 + P);
+    fileID = fopen('businessInPile.txt', 'r');
+    for i = 1 : M + newEdgesCnt
+        tmp = fscanf(fileID, '%d', 3 + P);
+        edgePile(i, 1) = tmp(1);
+        edgePile(i, 2) = tmp(2);
+        edgePile(i, 3) = tmp(3);
+        edgePile(i, 4 : 3 + P) = tmp(4 : 3 + P);
+    end
+    fclose(fileID);
+
+    % 记录每个业务在不考虑通道堵塞的条件下经过的边的编号
+    fileID = fopen('businessMinPath.txt', 'r');
+    businessMinPath = cell(T, 1);
+    for i = 1 : T
+        m = fscanf(fileID, '%d', 1); % 读取每一个业务的经过的最小边的数量
+        edgePassed = fscanf(fileID, '%d', m); % 读取经过的边的编号
+        businessMinPath{i, 1} = edgePassed;
+    end
+    fclose(fileID);
 end
 

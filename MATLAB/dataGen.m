@@ -55,6 +55,7 @@ function [dataGenArgs] = dataGen()
     if args.isVisualization
         CyclizedMST = figure("Name", "Cyclized MST");
         hold on
+        nEdge = size(edge, 1);
         for i = 1 : nEdge
             plot([flatNodeArray{edge(i, 1) + 1}.x, flatNodeArray{edge(i, 2) + 1}.x], ...
             [flatNodeArray{edge(i, 1) + 1}.y, flatNodeArray{edge(i, 2) + 1}.y], ...
@@ -153,5 +154,5 @@ function [dataGenArgs] = dataGen()
 
     %% 返回随机数据的参数
     dataGenArgs = args;
-
+    save dataGenArgs.mat
 end

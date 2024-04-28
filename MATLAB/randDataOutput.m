@@ -14,8 +14,8 @@ function [] = randDataOutput(args, allEdge, buses)
         fprintf(fileID, '%d %d %d %d %d\n', args.N, args.M, args.T, args.P, args.D);
         
         % 写入边数据
-        for i = 1 : args.M
-            fprintf(fileID, '%d %d %d\n', allEdge(i, 1), allEdge(i, 2), allEdge(i, 3));
+        for j = 1 : args.M
+            fprintf(fileID, '%d %d %d\n', allEdge(j, 1), allEdge(j, 2), allEdge(j, 3));
         end
         
         % 写入业务数据

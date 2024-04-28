@@ -19,7 +19,7 @@ function [BusinessAllocation] = plotOverview(edgeStat)
 
     for k = 1 : 4 
         nexttile
-        if k >= 2
+        if k >= 3
             maxVal = max(edgeStat(:, 2 + k - 1));
         else
             maxVal = max(busStatistic(:, 3));
