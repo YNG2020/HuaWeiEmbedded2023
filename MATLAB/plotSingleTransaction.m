@@ -1,7 +1,7 @@
-function [singleBusinsee] = plotSingleBusiness(edgeStat, edgePile, edgePassed1, edgePassed2)
+function [singleTraninsee] = plotSingleTransaction(edgeStat, edgePile, edgePassed1, edgePassed2)
     load flatNodeArray.mat flatNodeArray
     M = size(edgeStat, 1);
-    singleBusinsee = figure("Name", "Single Businsee");
+    singleTraninsee = figure("Name", "Single Traninsee");
     hold on
     for i = 1 : M
         plot([flatNodeArray{edgeStat(i, 1) + 1}.x, flatNodeArray{edgeStat(i, 2) + 1}.x], ...

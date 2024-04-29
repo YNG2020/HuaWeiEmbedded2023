@@ -1,4 +1,4 @@
-function [] = randDataOutput(args, allEdge, buses)
+function [] = randDataOutput(args, allEdge, trans)
 
     outputLocation{1} = "dataMATLAB.txt";
     outputLocation{2} = "..\build\x64-Release\dataMATLAB.txt";
@@ -20,7 +20,7 @@ function [] = randDataOutput(args, allEdge, buses)
         
         % 写入业务数据
         for j = 1 : args.T
-            fprintf(fileID, '%d %d\n', buses(j, 1), buses(j, 2));
+            fprintf(fileID, '%d %d\n', trans(j, 1), trans(j, 2));
         end
         
         % 关闭文件

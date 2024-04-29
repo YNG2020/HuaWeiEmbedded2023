@@ -37,18 +37,18 @@ public:
 
 };
 
-class Business {
+class Transaction {
 public:
     int start;  // 业务起点
     int end;    // 业务终点
-    int busID;  // 业务ID
+    int tranID;  // 业务ID
     int curA;   // 当前信号强度
     int expectedAllocationPressure; // 期望分配压力，值为该业务的pathStatistic上经过的边的statisticCnt之和
-    Business()
+    Transaction()
     {
         start = -1;
         end = -1;
-        busID = -1;
+        tranID = -1;
         curA = 0;
         pileID = -1;
         expectedAllocationPressure = 0;

@@ -86,13 +86,13 @@ function [dataGenArgs] = dataGen()
         axis equal
     end
     %% 随机生成业务
-    buses = generateBusiness(args, flatNodeArray, nodeArray);
+    trans = generateTransaction(args, flatNodeArray, nodeArray);
     %% 输出生成的随机数据
-    randDataOutput(args, allEdge, buses);
+    randDataOutput(args, allEdge, trans);
     %% 读入业务路径（不考虑通道堵塞，此处仅展示业务的分布）
     system('getMinPath.exe');
     % 打开文件
-    fileID = fopen('businessAllocation.txt', 'r');
+    fileID = fopen('transactionAllocation.txt', 'r');
     
     % 读取第一行
     T = fscanf(fileID, '%d', 1);
@@ -117,7 +117,7 @@ function [dataGenArgs] = dataGen()
     if args.isVisualization
         maxUsedEdgeCnt = max(usedEdgeCnt(:, 3));
         cmap = turbo(maxUsedEdgeCnt + 1); % 定义颜色映射（可以根据实际需求选择其他颜色映射）
-        BusinessAllocation = figure("Name", "Business allocation situation");
+        TransactionAllocation = figure("Name", "Transaction allocation situation");
         hold on
         % 绘制每条边
         for i = 1 : args.M
@@ -149,7 +149,7 @@ function [dataGenArgs] = dataGen()
         exportgraphics(SelectedNodes, 'SelectedNodes.png', 'Resolution', 600);
         exportgraphics(MST, 'MST.png', 'Resolution', 600);
         exportgraphics(CyclizedMST, 'CyclizedMST.png', 'Resolution', 600);
-        exportgraphics(BusinessAllocation, 'BusinessAllocation.png', 'Resolution', 600);
+        exportgraphics(TransactionAllocation, 'TransactionAllocation.png', 'Resolution', 600);
     end
 
     %% 返回随机数据的参数

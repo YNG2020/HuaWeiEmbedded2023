@@ -41,8 +41,8 @@ function [UsedPile] = plotUsedPile(edgePile, edgePassed)
     ax.YLim = [0 p];
     
     % 设置图表标题和坐标轴标签
-    xlabel('边编号', 'FontSize', 13);
-    ylabel('通道编号', 'FontSize', 13);
+    xlabel('Edge ID', 'FontSize', 13);
+    ylabel('Pile ID', 'FontSize', 13);
     
     % 显示图表
     hold off;

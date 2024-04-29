@@ -1,20 +1,20 @@
-function [BusinessAllocation] = plotOverview(edgeStat)
+function [TransactionAllocation] = plotOverview(edgeStat)
     load flatNodeArray.mat flatNodeArray
     load flatNodeArray.mat nodeArray
     load flatNodeArray.mat args
 
-    BusinessAllocation = figure("Name", "Edge Statistic");
+    TransactionAllocation = figure("Name", "Edge Statistic");
     % screen_size = get(groot, 'ScreenSize');
     % window_position = [screen_size(1) + 0 * screen_size(3), screen_size(2) + 0 * screen_size(4)];
     % window_size = [1.0 * screen_size(3), 1.0 * screen_size(4)];
-    % set(BusinessAllocation, 'Position', [window_position, window_size]);
+    % set(TransactionAllocation, 'Position', [window_position, window_size]);
     set(gcf, 'WindowState', 'maximized');
     tiledlayout(2, 2, "TileSpacing", "none");
 
-    busStatistic = zeros(size(edgeStat, 1), 3);
-    fileID = fopen('businessStatistic.txt', 'r');
+    tranStatistic = zeros(size(edgeStat, 1), 3);
+    fileID = fopen('transactionStatistic.txt', 'r');
     for i = 1 : size(edgeStat, 1)
-        busStatistic(i, :) = fscanf(fileID, '%d', 3);
+        tranStatistic(i, :) = fscanf(fileID, '%d', 3);
     end
 
     for k = 1 : 4 
@@ -22,7 +22,7 @@ function [BusinessAllocation] = plotOverview(edgeStat)
         if k >= 3
             maxVal = max(edgeStat(:, 2 + k - 1));
         else
-            maxVal = max(busStatistic(:, 3));
+            maxVal = max(tranStatistic(:, 3));
         end
         cmap = turbo(maxVal + 1); % 定义颜色映射（可以根据实际需求选择其他颜色映射）
         hold on
@@ -32,7 +32,7 @@ function [BusinessAllocation] = plotOverview(edgeStat)
             if k >= 2
                 colorIndex = edgeStat(i, 2 + k - 1) + 1;
             else
-                colorIndex = busStatistic(i, 3) + 1;
+                colorIndex = tranStatistic(i, 3) + 1;
             end
             color = cmap(colorIndex, :);
             lineWidth = 1 + 3 * ((colorIndex + 1) / (maxVal + 1));
