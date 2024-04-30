@@ -17,6 +17,7 @@ int main()
     else                        // 用于本地测试
         inputFromFile();
 
+
     Solution solution;
     solution.runStrategy();     // 运行总策略
 

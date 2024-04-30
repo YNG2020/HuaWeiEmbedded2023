@@ -32,8 +32,8 @@ function [singleTransaction, figureUsedPile] = ...
 
     fig1 = get(ax1, 'children'); % get handle to all the children in the figure
     fig2 = get(ax2, 'children');
-    copyobj(fig1,s1); %copy children to new parent axes i.e. the subplot axes
-    copyobj(fig2,s2);
+    copyobj(fig1,s1); % copyobj creates copies of graphics objects and assigns the objects to the new parent.
+    copyobj(fig2,s2); % copyobj does not copy properties
     close(UsedPile1);
     close(UsedPile2);
 

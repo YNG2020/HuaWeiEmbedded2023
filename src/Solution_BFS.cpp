@@ -17,6 +17,8 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
     bool findPath = false;
     int minPathDist = Configure::INF;
     int choosenP = -1;
+    if (tran.tranID == 473)
+        int a = 1;
 
     // P个编号的通道都搜索一次
     for (int p = 0; p < P; ++p)
@@ -357,15 +359,15 @@ void Solution::BFS_tranStatistic(Transaction& tran)
     while (tran.pathTmp[curNode] != -1)
     {
         int edgeId = tran.pathTmp[curNode];  // 存储于edge数组中真正的边的Id
-        tran.pathStatistic.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
+        tran.path.push_back(edgeId / 2); // edgeId / 2是为了适应题目要求
         curNode = edge[edgeId].from;
     }
-    std::reverse(tran.pathStatistic.begin(), tran.pathStatistic.end());
-    for (int i = 0; i < tran.pathStatistic.size(); ++i)
+    std::reverse(tran.path.begin(), tran.path.end());
+    for (int i = 0; i < tran.path.size(); ++i)
     {
-        int edgeId = tran.pathStatistic[i];
+        int edgeId = tran.path[i];
         edgeId = edgeId * 2;
-		++edge[edgeId].statisticCnt;
-		++edge[edgeId + 1].statisticCnt;
+		++edge[edgeId].usedPileCnt;
+		++edge[edgeId + 1].usedPileCnt;
     }
 }

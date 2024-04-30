@@ -63,6 +63,15 @@ void inputFromJudger()
         std::cin >> Sj >> Tj;
         addTran(Sj, Tj); // 添加业务
     }
+    for (int i = 0; i < M; ++i)
+    {
+        oriHead[i] = head[i];
+    }
+    for (int i = 0; i < cntEdge; ++i)
+    {
+		oriEdge[i] = edge[i];
+    }
+    oriCntEdge = cntEdge;
 }
 
 // 文件输入流，用于文件
@@ -97,6 +106,15 @@ void inputFromFile()
         myCin >> Sj >> Tj;
         addTran(Sj, Tj); // 添加业务
     }
+    for (int i = 0; i < M; ++i)
+    {
+        oriHead[i] = head[i];
+    }
+    for (int i = 0; i < cntEdge; ++i)
+    {
+        oriEdge[i] = edge[i];
+    }
+    oriCntEdge = cntEdge;
 }
 
 // 标准输出流，用于判题器
@@ -246,7 +264,7 @@ void outputStatistic()
 	}
     for (int i = 0; i < M; ++i)
     {
-        myCout << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].statisticCnt << endl;
+        myCout << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].usedPileCnt << endl;
 	}
 	myCout.close();
 
@@ -257,11 +275,11 @@ void outputStatistic()
     }
     for (int i = 0; i < T; ++i)
     {
-        int pSize = trans[i].pathStatistic.size();
+        int pSize = trans[i].path.size();
         myCout1 << pSize << " ";
         for (int j = 0; j < pSize; ++j)
         {
-            int pathID = trans[i].pathStatistic[j];
+            int pathID = trans[i].path[j];
 
             myCout1 << pathID;
             if (j == pSize - 1 && i != T - 1)

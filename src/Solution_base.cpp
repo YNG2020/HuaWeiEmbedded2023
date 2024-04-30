@@ -18,14 +18,23 @@ Solution::Solution()
 // 光线扩容难题总策略
 void Solution::runStrategy()
 {
-    // 首先获取业务路径（不考虑通道堵塞）在光网络上的分布情况
-    runStatistic();
+    for (int i = 0; i < T; ++i)
+        BFS_detectMinPathSize(trans[i]);        // 先找到最短路径的长度，以便于后续的路径长度限制
+    for (int i = 0; i < T; ++i)
+        BFS_tranStatistic(trans[i]);
     if (Configure::forStatisticOutput && !Configure::forJudger)
-    {   
         outputStatistic();
-    }
-    sortTran();  // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
+    
+    sumUptheAllocationPressure();     // 求和分配光业务时，每条光业务的期望分配压力
+    sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
+    resetEverything();      // 把加载光业务对网络的影响全部清除
+    preAllocateTran();      // 初分配
+
+    sumUptheAllocationPressure();
+    sortTran();
+    resetEverything();
     preAllocateTran();
+
     tryDeleteEdge();
 
     if (forIter)
@@ -49,19 +58,18 @@ void Solution::runStrategy()
 }
 
 // 对业务路径在网络上的分布做一个统计（不考虑通道编号限制）
-void Solution::runStatistic()
+void Solution::sumUptheAllocationPressure()
 {
-    for (int i = 0; i < T; ++i)
-		BFS_tranStatistic(trans[i]);
     for (int i = 0; i < T; ++i)
     {
         Transaction& tran = trans[i];
-        int pathSize = tran.pathStatistic.size();
+        int pathSize = tran.path.size();
         for (int j = 0; j < pathSize; ++j)
         {
-            tran.expectedAllocationPressure += (edge[tran.pathStatistic[j] * 2].statisticCnt % P);
+            tran.expectedAllocationPressure += (edge[tran.path[j] * 2].usedPileCnt %  (1 * P));
         }
-        //tran.expectedAllocationPressure = tran.pathStatistic.size();
+        //tran.expectedAllocationPressure = tran.path.size();
+        //tran.expectedAllocationPressure = 1;
     }
 }
 
@@ -255,7 +263,6 @@ void Solution::tryDeleteEdge()
 // 把业务tranID加载到光网络中
 void Solution::loadTran(int tranID, bool ifTryDeleteEdge)
 {
-    BFS_detectMinPathSize(trans[tranID]);        // 先找到最短路径的长度，以便于后续的路径长度限制
     BFS_loadTran(trans[tranID], ifTryDeleteEdge); // 加载业务到光网络中
     loadMultiplier(tranID);                      // 加载放大器到业务上
 }
@@ -387,8 +394,8 @@ void Solution::sortTran()
 {   // 在业务分配的后期，加边是一定要加的。应该思考，在需要加边时，如何优化加载业务的顺序，使得加边的数目最少。
     sortedTranIndices.resize(T);
     for (int i = 0; i < T; ++i)
-
         sortedTranIndices[i] = i;
+
     if (!forSortTran)
         return;
     // 根据 expectedAllocationPressure 进行排序
@@ -402,4 +409,35 @@ void Solution::sortTran()
             return trans[a].expectedAllocationPressure > trans[b].expectedAllocationPressure;
             }(a, b);
         });
+}
+
+// 把加载光业务对网络的影响全部清除
+void Solution::resetEverything()
+{
+    for (int i = 0; i < cntEdge; ++i)
+    {
+        edge[i].usedPileCnt = 0;
+        for (int j = 0; j < P; ++j)
+            edge[i].Pile[j] = -1;
+    }
+    for (int i = 0; i < cntTran; ++i)
+    {
+        trans[i].expectedAllocationPressure = 0;
+        trans[i].path.clear();
+        trans[i].mutiplierID.clear();
+        trans[i].curA = D;
+        trans[i].pileID = -1;
+        trans[i].pathTmp.clear();
+    }
+    newEdge.clear();
+    newEdgePathID.clear();
+    for (int i = 0; i < M; ++i)
+    {
+        head[i] = oriHead[i];
+    }
+    for (int i = 0; i < cntEdge; ++i)
+    {
+        edge[i] = oriEdge[i];
+    }
+    cntEdge = oriCntEdge;
 }
