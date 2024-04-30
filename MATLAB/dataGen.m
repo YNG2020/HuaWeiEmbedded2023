@@ -3,6 +3,7 @@ function [dataGenArgs] = dataGen()
     args = dataGenConfigure();
     %% 生成随机节点
     [nodeArray, flatNodeArray] = nodeCreated(args);
+    save flatNodeArray.mat
     
     if args.isVisualization
         SelectedNodes = figure("Name", "Selected Nodes");
@@ -23,7 +24,7 @@ function [dataGenArgs] = dataGen()
     end
     %% 求得相应的最小生成树
     startNode = 0;
-    edge = Prim(args, flatNodeArray, startNode);
+    edge = Prim(args, flatNodeArray, startNode);    % edge数组的第i行存储第i条边的起点、终点、距离
 
     if args.isVisualization
         nEdge = size(edge, 1);
@@ -54,6 +55,7 @@ function [dataGenArgs] = dataGen()
     if args.isVisualization
         CyclizedMST = figure("Name", "Cyclized MST");
         hold on
+        nEdge = size(edge, 1);
         for i = 1 : nEdge
             plot([flatNodeArray{edge(i, 1) + 1}.x, flatNodeArray{edge(i, 2) + 1}.x], ...
             [flatNodeArray{edge(i, 1) + 1}.y, flatNodeArray{edge(i, 2) + 1}.y], ...
@@ -84,13 +86,13 @@ function [dataGenArgs] = dataGen()
         axis equal
     end
     %% 随机生成业务
-    buses = generateBusiness(args, flatNodeArray, nodeArray);
+    trans = generateTransaction(args, flatNodeArray, nodeArray);
     %% 输出生成的随机数据
-    randDataOutput(args, allEdge, buses);
+    randDataOutput(args, allEdge, trans);
     %% 读入业务路径（不考虑通道堵塞，此处仅展示业务的分布）
     system('getMinPath.exe');
     % 打开文件
-    fileID = fopen('businessAllocation.txt', 'r');
+    fileID = fopen('transactionAllocation.txt', 'r');
     
     % 读取第一行
     T = fscanf(fileID, '%d', 1);
@@ -115,7 +117,7 @@ function [dataGenArgs] = dataGen()
     if args.isVisualization
         maxUsedEdgeCnt = max(usedEdgeCnt(:, 3));
         cmap = turbo(maxUsedEdgeCnt + 1); % 定义颜色映射（可以根据实际需求选择其他颜色映射）
-        BusinessAllocation = figure("Name", "Business allocation situation");
+        TransactionAllocation = figure("Name", "Transaction allocation situation");
         hold on
         % 绘制每条边
         for i = 1 : args.M
@@ -147,10 +149,10 @@ function [dataGenArgs] = dataGen()
         exportgraphics(SelectedNodes, 'SelectedNodes.png', 'Resolution', 600);
         exportgraphics(MST, 'MST.png', 'Resolution', 600);
         exportgraphics(CyclizedMST, 'CyclizedMST.png', 'Resolution', 600);
-        exportgraphics(BusinessAllocation, 'BusinessAllocation.png', 'Resolution', 600);
+        exportgraphics(TransactionAllocation, 'TransactionAllocation.png', 'Resolution', 600);
     end
 
     %% 返回随机数据的参数
     dataGenArgs = args;
-
+    save dataGenArgs.mat
 end

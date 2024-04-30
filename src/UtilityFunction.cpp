@@ -9,6 +9,7 @@
 // 加边函数，s起点，t终点，d距离
 void addEdge(int s, int t, int d)
 {
+    edge[cntEdge].edgeID = cntEdge;  // 边的编号
     edge[cntEdge].from = s; // 起点
     edge[cntEdge].to = t;   // 终点
     edge[cntEdge].d = 1;    // 距离
@@ -24,16 +25,16 @@ void addEdge(int s, int t, int d)
 }
 
 // 加业务函数
-void addBus(int start, int end)
+void addTran(int start, int end)
 {
-    buses[cntBus].start = start;
-    buses[cntBus].end = end;
-    buses[cntBus].busID = cntBus;
-    buses[cntBus].curA = D;
-    vector<int>().swap(buses[cntBus].path);
-    vector<int>().swap(buses[cntBus].pathTmp);
-    vector<int>().swap(buses[cntBus].mutiplierID);
-    ++cntBus;
+    trans[cntTran].start = start;
+    trans[cntTran].end = end;
+    trans[cntTran].tranID = cntTran;
+    trans[cntTran].curA = D;
+    vector<int>().swap(trans[cntTran].path);
+    vector<int>().swap(trans[cntTran].pathTmp);
+    vector<int>().swap(trans[cntTran].mutiplierID);
+    ++cntTran;
 }
 
 // 标准输入流，用于判题器
@@ -60,7 +61,7 @@ void inputFromJudger()
     int Sj, Tj;
     for (int i = 0; i < T; ++i) {
         std::cin >> Sj >> Tj;
-        addBus(Sj, Tj); // 添加业务
+        addTran(Sj, Tj); // 添加业务
     }
 }
 
@@ -94,7 +95,7 @@ void inputFromFile()
     int Sj, Tj;
     for (int i = 0; i < T; ++i) {
         myCin >> Sj >> Tj;
-        addBus(Sj, Tj); // 添加业务
+        addTran(Sj, Tj); // 添加业务
     }
 }
 
@@ -118,13 +119,13 @@ void outputForJudger()
         std::cout << newEdge[i].first << " " << newEdge[i].second << endl;
     }
     for (int i = 0; i < T; ++i) {
-        int pSize = buses[i].path.size();
-        int mSize = buses[i].mutiplierID.size();
+        int pSize = trans[i].path.size();
+        int mSize = trans[i].mutiplierID.size();
 
-        std::cout << buses[i].pileID << " " << pSize << " " << mSize << " ";
+        std::cout << trans[i].pileID << " " << pSize << " " << mSize << " ";
         for (int j = 0; j < pSize; ++j)
         {
-            int pathID = buses[i].path[j];
+            int pathID = trans[i].path[j];
             if (pathID >= M)
                 pathID = newEdgeMap[pathID];
 
@@ -140,8 +141,8 @@ void outputForJudger()
         }
         for (int j = 0; j < mSize; ++j)
         {
-            std::cout << buses[i].mutiplierID[j];
-            if (j < buses[i].mutiplierID.size() - 1)
+            std::cout << trans[i].mutiplierID[j];
+            if (j < trans[i].mutiplierID.size() - 1)
                 std::cout << " ";
             else if (j == mSize - 1 && i != T - 1)
                 std::cout << endl;
@@ -175,15 +176,15 @@ void outputForFile()
     }
     int totP = 0, totM = 0;
     for (int i = 0; i < T; ++i) {
-        int pSize = buses[i].path.size();
-        int mSize = buses[i].mutiplierID.size();
+        int pSize = trans[i].path.size();
+        int mSize = trans[i].mutiplierID.size();
         totP += pSize;
         totM += mSize;
 
-        myCout << buses[i].pileID << " " << pSize << " " << mSize << " ";
+        myCout << trans[i].pileID << " " << pSize << " " << mSize << " ";
         for (int j = 0; j < pSize; ++j)
         {
-            int pathID = buses[i].path[j];
+            int pathID = trans[i].path[j];
             if (pathID >= M)
                 pathID = newEdgeMap[pathID];
 
@@ -199,12 +200,79 @@ void outputForFile()
         }
         for (int j = 0; j < mSize; ++j)
         {
-            myCout << buses[i].mutiplierID[j];
-            if (j < buses[i].mutiplierID.size() - 1)
+            myCout << trans[i].mutiplierID[j];
+            if (j < trans[i].mutiplierID.size() - 1)
                 myCout << " ";
             else if (j == mSize - 1 && i != T - 1)
                 myCout << endl;
         }
     }
+    myCout.close();
     std::cerr << "Total Cost = " << n * 1000000 + totM * 100 + totP << "\n";
+    // 以下输出边集数组的每条边（原有边和新加入的边）的通道分配情况
+    ofstream myCout1("transactionInPile.txt");
+    if (!myCout1.is_open())
+    {
+        return;
+    }
+    for (int i = 0; i < M; ++i)
+    {
+        myCout1 << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].usedPileCnt << " ";
+        for (int j = 0; j < P; ++j)
+        {
+            myCout1 << edge[i * 2].Pile[j] << " ";
+        }
+        myCout1 << endl;
+    }
+    for (int i = 0; i < newEdge.size(); ++i)
+    {
+        myCout1 << edge[newEdgePathID[i] * 2].from << " " << edge[newEdgePathID[i] * 2].to << " " << edge[newEdgePathID[i] * 2].usedPileCnt << " ";
+        for (int j = 0; j < P; ++j)
+        {
+			myCout1 << edge[newEdgePathID[i] * 2].Pile[j] << " ";
+		}
+		myCout1 << endl;
+	}
+    myCout1.close();
+}
+
+// 输出业务在网络上的分布的统计结果
+void outputStatistic()
+{
+	ofstream myCout("transactionStatistic.txt");
+    if (!myCout.is_open())
+    {
+        return;
+	}
+    for (int i = 0; i < M; ++i)
+    {
+        myCout << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].statisticCnt << endl;
+	}
+	myCout.close();
+
+    ofstream myCout1("transactionMinPath.txt");
+    if (!myCout1.is_open())
+    {
+        return;
+    }
+    for (int i = 0; i < T; ++i)
+    {
+        int pSize = trans[i].pathStatistic.size();
+        myCout1 << pSize << " ";
+        for (int j = 0; j < pSize; ++j)
+        {
+            int pathID = trans[i].pathStatistic[j];
+
+            myCout1 << pathID;
+            if (j == pSize - 1 && i != T - 1)
+            {
+                myCout1 << endl;
+            }
+            else if (j != pSize - 1)
+            {
+                myCout1 << " ";
+            }
+        }
+    }
+    myCout1.close();
 }

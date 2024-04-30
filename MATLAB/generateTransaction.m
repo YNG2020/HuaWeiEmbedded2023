@@ -1,7 +1,7 @@
-function buses = generateBusiness(args, flatNodeArray, nodeArray)
+function trans = generateTransaction(args, flatNodeArray, nodeArray)
     cellDist = zeros(args.nCell, args.nCell);
     nXCell = (args.spaceLimX2 - args.spaceLimX1 - args.cellX) / (args.cellX + args.cellXGap) + 1;
-    buses = zeros(args.TMAX, 2);
+    trans = zeros(args.TMAX, 2);
     
     for i = 1 : args.nCell
         cellID1 = i;
@@ -21,22 +21,22 @@ function buses = generateBusiness(args, flatNodeArray, nodeArray)
     end
     [~, cellDistSortedIDx] = sort(cellDist, 2, 'ascend');
     rng(args.randomSeed);
-    businessCnt = 0;
+    transactionCnt = 0;
     rngSeedCnt = randi(86400);
     for i = 1 : length(flatNodeArray)
         nodeID1 = flatNodeArray{1, i}.nodeID;
         cellID1 = flatNodeArray{1, i}.cellID;
         [nodeID2, rngSeedCnt] = getNodeIDAccordingDistMode(args, cellDistSortedIDx, nodeArray, cellID1, rngSeedCnt, nodeID1);
         rng(args.randomSeed + rngSeedCnt);
-        nRepeated = ceil(randi(args.P) * args.businessPressure * 0.5);
+        nRepeated = ceil(randi(args.P) * args.transactionPressure * 0.5);
         for j = 1 : nRepeated
-            businessCnt = businessCnt + 1;
-            buses(businessCnt, 1) = nodeID1;
-            buses(businessCnt, 2) = nodeID2;
+            transactionCnt = transactionCnt + 1;
+            trans(transactionCnt, 1) = nodeID1;
+            trans(transactionCnt, 2) = nodeID2;
         end
     end
-    buses = buses(1:businessCnt, :);
-    args.T = businessCnt;
+    trans = trans(1:transactionCnt, :);
+    args.T = transactionCnt;
 end
 
 function [nodeID2, rngSeedCnt] = getNodeIDAccordingDistMode(args, cellDistSortedIDx, nodeArray, cellID1, rngSeedCnt, nodeID1)

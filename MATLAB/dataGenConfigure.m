@@ -29,13 +29,13 @@ classdef dataGenConfigure < handle
         % 往光网络上添加光业务的参数
         p_distMode = [0.05, 0.3 0.35 0.2 0.1];
         num_distMode = 0;   % 交由Constructor初始化
-        businessPressure = 0.5; % 业务压力系数，控制着相同业务的重复次数，必须大于0小于1
+        transactionPressure = 0.5; % 业务压力系数，控制着相同业务的重复次数，必须大于0小于1
 
         % 控制是否展示对数据进行可视化
         isVisualization = true;
 
         % 控制是否保存图片
-        isSaveFigure = false; 
+        isSaveFigure = true; 
 
     end
 
@@ -46,8 +46,8 @@ classdef dataGenConfigure < handle
             generateD(this);
             generateP(this);
             this.num_distMode = length(this.p_distMode);
-            if this.businessPressure <= 0 || this.businessPressure >= 1
-                this.businessPressure = 0.1;
+            if this.transactionPressure <= 0 || this.transactionPressure >= 1
+                this.transactionPressure = 0.1;
             end
         end
 
