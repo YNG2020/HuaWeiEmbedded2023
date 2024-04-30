@@ -1,4 +1,4 @@
-function [UsedPile] = plotUsedPile(edgePile, edgePassed)
+function [UsedPile, ax] = plotUsedPile(edgePile, edgePassed)
     % plotUsedPile
     load dataGenArgs.mat args
     UsedPile = figure("Name", "UsedPile");

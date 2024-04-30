@@ -61,7 +61,7 @@ void Solution::runStatistic()
         {
             tran.expectedAllocationPressure += (edge[tran.pathStatistic[j] * 2].statisticCnt % P);
         }
-        tran.expectedAllocationPressure = tran.pathStatistic.size();
+        //tran.expectedAllocationPressure = tran.pathStatistic.size();
     }
 }
 

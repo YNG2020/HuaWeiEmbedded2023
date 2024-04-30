@@ -28,7 +28,7 @@ public:
 	vector<int> tmpOKPath;      // 用于存储在某个通道下找到的路径
 
 	// 策略参数
-	const bool forSortTran = true;		// 是否对加载业务进行排序
+	const bool forSortTran = false;		// 是否对加载业务进行排序
 	const bool forIter = false;			// 是否使用迭代策略
 	const bool forTryDeleteEdge = false;	// 是否尝试删除边
 	float pathSizeLimRatio = 3.0;			// 限制找到的路径长度相对于理论上的最短路径长度的倍数
