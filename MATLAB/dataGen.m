@@ -1,6 +1,7 @@
-function [dataGenArgs] = dataGen()
+function [dataGenArgs] = dataGen(randomSeed)
     %% 生成参数配置变量args    
     args = dataGenConfigure();
+    args.randomSeed = randomSeed;
     %% 生成随机节点
     [nodeArray, flatNodeArray] = nodeCreated(args);
     save flatNodeArray.mat
@@ -92,7 +93,7 @@ function [dataGenArgs] = dataGen()
     %% 读入业务路径（不考虑通道堵塞，此处仅展示业务的分布）
     system('getMinPath.exe');
     % 打开文件
-    fileID = fopen('transactionAllocation.txt', 'r');
+    fileID = fopen('businessAllocation.txt', 'r');
     
     % 读取第一行
     T = fscanf(fileID, '%d', 1);

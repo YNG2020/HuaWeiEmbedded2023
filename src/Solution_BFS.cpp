@@ -17,8 +17,6 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
     bool findPath = false;
     int minPathDist = Configure::INF;
     int choosenP = -1;
-    if (tran.tranID == 473)
-        int a = 1;
 
     // P个编号的通道都搜索一次
     for (int p = 0; p < P; ++p)
@@ -79,7 +77,7 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
     {   // 找不到路，需要构造新边
         if (ifTryDeleteEdge)
         {
-            if (/*++addNewEdgeCnt % 2 == 0 && */(tran.start != trans[tran.tranID - 1].start || tran.end != trans[tran.tranID - 1].end))   // 删边时机控制，不过度删边，不在添加相同的业务时删边
+            if (tran.start != trans[tran.tranID - 1].start || tran.end != trans[tran.tranID - 1].end)   // 删边时机控制，不过度删边，不在添加相同的业务时删边
                 tryDeleteEdge();
         }
         BFS_addNewEdge(tran);       // 只加最短路径上需要进行加边的边
@@ -275,47 +273,6 @@ void Solution::BFS_addNewEdge(Transaction& tran)
     std::reverse(tran.path.begin(), tran.path.end());
 }
 
-// 寻找业务tran的起点到终点的路径（不考虑通道堵塞），找出对某个业务而言所需路径的最小长度
-void Solution::BFS_detectMinPathSize(Transaction& tran)
-{
-    if (minPathSize.find(make_pair(tran.start, tran.end)) != minPathSize.end())   // 键已存在，直接返回
-        return;
-    // 相关寻路变量的初始化
-    int start = tran.start, end = tran.end;
-    int minBlockEdgeCnt = Configure::INF;                   // 记录不同通道编号下，对于某一个光业务的最短路径，该路径上已经被占用的边的最小数量
-    memset(vis, 0, sizeof(vis));                            // vis数组初始化
-    queue<SimpleNode> nodes;
-    nodes.emplace(start, 0);
-    vis[start] = true;
-    int from = start, to = -1, curDis = 0;
-
-    while (!nodes.empty() && to != end)
-    {
-        from = nodes.front().nodeID;
-        curDis = nodes.front().dis;
-        nodes.pop();
-
-        for (int i = head[from]; i != -1; i = edge[i].next)
-        {
-            to = edge[i].to;
-            if (vis[to])
-                continue;
-            vis[to] = true;
-
-            if (to == end)
-            {
-                from = to;
-                ++curDis;
-                break;
-            }
-            else
-                nodes.emplace(to, curDis + 1);
-        }
-
-    }
-    minPathSize[make_pair(start, end)] = curDis;
-}
-
 // 在不考虑通道堵塞的情况下，对业务Tran进行路径分配，以统计每条边的使用次数（edge[edgeId].statisticCnt）
 void Solution::BFS_tranStatistic(Transaction& tran)
 {
@@ -370,4 +327,5 @@ void Solution::BFS_tranStatistic(Transaction& tran)
 		++edge[edgeId].usedPileCnt;
 		++edge[edgeId + 1].usedPileCnt;
     }
+    minPathSize[make_pair(start, end)] = tran.path.size();
 }

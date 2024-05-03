@@ -1,5 +1,6 @@
 function [singleTransaction, figureUsedPile] = ...
     plotUsedPilewithMinPath(transactionID, transactionMinPath, transactionPassEdgeID, edgeStat, edgePile)
+    transactionID = transactionID + 1;
     edgePassed1 = transactionMinPath{transactionID};
     [UsedPile1, ax1] = plotUsedPile(edgePile, edgePassed1);
     edgePassed2 = transactionPassEdgeID{transactionID};

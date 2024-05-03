@@ -17,24 +17,27 @@ Solution::Solution()
 
 // 光线扩容难题总策略
 void Solution::runStrategy()
-{
+{  
     for (int i = 0; i < T; ++i)
-        BFS_detectMinPathSize(trans[i]);        // 先找到最短路径的长度，以便于后续的路径长度限制
-    for (int i = 0; i < T; ++i)
-        BFS_tranStatistic(trans[i]);
+        BFS_tranStatistic(trans[i]);    // 先找到最短路径及其长度，并统计每条边的使用次数（edge[edgeId].statisticCnt）
     if (Configure::forStatisticOutput && !Configure::forJudger)
         outputStatistic();
+    sortedTranIndices.resize(T);
+    for (int i = 0; i < T; ++i)
+        sortedTranIndices[i] = i;
     
     sumUptheAllocationPressure();     // 求和分配光业务时，每条光业务的期望分配压力
     sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
     resetEverything();      // 把加载光业务对网络的影响全部清除
     preAllocateTran();      // 初分配
 
-    sumUptheAllocationPressure();
-    sortTran();
-    resetEverything();
-    preAllocateTran();
+    //sumUptheAllocationPressure();
+    //sortTran();
+    //resetEverything();
+    //preAllocateTran();
 
+    forTryDeleteEdge = false;
+    tryDeleteEdge();
     tryDeleteEdge();
 
     if (forIter)
@@ -63,13 +66,8 @@ void Solution::sumUptheAllocationPressure()
     for (int i = 0; i < T; ++i)
     {
         Transaction& tran = trans[i];
-        int pathSize = tran.path.size();
-        for (int j = 0; j < pathSize; ++j)
-        {
-            tran.expectedAllocationPressure += (edge[tran.path[j] * 2].usedPileCnt %  (1 * P));
-        }
-        //tran.expectedAllocationPressure = tran.path.size();
-        //tran.expectedAllocationPressure = 1;
+        tran.expectedAllocationPressure = tran.path.size();
+        //tran.expectedAllocationPressure = (tran.path.size() + tran.path.size() - minPathSize[make_pair(tran.start, tran.end)]);
     }
 }
 
@@ -392,10 +390,6 @@ void Solution::backtrackPath(Transaction& tran)
 // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
 void Solution::sortTran()
 {   // 在业务分配的后期，加边是一定要加的。应该思考，在需要加边时，如何优化加载业务的顺序，使得加边的数目最少。
-    sortedTranIndices.resize(T);
-    for (int i = 0; i < T; ++i)
-        sortedTranIndices[i] = i;
-
     if (!forSortTran)
         return;
     // 根据 expectedAllocationPressure 进行排序

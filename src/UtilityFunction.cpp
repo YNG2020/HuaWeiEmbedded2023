@@ -226,7 +226,8 @@ void outputForFile()
         }
     }
     myCout.close();
-    std::cerr << "Total Cost = " << n * 1000000 + totM * 100 + totP << "\n";
+    totCost = n * 1000000 + totM * 100 + totP;
+    std::cerr << "Total Cost = " << totCost << "\n";
     // 以下输出边集数组的每条边（原有边和新加入的边）的通道分配情况
     ofstream myCout1("transactionInPile.txt");
     if (!myCout1.is_open())

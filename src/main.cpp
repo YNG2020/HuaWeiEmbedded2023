@@ -11,12 +11,14 @@
 using namespace std;
 
 int main()
+//int main(int argc, char* argv[])
 {
+    //sortTranStrategy = atoi(argv[1]);
+
     if (Configure::forJudger)   // 用于评测
         inputFromJudger();
     else                        // 用于本地测试
         inputFromFile();
-
 
     Solution solution;
     solution.runStrategy();     // 运行总策略
@@ -26,5 +28,5 @@ int main()
     else                        // 用于本地测试
         outputForFile();
 
-    return 0;
+    return totCost;
 }
