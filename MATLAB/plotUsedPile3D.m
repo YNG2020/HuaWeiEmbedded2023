@@ -34,20 +34,18 @@ function [UsedPile, ax] = plotUsedPile3D(edgePile)
         x = [startX, startX, endX, endX];   % 定义X轴的范围
         y = [startY, startY, endY, endY];   % 定义Y轴的范围
     
-        if multiEdgeID > 1
-            a = 1;
-        end
         for j = 1 : p
             level = multiEdgeID * (1 / newEdgeTmpCnt(singleEdgeID));
             z = [j - 1 + level - 1 / newEdgeTmpCnt(singleEdgeID), j - 1 + level, j - 1 + level, j - 1 + level - 1 / newEdgeTmpCnt(singleEdgeID)];
             % 使用fill函数填充颜色
             if edgePile(edgeID, 3 + j) == -1
-                fill3(x, y, z, colors(1, :));
+                fill3(x, y, z, colors(1, :), 'FaceAlpha', 1);
             else
-                fill3(x, y, z, colors(edgePile(edgeID, 3 + j) + 2, :));
+                fill3(x, y, z, colors(edgePile(edgeID, 3 + j) + 2, :), 'FaceAlpha', 1);
+                % 添加标记
+                text((x(1) + x(4)) / 2, (y(1) + y(4)) / 2, (z(1) + z(2)) / 2, num2str(edgePile(edgeID, 3 + j)),'HorizontalAlignment', 'center', 'Color', 'w');
             end
-            % 添加标记
-            % text(i - 0.5, j - 0.5, num2str(edgePile(edgeID, 3 + j)), 'HorizontalAlignment', 'center', 'Color', 'w');
+
         end
     end
 

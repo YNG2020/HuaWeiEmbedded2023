@@ -36,7 +36,7 @@ void Solution::runStrategy()
     //resetEverything();
     //preAllocateTran();
 
-    forTryDeleteEdge = false;
+    forTryDeleteEdge = true;
     tryDeleteEdge();
     tryDeleteEdge();
 
@@ -46,8 +46,9 @@ void Solution::runStrategy()
             std::cout << "Original newEdge.size = " << newEdge.size() << endl;
         for (int cnt = 0; cnt < cntLimit; ++cnt)
         {
-            reAllocateTran(pow(reAllocateTranNumFunBase, reAllocateTranNumFunExpRatio * cnt) * T);
-            tryDeleteEdge();
+            //reAllocateTran(pow(reAllocateTranNumFunBase, reAllocateTranNumFunExpRatio * cnt) * T);
+            reAllocateTran(0.3 * T);
+            //tryDeleteEdge();
             if (Configure::forIterOutput && !Configure::forJudger)
                 std::cout << "newEdge.size = " << newEdge.size() << endl;
         }
@@ -95,21 +96,21 @@ void Solution::reAllocateTran(int HLim)
     {
         std::mt19937 rng(42); // 设置随机数种子  
         random_shuffle(totTranIDx.begin(), totTranIDx.end());
-        for (int i = 0; i < gap; ++i)
+        for (int j = 0; j < gap; ++j)
         {
-            tranIDx[i] = totTranIDx[i];
+            tranIDx[j] = totTranIDx[j];
         }
 
         int oriEdgeNum = 0;
 
         vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
         vector<int> pileTmp1(gap, -1);
-        for (int j = i, tranID; j < i + gap; ++j)
+        for (int j = 0, tranID; j < gap; ++j)
         {
-            tranID = tranIDx[j - i];
+            tranID = tranIDx[j];
             oriEdgeNum += trans[tranID].path.size();
-            pathTmp1[j - i] = trans[tranID].pathTmp;
-            pileTmp1[j - i] = trans[tranID].pileID;
+            pathTmp1[j] = trans[tranID].pathTmp;
+            pileTmp1[j] = trans[tranID].pileID;
             recoverNetwork(tranID, trans[tranID].pileID);
         }
 
@@ -117,24 +118,26 @@ void Solution::reAllocateTran(int HLim)
         bool findPath = false;
         vector<vector<int>> pathTmp2(gap, vector<int>());     // 用于此后重新加载边
         vector<int> pileTmp2(gap, -1);
-        for (int j = i + gap - 1, tranID; j >= i; --j)
+        for (int j = gap - 1, tranID; j >= 0; --j)      // 反向加载效果更好
         {
-            tranID = tranIDx[j - i];
+            tranID = tranIDx[j];
             loadTran(tranID, false);
-            pathTmp2[j - i] = trans[tranID].pathTmp;
-            pileTmp2[j - i] = trans[tranID].pileID;
+            pathTmp2[j] = trans[tranID].pathTmp;
+            pileTmp2[j] = trans[tranID].pileID;
             curEdgeNum += trans[tranID].path.size();
         }
 
         if (oriEdgeNum > curEdgeNum)
         {   // 总体的边数减少，接受迁移
+            tryDeleteEdge();
             continue;
         }
         else {  // 否则，回复原状态
-            for (int j = i + gap - 1, tranID; j >= i; --j)
+            for (int j = 0, tranID; j < gap; ++j)
+            //for (int j = i + gap - 1, tranID; j >= i; --j)
             {   // 把试图寻路时，造成的对网络的影响消除
-                tranID = tranIDx[j - i];
-                recoverNetwork(tranID, pileTmp2[j - i]);
+                tranID = tranIDx[j];
+                recoverNetwork(tranID, pileTmp2[j]);
             }
 
             for (int j = i, tranID; j < i + gap; ++j)
@@ -149,6 +152,7 @@ void Solution::reAllocateTran(int HLim)
                 trans[tranID].curA = D;
                 reloadTran(tranID, pileTmp1[j - i], pathTmp1[j - i]);
             }
+            tryDeleteEdge();
         }
     }
 }
@@ -159,9 +163,10 @@ void Solution::tryDeleteEdge()
     if (!forTryDeleteEdge)
 		return;
     int n = newEdge.size(), trueEdgeID;
+    vector<int> oriNewEdgePathID = newEdgePathID;
     for (int idx = 0; idx < n; ++idx)
     {
-        int idxEdge = newEdgePathID[idx]; // idxEdge为边在边集数组的编号（计数时，双向边视作同一边）  
+        int idxEdge = oriNewEdgePathID[idx]; // idxEdge为边在边集数组的编号（计数时，双向边视作同一边）  
 
         trueEdgeID = idxEdge * 2;
         int tranCnt = 0;
@@ -180,8 +185,6 @@ void Solution::tryDeleteEdge()
             int iter = find(newEdgePathID.begin(), newEdgePathID.end(), idxEdge) - newEdgePathID.begin();
             newEdge.erase(newEdge.begin() + iter);
             newEdgePathID.erase(newEdgePathID.begin() + iter);
-            --idx;
-            --n;
 
             for (int k = 0; k < P; ++k)
             {   // 该边已删除，就应对其进行封锁
@@ -218,8 +221,6 @@ void Solution::tryDeleteEdge()
                 int iter = find(newEdgePathID.begin(), newEdgePathID.end(), idxEdge) - newEdgePathID.begin();
                 newEdge.erase(newEdge.begin() + iter);
                 newEdgePathID.erase(newEdgePathID.begin() + iter);
-                --idx;
-                --n;
 
                 for (int k = 0; k < P; ++k)
                 {   // 该边已删除，就应对其进行封锁
