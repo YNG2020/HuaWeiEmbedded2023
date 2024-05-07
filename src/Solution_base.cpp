@@ -40,6 +40,7 @@ void Solution::runStrategy()
     tryDeleteEdge();
     tryDeleteEdge();
 
+    ifLast = true;
     if (forIter)
     {
         if (Configure::forIterOutput && !Configure::forJudger)
@@ -185,6 +186,9 @@ void Solution::tryDeleteEdge()
             int iter = find(newEdgePathID.begin(), newEdgePathID.end(), idxEdge) - newEdgePathID.begin();
             newEdge.erase(newEdge.begin() + iter);
             newEdgePathID.erase(newEdgePathID.begin() + iter);
+            pair<int, int> nodePair = make_pair(edge[trueEdgeID].from, edge[trueEdgeID].to);
+            iter = find(multiEdgeID[nodePair].begin(), multiEdgeID[nodePair].end(), trueEdgeID) - multiEdgeID[nodePair].begin();
+            multiEdgeID[nodePair].erase(multiEdgeID[nodePair].begin() + iter);
 
             for (int k = 0; k < P; ++k)
             {   // 该边已删除，就应对其进行封锁
@@ -221,6 +225,9 @@ void Solution::tryDeleteEdge()
                 int iter = find(newEdgePathID.begin(), newEdgePathID.end(), idxEdge) - newEdgePathID.begin();
                 newEdge.erase(newEdge.begin() + iter);
                 newEdgePathID.erase(newEdgePathID.begin() + iter);
+                pair<int, int> nodePair = make_pair(edge[trueEdgeID].from, edge[trueEdgeID].to);
+                iter = find(multiEdgeID[nodePair].begin(), multiEdgeID[nodePair].end(), trueEdgeID) - multiEdgeID[nodePair].begin();
+                multiEdgeID[nodePair].erase(multiEdgeID[nodePair].begin() + iter);
 
                 for (int k = 0; k < P; ++k)
                 {   // 该边已删除，就应对其进行封锁
@@ -435,4 +442,53 @@ void Solution::resetEverything()
         edge[i] = oriEdge[i];
     }
     cntEdge = oriCntEdge;
+}
+
+// 在重边之间迁移业务
+void Solution::transferTranInMultiEdge(Transaction& tran)
+{
+    if (!ifLast)
+        return;
+    for (int i = 0; i < tran.path.size(); ++i)
+    {
+        int trueEdgeID = tran.path[i] * 2;
+        if (trueEdgeID < M * 2)     // 不是新加的边，直接跳过
+            continue;
+        int from = edge[trueEdgeID].from, to = edge[trueEdgeID].to;
+        pair<int, int> nodePair = make_pair(from, to);
+        int multiEdgeid = find(multiEdgeID[nodePair].begin(), multiEdgeID[nodePair].end(), trueEdgeID) - multiEdgeID[nodePair].begin();
+        int lastEdgeID = multiEdgeID[nodePair][multiEdgeid];
+        for (int j = multiEdgeid - 1; j >= 0; --j)
+        {   // 尽可能把业务迁移到重边编号小的边上
+            int edgeID = multiEdgeID[nodePair][0];
+            if (edge[edgeID].Pile[tran.pileID] == -1)
+            {
+                edge[edgeID].Pile[tran.pileID] = tran.tranID;
+                ++edge[edgeID].usedPileCnt;
+                edge[edgeID + 1].Pile[tran.pileID] = tran.tranID;
+                ++edge[edgeID + 1].usedPileCnt;
+
+                edge[lastEdgeID].Pile[tran.pileID] = -1;
+                --edge[lastEdgeID].usedPileCnt;
+                edge[lastEdgeID + 1].Pile[tran.pileID] = -1;
+                --edge[lastEdgeID + 1].usedPileCnt;
+                
+                tran.path[i] = edgeID / 2;
+                for (int k = 0; k < N; ++k)
+                {
+                    if (edge[tran.pathTmp[k]].to == edge[edgeID].to && edge[tran.pathTmp[k]].from == edge[edgeID].from)
+                    {
+                        tran.pathTmp[k] = edgeID;
+						break;
+                    }
+                    if (edge[tran.pathTmp[k]].to == edge[edgeID + 1].to && edge[tran.pathTmp[k]].from == edge[edgeID + 1].from)
+                    {
+                        tran.pathTmp[k] = edgeID + 1;
+						break;
+                    }
+                }
+                lastEdgeID = edgeID;
+            }
+        }
+    }
 }

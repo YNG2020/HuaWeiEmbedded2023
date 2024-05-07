@@ -86,6 +86,7 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
 
     tran.pileID = choosenP;
     backtrackPath(tran);     // 回溯路径，以构造出一条完整的路径
+    transferTranInMultiEdge(tran);
 }
 
 // 考虑一边多通道的情况下，寻找业务tran的起点到终点的路径，但遇到需要加边的情况，不做处理，直接返回，仅tryDeletegeEdge时使用
@@ -270,6 +271,7 @@ void Solution::BFS_addNewEdge(Transaction& tran)
         }
 
     }
+    transferTranInMultiEdge(tran);
     std::reverse(tran.path.begin(), tran.path.end());
 }
 

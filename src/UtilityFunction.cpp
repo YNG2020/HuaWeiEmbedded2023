@@ -22,6 +22,13 @@ void addEdge(int s, int t, int d)
     head[s] = cntEdge++;    // 更新以s为起点的在逻辑上的第一条边在边集数组的位置（编号）
     if (d < minDist[make_pair(s, t)])
         minDist[make_pair(s, t)] = d;
+    if (s > t)
+    {
+        if (cntEdge % 2)
+            multiEdgeID[make_pair(t, s)].push_back(cntEdge - 1);
+        else
+            multiEdgeID[make_pair(t, s)].push_back(cntEdge - 2);
+    }
 }
 
 // 加业务函数

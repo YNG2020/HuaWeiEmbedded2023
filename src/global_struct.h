@@ -65,7 +65,10 @@ struct HashFunc_t
 {
     size_t operator() (const pair<int, int>& key) const
     {
-        return hash<int>()(key.first) ^ hash<int>()(key.second);;
+        if (key.first > key.second)
+			return hash<int>()(key.second) ^ hash<int>()(key.first);
+		else
+            return hash<int>()(key.first) ^ hash<int>()(key.second);;
     }
 };
 
@@ -73,7 +76,7 @@ struct Equalfunc_t
 {
     bool operator() (pair<int, int> const& a, pair<int, int> const& b) const
     {
-        return a.first == b.first && a.second == b.second;
+        return (a.first == b.first && a.second == b.second) || (a.first == b.second && a.second == b.first);
     }
 };
 
