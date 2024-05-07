@@ -20,3 +20,4 @@ unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;
 vector<int> sortedTranIndices;
 int oriHead[Configure::maxN];
 Edge oriEdge[Configure::maxM];
+unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> multiEdgeID;
