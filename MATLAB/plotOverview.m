@@ -19,7 +19,7 @@ function [TransactionAllocation] = plotOverview(edgeStat)
 
     for k = 1 : 4 
         nexttile
-        if k >= 3
+        if k >= 2
             maxVal = max(edgeStat(:, 2 + k - 1));
         else
             maxVal = max(tranStatistic(:, 3));

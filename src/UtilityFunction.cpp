@@ -22,6 +22,13 @@ void addEdge(int s, int t, int d)
     head[s] = cntEdge++;    // 更新以s为起点的在逻辑上的第一条边在边集数组的位置（编号）
     if (d < minDist[make_pair(s, t)])
         minDist[make_pair(s, t)] = d;
+    if (s > t)
+    {
+        if (cntEdge % 2)
+            multiEdgeID[make_pair(t, s)].push_back(cntEdge - 1);
+        else
+            multiEdgeID[make_pair(t, s)].push_back(cntEdge - 2);
+    }
 }
 
 // 加业务函数
@@ -63,6 +70,15 @@ void inputFromJudger()
         std::cin >> Sj >> Tj;
         addTran(Sj, Tj); // 添加业务
     }
+    for (int i = 0; i < M; ++i)
+    {
+        oriHead[i] = head[i];
+    }
+    for (int i = 0; i < cntEdge; ++i)
+    {
+		oriEdge[i] = edge[i];
+    }
+    oriCntEdge = cntEdge;
 }
 
 // 文件输入流，用于文件
@@ -97,6 +113,15 @@ void inputFromFile()
         myCin >> Sj >> Tj;
         addTran(Sj, Tj); // 添加业务
     }
+    for (int i = 0; i < M; ++i)
+    {
+        oriHead[i] = head[i];
+    }
+    for (int i = 0; i < cntEdge; ++i)
+    {
+        oriEdge[i] = edge[i];
+    }
+    oriCntEdge = cntEdge;
 }
 
 // 标准输出流，用于判题器
@@ -148,6 +173,7 @@ void outputForJudger()
                 std::cout << endl;
         }
     }
+    totCost = n;
 }
 
 // 文件输出流，用于文件
@@ -208,7 +234,8 @@ void outputForFile()
         }
     }
     myCout.close();
-    std::cerr << "Total Cost = " << n * 1000000 + totM * 100 + totP << "\n";
+    totCost = n;
+    std::cerr << "Total Cost = " << totCost << "\n";
     // 以下输出边集数组的每条边（原有边和新加入的边）的通道分配情况
     ofstream myCout1("transactionInPile.txt");
     if (!myCout1.is_open())
@@ -246,7 +273,7 @@ void outputStatistic()
 	}
     for (int i = 0; i < M; ++i)
     {
-        myCout << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].statisticCnt << endl;
+        myCout << edge[i * 2].from << " " << edge[i * 2].to << " " << edge[i * 2].usedPileCnt << endl;
 	}
 	myCout.close();
 
@@ -257,11 +284,11 @@ void outputStatistic()
     }
     for (int i = 0; i < T; ++i)
     {
-        int pSize = trans[i].pathStatistic.size();
+        int pSize = trans[i].path.size();
         myCout1 << pSize << " ";
         for (int j = 0; j < pSize; ++j)
         {
-            int pathID = trans[i].pathStatistic[j];
+            int pathID = trans[i].path[j];
 
             myCout1 << pathID;
             if (j == pSize - 1 && i != T - 1)

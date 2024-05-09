@@ -21,7 +21,7 @@ public:
     int trueD;  // 边的真正长度，用于计算边的损耗，以添加放大器
     vector<int> Pile = vector<int>(Configure::maxP, -1); // 该边上存在的通道，记录的是当前承载的业务的编号，不承载业务时值为-1，边被封禁时，值为T
     int usedPileCnt;	// 该边上用掉的通道的数量
-    int statisticCnt;   // 该边上用掉的通道的数量（统计用，不考虑通道编号的限制）
+    //int statisticCnt;   // 该边上用掉的通道的数量（统计用，不考虑通道编号的限制）
     Edge() 
     {
         edgeID = -1;
@@ -31,7 +31,7 @@ public:
         next = -1;
         trueD = 0;
         usedPileCnt = 0;
-        statisticCnt = 0;
+        //statisticCnt = 0;
         Pile = vector<int>(Configure::maxP, -1);
     }
 
@@ -57,7 +57,7 @@ public:
     vector<int> pathTmp;   // 存储从起点到其它点的最短路径的末边的编号（考虑通道堵塞的最短）
     vector<int> trueMinPath;   // 存储从起点到其它点的最短路径的末边的编号（不考虑通道堵塞的最短）
     vector<int> path;   // 存储路径所经过的边
-    vector<int> pathStatistic;   // 存储在统计阶段时，无视通道限制，路径所经过的边
+    //vector<int> pathStatistic;   // 存储在统计阶段时，无视通道限制，路径所经过的边
     vector<int> mutiplierID;    // 存储所经过的放大器所在节点的编号
 };
 
@@ -65,7 +65,10 @@ struct HashFunc_t
 {
     size_t operator() (const pair<int, int>& key) const
     {
-        return hash<int>()(key.first) ^ hash<int>()(key.second);;
+        if (key.first > key.second)
+			return hash<int>()(key.second) ^ hash<int>()(key.first);
+		else
+            return hash<int>()(key.first) ^ hash<int>()(key.second);;
     }
 };
 
@@ -73,7 +76,7 @@ struct Equalfunc_t
 {
     bool operator() (pair<int, int> const& a, pair<int, int> const& b) const
     {
-        return a.first == b.first && a.second == b.second;
+        return (a.first == b.first && a.second == b.second) || (a.first == b.second && a.second == b.first);
     }
 };
 

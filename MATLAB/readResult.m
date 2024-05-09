@@ -138,5 +138,7 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
         transactionMinPath{i, 1} = edgePassed;
     end
     fclose(fileID);
+    save newEdgeIdx.mat
+    save newEdgeTmpCnt.mat
 end
 
