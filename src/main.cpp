@@ -13,7 +13,7 @@ using namespace std;
 int main()
 //int main(int argc, char* argv[])
 {
-    //sortTranStrategy = atoi(argv[1]);
+    //strategy = atoi(argv[1]);
 
     if (Configure::forJudger)   // 用于评测
         inputFromJudger();

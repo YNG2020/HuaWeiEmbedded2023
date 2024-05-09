@@ -143,10 +143,6 @@ bool Solution::BFS_detectPath(Transaction& tran, int blockEdge)
         }
         if (from == end)
         {
-            // 找到的路径长度太长，宁愿不要
-            if (curDis > pathSizeLimRatio * minPathSize[make_pair(start, end)])
-                continue;
-
             int curNode = end, tmpDist = curDis;
             if (tmpDist <= minPathDist)
             {

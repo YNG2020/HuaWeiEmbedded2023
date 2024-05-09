@@ -40,18 +40,22 @@ void Solution::runStrategy()
     tryDeleteEdge();
     tryDeleteEdge();
 
-    ifLast = true;
+    ifLast = false;
     if (forIter)
     {
         if (Configure::forIterOutput && !Configure::forJudger)
             std::cout << "Original newEdge.size = " << newEdge.size() << endl;
         for (int cnt = 0; cnt < cntLimit; ++cnt)
         {
-            //reAllocateTran(pow(reAllocateTranNumFunBase, reAllocateTranNumFunExpRatio * cnt) * T);
-            reAllocateTran(0.3 * T);
+            double reallocateTranNum = 0.3 * T;
+            //double reallocateTranNum = pow(reAllocateTranNumFunBase, reAllocateTranNumFunExpRatio * cnt) * T;
+            reAllocateTran(reallocateTranNum);
             //tryDeleteEdge();
             if (Configure::forIterOutput && !Configure::forJudger)
+            {
+                std::cout << "Number of Trans to be reallocate: " << reallocateTranNum / T << "T" << endl;
                 std::cout << "newEdge.size = " << newEdge.size() << endl;
+            }
         }
 
         tryDeleteEdge();
@@ -85,14 +89,17 @@ void Solution::preAllocateTran()
 // 试图重新分配业务到光网络中
 void Solution::reAllocateTran(int HLim)
 {
-    int gap = max(int(0.025 * T), 20);       // (TODO，gap的机理需要被弄清楚)
+    int gap;
+    if (strategy == 0)
+        gap = 1;       // (TODO，gap的机理需要被弄清楚)
+    else
+        gap = max(int(0.025 * T), 20);
     if (gap > T)
         return;
     vector<int> totTranIDx(T, 0);
     vector<int> tranIDx(gap, 0);
     for (int i = 0; i < T; ++i)
         totTranIDx[i] = i;
-
     for (int i = 0; i + gap < HLim; i = i + gap)
     {
         std::mt19937 rng(42); // 设置随机数种子  
@@ -158,14 +165,14 @@ void Solution::reAllocateTran(int HLim)
     }
 }
 
-// 试图删除新边
-void Solution::tryDeleteEdge()
+// 试图删除新边，参数increasing用于控制删边时，是从旧边开始删，还是从新边开始删
+void Solution::tryDeleteEdge(bool increasing)
 {
     if (!forTryDeleteEdge)
 		return;
     int n = newEdge.size(), trueEdgeID;
     vector<int> oriNewEdgePathID = newEdgePathID;
-    for (int idx = 0; idx < n; ++idx)
+    for (int idx = increasing ? 0 : n - 1; increasing ? (idx < n) : (idx >= 0); increasing ? ++idx : --idx)
     {
         int idxEdge = oriNewEdgePathID[idx]; // idxEdge为边在边集数组的编号（计数时，双向边视作同一边）  
 

@@ -173,6 +173,7 @@ void outputForJudger()
                 std::cout << endl;
         }
     }
+    totCost = n;
 }
 
 // 文件输出流，用于文件
@@ -233,7 +234,7 @@ void outputForFile()
         }
     }
     myCout.close();
-    totCost = n * 1000000 + totM * 100 + totP;
+    totCost = n;
     std::cerr << "Total Cost = " << totCost << "\n";
     // 以下输出边集数组的每条边（原有边和新加入的边）的通道分配情况
     ofstream myCout1("transactionInPile.txt");
