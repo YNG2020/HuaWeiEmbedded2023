@@ -39,7 +39,7 @@ void addTran(int start, int end)
     trans[cntTran].tranID = cntTran;
     trans[cntTran].curA = D;
     vector<int>().swap(trans[cntTran].path);
-    vector<int>().swap(trans[cntTran].pathTmp);
+    vector<int>().swap(trans[cntTran].lastEdgesOfShortestPaths);
     vector<int>().swap(trans[cntTran].mutiplierID);
     ++cntTran;
 }

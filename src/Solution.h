@@ -13,6 +13,7 @@ public:
 	void sumUptheAllocationPressure();
 	void BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge);
 	bool BFS_detectPath(Transaction& tran, int blockEdge);
+	bool BFS_detectPathSim(const Transaction& tran, int blockEdge);
 	void BFS_addNewEdge(Transaction& tran);
 	void BFS_tranStatistic(Transaction& tran);
 	void loadTran(int tranID, bool ifTryDeleteEdge);
@@ -21,8 +22,9 @@ public:
 	void preAllocateTran();
 	void reAllocateTran(int HLim);
 	void tryDeleteEdge(bool increasing = true);
+	void performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& lastTranIDs);
 	void recoverNetwork(int lastTranID, int lastPileID);
-	void reloadTran(int lastTranID, int lastPileID, vector<int>& pathTmp);
+	void reloadTran(int lastTranID, int lastPileID, vector<int>& lastEdgesOfShortestPaths);
 	void sortTran();
 	void resetEverything();
 	void transferTranInMultiEdge(Transaction& tran);
