@@ -21,8 +21,9 @@ public:
 	void backtrackPath(Transaction& tran);
 	void preAllocateTran();
 	void reAllocateTran(int HLim);
-	void tryDeleteEdge(bool increasing = true);
-	void performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& lastTranIDs);
+	void tryDeleteEdge(bool increasing = true, bool ifSimDeleteEdge = false);
+	int tryDeleteEdgeSim(bool increasing = true);
+	void performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& lastTranIDs, bool ifSim = false);
 	void recoverNetwork(int lastTranID, int lastPileID);
 	void reloadTran(int lastTranID, int lastPileID, vector<int>& lastEdgesOfShortestPaths);
 	void sortTran();
@@ -36,7 +37,7 @@ public:
 	bool forTryDeleteEdge = true;	// 是否尝试删除边
 	bool ifLast = false;
 	float pathSizeLimRatio = 3.0;			// 限制找到的路径长度相对于理论上的最短路径长度的倍数
-	int cntLimit = 20;						// 最大迭代次数
+	int cntLimit = 100;						// 最大迭代次数
 	float reAllocateTranNumFunBase = 2.71;	// 重新分配业务时，要被重分配的业务的数量函数（一个指数函数）的基数
 	float reAllocateTranNumFunExpRatio = -0.005;	// 重新分配业务时，要被重分配的业务的数量函数（一个指数函数）的指数
 };

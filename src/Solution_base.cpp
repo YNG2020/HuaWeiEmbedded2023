@@ -93,7 +93,7 @@ void Solution::reAllocateTran(int HLim)
     if (strategy == 0)
         gap = 1;       // (TODO，gap的机理需要被弄清楚)
     else
-        gap = max(int(0.025 * T), 20);
+        gap = max(int(0.025 * T), 30);
     if (gap > T)
         return;
     vector<int> totTranIDx(T, 0);
@@ -109,20 +109,20 @@ void Solution::reAllocateTran(int HLim)
             tranIDx[j] = totTranIDx[j];
         }
 
-        int oriEdgeNum = 0;
+        int oriUsedEdgeNum = 0, oriNewEdgeNum = newEdge.size();
 
         vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
         vector<int> pileTmp1(gap, -1);
         for (int j = 0, tranID; j < gap; ++j)
         {
             tranID = tranIDx[j];
-            oriEdgeNum += trans[tranID].path.size();
+            oriUsedEdgeNum += trans[tranID].path.size();
             pathTmp1[j] = trans[tranID].lastEdgesOfShortestPaths;
             pileTmp1[j] = trans[tranID].pileID;
             recoverNetwork(tranID, trans[tranID].pileID);
         }
 
-        int curEdgeNum = 0;
+        int curUsedEdgeNum = 0;
         bool findPath = false;
         vector<vector<int>> pathTmp2(gap, vector<int>());     // 用于此后重新加载边
         vector<int> pileTmp2(gap, -1);
@@ -132,17 +132,23 @@ void Solution::reAllocateTran(int HLim)
             loadTran(tranID, false);
             pathTmp2[j] = trans[tranID].lastEdgesOfShortestPaths;
             pileTmp2[j] = trans[tranID].pileID;
-            curEdgeNum += trans[tranID].path.size();
+            curUsedEdgeNum += trans[tranID].path.size();
         }
 
-        if (oriEdgeNum > curEdgeNum)
-        {   // 总体的边数减少，接受迁移
+        int newEdgeNumAftertryDeleteEdge = tryDeleteEdgeSim();
+
+        if (oriNewEdgeNum > newEdgeNumAftertryDeleteEdge)
+        {   // 新增的边数减少，接受迁移
             tryDeleteEdge();
             continue;
         }
+        else if (oriNewEdgeNum == newEdgeNumAftertryDeleteEdge && oriUsedEdgeNum > curUsedEdgeNum)
+        {   // 新增的边数不变，但是使用的边数减少，接受迁移
+			tryDeleteEdge();
+			continue;
+        }
         else {  // 否则，回复原状态
             for (int j = 0, tranID; j < gap; ++j)
-            //for (int j = i + gap - 1, tranID; j >= i; --j)
             {   // 把试图寻路时，造成的对网络的影响消除
                 tranID = tranIDx[j];
                 recoverNetwork(tranID, pileTmp2[j]);
@@ -160,7 +166,7 @@ void Solution::reAllocateTran(int HLim)
                 trans[tranID].curA = D;
                 reloadTran(tranID, pileTmp1[j - i], pathTmp1[j - i]);
             }
-            tryDeleteEdge();
+            tryDeleteEdge(false);
         }
     }
 }
