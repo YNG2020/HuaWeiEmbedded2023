@@ -79,7 +79,7 @@ void Solution::tryDeleteEdge(bool increasing, bool ifSimDeleteEdge)
 }
 
 // tryDeleteEdge的模拟，参数increasing用于控制删边时，是从旧边开始删，还是从新边开始删
-int Solution::tryDeleteEdgeSim(bool increasing)
+bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUsedEdgeNum, bool increasing)
 {
     int n = newEdge.size(), trueEdgeID;
     vector<int> oriNewEdgePathID = newEdgePathID;
@@ -126,8 +126,12 @@ int Solution::tryDeleteEdgeSim(bool increasing)
         }
 
         if (findPath)
-        {   // 成功删除新边，将原本新添加的边idxEdge从newEdge中删除
-            performDeleteEdge(idxEdge, tranCnt, lastTranIDs, true);
+        {   // 可以删除新边
+            for (int k = 0; k < P; ++k)
+            {   // 该边已删除，就应对其进行封锁
+                edge[trueEdgeID].Pile[k] = T;
+                edge[trueEdgeID + 1].Pile[k] = T;   // 偶数+1
+            }
             // 备份
             totLastTranID.push_back(lastTranIDs);
             totLastPileID.push_back(lastPileIDs);
@@ -157,66 +161,82 @@ int Solution::tryDeleteEdgeSim(bool increasing)
         }
     }
 
-    // 回溯，将网络和业务恢复到删边前的状态
-    for (int i = nDeleteEdge - 1; i >= 0; --i)
+    if (oriNewEdgeNum > n - nDeleteEdge)
+    {   // 新增的边数减少，接受迁移
+        for (int i = nDeleteEdge - 1; i >= 0; --i)
+        {   // 将原本新添加的边idxEdge从newEdge中删除
+            performDeleteEdge(totDeleteEdgeID[i] / 2, totLastTranID[i].size(), totLastTranID[i]);
+        }
+        return true;
+    }
+    else if (oriNewEdgeNum == (n - nDeleteEdge) && oriUsedEdgeNum > curUsedEdgeNum)
+    {   // 新增的边数不变，但是使用的边数减少，接受迁移
+        for (int i = nDeleteEdge - 1; i >= 0; --i)
+        {   // 将原本新添加的边idxEdge从newEdge中删除
+            performDeleteEdge(totDeleteEdgeID[i] / 2, totLastTranID[i].size(), totLastTranID[i]);
+        }
+        return true;;
+    }
+    else
     {
-        trueEdgeID = totDeleteEdgeID[i];
-        for (int j = 0; j < P; ++j)
+        // 回溯，将网络和业务恢复到删边前的状态
+        for (int i = nDeleteEdge - 1; i >= 0; --i)
         {
-            edge[trueEdgeID].Pile[j] = -1;
-            edge[trueEdgeID + 1].Pile[j] = -1;
-        }
-        // 遍历totLastPileID[i]，把edge[trueEdgeID]和edge[trueEdgeID+1]的通道状态还原
-        int arrSize = totLastPileID[i].size();
-        for (int j = 0; j < arrSize; ++j)
-        {
-            edge[trueEdgeID].Pile[totLastPileID[i][j]] = totLastTranID[i][j];
-			edge[trueEdgeID + 1].Pile[totLastPileID[i][j]] = totLastTranID[i][j];
-        }
-        // 遍历totLastTranID[i]，把试图寻路(BFS_detectPath)时，造成的对网络的影响消除
-        arrSize = totLastTranID[i].size();
-        for (int j = 0; j < arrSize; ++j)
-        {
-			recoverNetwork(totLastTranID[i][j], totTmpLastPileIDs[i][j]);
-		}
-		// 遍历totLastTranID[i]，重新加载所有的边
-        for (int j = 0; j < arrSize; ++j)
-        {
-            vector<int> nullVector, nullPath1, nullPath2;
-            trans[totLastTranID[i][j]].mutiplierID.swap(nullVector);
-            trans[totLastTranID[i][j]].path.swap(nullPath1);
-            trans[totLastTranID[i][j]].lastEdgesOfShortestPaths.swap(nullPath2);
+            trueEdgeID = totDeleteEdgeID[i];
+            for (int j = 0; j < P; ++j)
+            {
+                edge[trueEdgeID].Pile[j] = -1;
+                edge[trueEdgeID + 1].Pile[j] = -1;
+            }
+            // 遍历totLastPileID[i]，把edge[trueEdgeID]和edge[trueEdgeID+1]的通道状态还原
+            int arrSize = totLastPileID[i].size();
+            for (int j = 0; j < arrSize; ++j)
+            {
+                edge[trueEdgeID].Pile[totLastPileID[i][j]] = totLastTranID[i][j];
+                edge[trueEdgeID + 1].Pile[totLastPileID[i][j]] = totLastTranID[i][j];
+            }
+            // 遍历totLastTranID[i]，把试图寻路(BFS_detectPath)时，造成的对网络的影响消除
+            arrSize = totLastTranID[i].size();
+            for (int j = 0; j < arrSize; ++j)
+            {
+                recoverNetwork(totLastTranID[i][j], totTmpLastPileIDs[i][j]);
+            }
+            // 遍历totLastTranID[i]，重新加载所有的边
+            for (int j = 0; j < arrSize; ++j)
+            {
+                vector<int> nullVector, nullPath1, nullPath2;
+                trans[totLastTranID[i][j]].mutiplierID.swap(nullVector);
+                trans[totLastTranID[i][j]].path.swap(nullPath1);
+                trans[totLastTranID[i][j]].lastEdgesOfShortestPaths.swap(nullPath2);
 
-            trans[totLastTranID[i][j]].pileID = -1;
-            trans[totLastTranID[i][j]].curA = D;
-            reloadTran(totLastTranID[i][j], totLastPileID[i][j], totLastEdgesOfShortestPaths[i][j]);
+                trans[totLastTranID[i][j]].pileID = -1;
+                trans[totLastTranID[i][j]].curA = D;
+                reloadTran(totLastTranID[i][j], totLastPileID[i][j], totLastEdgesOfShortestPaths[i][j]);
+            }
         }
-	}
-
-    return n - nDeleteEdge;
+        return false;
+    }
 }
 
 // 执行删除边操作
-void Solution::performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& lastTranIDs, bool ifSim)
+void Solution::performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& lastTranIDs)
 {
     int trueEdgeID = idxEdge * 2;
-    if (!ifSim)
-    {
-        // 将原本新添加的边从newEdge中删除
-        int iter = find(newEdgePathID.begin(), newEdgePathID.end(), idxEdge) - newEdgePathID.begin();
-        newEdge.erase(newEdge.begin() + iter);
-        newEdgePathID.erase(newEdgePathID.begin() + iter);
-        pair<int, int> nodePair = make_pair(edge[trueEdgeID].from, edge[trueEdgeID].to);
-        iter = find(multiEdgeID[nodePair].begin(), multiEdgeID[nodePair].end(), trueEdgeID) - multiEdgeID[nodePair].begin();
-        multiEdgeID[nodePair].erase(multiEdgeID[nodePair].begin() + iter);
 
-        for (int k = 0; k < tranCnt; ++k)
-        {   // 重新加载被迁移的业务的路径上的放大器设置
-            vector<int> nullVector;
-            trans[lastTranIDs[k]].mutiplierID.swap(nullVector);
-            trans[lastTranIDs[k]].curA = D;
-            loadMultiplier(lastTranIDs[k]);
-        }
+    // 将原本新添加的边从newEdge中删除
+    int iter = find(newEdgePathID.begin(), newEdgePathID.end(), idxEdge) - newEdgePathID.begin();
+    newEdge.erase(newEdge.begin() + iter);
+    newEdgePathID.erase(newEdgePathID.begin() + iter);
+    pair<int, int> nodePair = make_pair(edge[trueEdgeID].from, edge[trueEdgeID].to);
+    iter = find(multiEdgeID[nodePair].begin(), multiEdgeID[nodePair].end(), trueEdgeID) - multiEdgeID[nodePair].begin();
+    multiEdgeID[nodePair].erase(multiEdgeID[nodePair].begin() + iter);
+
+    for (int k = 0; k < tranCnt; ++k)
+    {   // 重新加载被迁移的业务的路径上的放大器设置
+        vector<int> nullVector;
+        trans[lastTranIDs[k]].mutiplierID.swap(nullVector);
+        trans[lastTranIDs[k]].curA = D;
+        loadMultiplier(lastTranIDs[k]);
     }
 
     for (int k = 0; k < P; ++k)
@@ -224,5 +244,4 @@ void Solution::performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& la
         edge[trueEdgeID].Pile[k] = T;
         edge[trueEdgeID + 1].Pile[k] = T;   // 偶数+1
     }
-
 }

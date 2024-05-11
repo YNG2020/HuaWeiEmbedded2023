@@ -53,17 +53,11 @@ void Solution::runStrategy()
             //tryDeleteEdge();
             if (Configure::forIterOutput && !Configure::forJudger)
             {
-                std::cout << "Number of Trans to be reallocate: " << reallocateTranNum / T << "T" << endl;
+                std::cout << "epoch: " << cnt << endl;
                 std::cout << "newEdge.size = " << newEdge.size() << endl;
             }
         }
-
-        tryDeleteEdge();
-        tryDeleteEdge();
     }
-
-    if (Configure::forIterOutput && !Configure::forJudger)
-        std::cout << "newEdge.size = " << newEdge.size() << endl;
 }
 
 // 对业务路径在网络上的分布做一个统计（不考虑通道编号限制）
@@ -93,7 +87,7 @@ void Solution::reAllocateTran(int HLim)
     if (strategy == 0)
         gap = 1;       // (TODO，gap的机理需要被弄清楚)
     else
-        gap = max(int(0.025 * T), 30);
+        gap = max(int(0.025 * T), 10);
     if (gap > T)
         return;
     vector<int> totTranIDx(T, 0);
@@ -135,19 +129,10 @@ void Solution::reAllocateTran(int HLim)
             curUsedEdgeNum += trans[tranID].path.size();
         }
 
-        int newEdgeNumAftertryDeleteEdge = tryDeleteEdgeSim();
+        bool ifSuccess = tryDeleteEdgeSim(oriNewEdgeNum, oriUsedEdgeNum, curUsedEdgeNum);
 
-        if (oriNewEdgeNum > newEdgeNumAftertryDeleteEdge)
-        {   // 新增的边数减少，接受迁移
-            tryDeleteEdge();
-            continue;
-        }
-        else if (oriNewEdgeNum == newEdgeNumAftertryDeleteEdge && oriUsedEdgeNum > curUsedEdgeNum)
-        {   // 新增的边数不变，但是使用的边数减少，接受迁移
-			tryDeleteEdge();
-			continue;
-        }
-        else {  // 否则，回复原状态
+        if (!ifSuccess)
+        {  // 回复为原状态
             for (int j = 0, tranID; j < gap; ++j)
             {   // 把试图寻路时，造成的对网络的影响消除
                 tranID = tranIDx[j];

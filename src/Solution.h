@@ -22,8 +22,8 @@ public:
 	void preAllocateTran();
 	void reAllocateTran(int HLim);
 	void tryDeleteEdge(bool increasing = true, bool ifSimDeleteEdge = false);
-	int tryDeleteEdgeSim(bool increasing = true);
-	void performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& lastTranIDs, bool ifSim = false);
+	bool tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUsedEdgeNum, bool increasing = true);
+	void performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& lastTranIDs);
 	void recoverNetwork(int lastTranID, int lastPileID);
 	void reloadTran(int lastTranID, int lastPileID, vector<int>& lastEdgesOfShortestPaths);
 	void sortTran();
