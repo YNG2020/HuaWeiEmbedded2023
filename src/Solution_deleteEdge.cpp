@@ -30,6 +30,8 @@ void Solution::tryDeleteEdge(bool increasing, bool ifSimDeleteEdge)
                 lastTranIDs.push_back(edge[trueEdgeID].Pile[j]);
                 lastPileIDs.push_back(j);
             }
+        if (tranCnt != 0 && !increasing)
+			return;
 
         vector<vector<int>> lastEdgesOfShortestPaths(tranCnt, vector<int>());     // 用于此后重新加载边
         for (int k = 0; k < tranCnt; ++k)
@@ -128,7 +130,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         if (findPath)
         {   // 可以删除新边
             for (int k = 0; k < P; ++k)
-            {   // 该边已删除，就应对其进行封锁
+            {   // 该边已删除，暂时对其进行封锁
                 edge[trueEdgeID].Pile[k] = T;
                 edge[trueEdgeID + 1].Pile[k] = T;   // 偶数+1
             }
@@ -238,6 +240,9 @@ void Solution::performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& la
         trans[lastTranIDs[k]].curA = D;
         loadMultiplier(lastTranIDs[k]);
     }
+
+    deleteEdge(trueEdgeID);
+    deleteEdge(trueEdgeID + 1);
 
     for (int k = 0; k < P; ++k)
     {   // 该边已删除，就应对其进行封锁

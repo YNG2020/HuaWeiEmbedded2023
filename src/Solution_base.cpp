@@ -40,14 +40,13 @@ void Solution::runStrategy()
     tryDeleteEdge();
     tryDeleteEdge();
 
-    ifLast = false;
     if (forIter)
     {
         if (Configure::forIterOutput && !Configure::forJudger)
             std::cout << "Original newEdge.size = " << newEdge.size() << endl;
         for (int cnt = 0; cnt < cntLimit; ++cnt)
         {
-            double reallocateTranNum = 0.3 * T;
+            double reallocateTranNum = T;
             //double reallocateTranNum = pow(reAllocateTranNumFunBase, reAllocateTranNumFunExpRatio * cnt) * T;
             reAllocateTran(reallocateTranNum);
             //tryDeleteEdge();
@@ -57,6 +56,11 @@ void Solution::runStrategy()
                 std::cout << "newEdge.size = " << newEdge.size() << endl;
             }
         }
+    }
+
+    if (!Configure::forJudger)
+    {
+        std::cout << "cntEdge: " << cntEdge << endl;
     }
 }
 
@@ -89,7 +93,7 @@ void Solution::reAllocateTran(int HLim)
     else
         gap = max(int(0.025 * T), 10);
     if (gap > T)
-        return;
+        gap = T - 1;
     vector<int> totTranIDx(T, 0);
     vector<int> tranIDx(gap, 0);
     for (int i = 0; i < T; ++i)

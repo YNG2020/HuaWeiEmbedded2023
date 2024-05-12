@@ -15,6 +15,8 @@ void addEdge(int s, int t, int d)
     edge[cntEdge].d = 1;    // 距离
     //edge[cntEdge].d = d;    // 距离
     edge[cntEdge].trueD = d;    // 距离
+    if (head[s] != -1)      // 此前的最后一条以s为起点的新加进来的边在边集数组的位置
+        edge[head[s]].pre = cntEdge;
     edge[cntEdge].next = head[s];   // 链式前向。以s为起点下一条边的编号，head[s]代表的是当前以s为起点的在逻辑上的第一条边在边集数组的位置（编号）
     for (int i = 0; i < P; ++i)
         edge[cntEdge].Pile[i] = -1;
@@ -29,6 +31,18 @@ void addEdge(int s, int t, int d)
         else
             multiEdgeID[make_pair(t, s)].push_back(cntEdge - 2);
     }
+}
+
+// 删边函数
+void deleteEdge(int edgeID)
+{
+    int pre = edge[edgeID].pre, next = edge[edgeID].next;
+    if (pre != -1)
+		edge[pre].next = next;
+	else // 说明要删除的边是在链表中以点edge[edgeID].from为起点的第一条边，此时要更新链表的头
+		head[edge[edgeID].from] = next;
+    if (next != -1)
+        edge[next].pre = pre;
 }
 
 // 加业务函数
@@ -235,6 +249,7 @@ void outputForFile()
     }
     myCout.close();
     totCost = n;
+    totCost = n * 1000000 + totM * 100 + totP;
     std::cerr << "Total Cost = " << totCost << "\n";
     // 以下输出边集数组的每条边（原有边和新加入的边）的通道分配情况
     ofstream myCout1("transactionInPile.txt");
@@ -302,4 +317,18 @@ void outputStatistic()
         }
     }
     myCout1.close();
+}
+
+// 成本计算函数
+void calculateCost()
+{
+    int totP = 0, totM = 0;
+    for (int i = 0; i < T; ++i)
+    {
+        int pSize = trans[i].path.size();
+        int mSize = trans[i].mutiplierID.size();
+        totP += pSize;
+        totM += mSize;
+    }
+    totCost = newEdge.size() * 1000000 + totM * 100 + totP;
 }
