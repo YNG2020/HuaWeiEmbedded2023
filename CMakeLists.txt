@@ -21,4 +21,5 @@ add_executable(main
     ${CMAKE_SOURCE_DIR}/src/UtilityFunction.cpp
     ${CMAKE_SOURCE_DIR}/src/Solution_base.cpp
     ${CMAKE_SOURCE_DIR}/src/Solution_BFS.cpp
+    ${CMAKE_SOURCE_DIR}/src/Solution_deleteEdge.cpp
 )

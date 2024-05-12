@@ -13,6 +13,7 @@ public:
 	void sumUptheAllocationPressure();
 	void BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge);
 	bool BFS_detectPath(Transaction& tran, int blockEdge);
+	bool BFS_detectPathSim(const Transaction& tran, int blockEdge);
 	void BFS_addNewEdge(Transaction& tran);
 	void BFS_tranStatistic(Transaction& tran);
 	void loadTran(int tranID, bool ifTryDeleteEdge);
@@ -20,9 +21,11 @@ public:
 	void backtrackPath(Transaction& tran);
 	void preAllocateTran();
 	void reAllocateTran(int HLim);
-	void tryDeleteEdge(bool increasing = true);
+	void tryDeleteEdge(bool increasing = true, bool ifSimDeleteEdge = false);
+	bool tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUsedEdgeNum, bool increasing = true);
+	void performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& lastTranIDs);
 	void recoverNetwork(int lastTranID, int lastPileID);
-	void reloadTran(int lastTranID, int lastPileID, vector<int>& pathTmp);
+	void reloadTran(int lastTranID, int lastPileID, vector<int>& lastEdgesOfShortestPaths);
 	void sortTran();
 	void resetEverything();
 	void transferTranInMultiEdge(Transaction& tran);
@@ -34,7 +37,7 @@ public:
 	bool forTryDeleteEdge = true;	// 是否尝试删除边
 	bool ifLast = false;
 	float pathSizeLimRatio = 3.0;			// 限制找到的路径长度相对于理论上的最短路径长度的倍数
-	int cntLimit = 20;						// 最大迭代次数
+	int cntLimit = 1000;						// 最大迭代次数
 	float reAllocateTranNumFunBase = 2.71;	// 重新分配业务时，要被重分配的业务的数量函数（一个指数函数）的基数
 	float reAllocateTranNumFunExpRatio = -0.005;	// 重新分配业务时，要被重分配的业务的数量函数（一个指数函数）的指数
 };

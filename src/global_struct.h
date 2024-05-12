@@ -18,10 +18,10 @@ public:
     int to;     // 终点
     int d;      // 边的长度（置1时，可被用于dijkstra，此时相当于BFS）
     int next;   // 同起点的下一条边在edge中的编号
+    int pre;    // 同起点的上一条边在edge中的编号
     int trueD;  // 边的真正长度，用于计算边的损耗，以添加放大器
     vector<int> Pile = vector<int>(Configure::maxP, -1); // 该边上存在的通道，记录的是当前承载的业务的编号，不承载业务时值为-1，边被封禁时，值为T
     int usedPileCnt;	// 该边上用掉的通道的数量
-    //int statisticCnt;   // 该边上用掉的通道的数量（统计用，不考虑通道编号的限制）
     Edge() 
     {
         edgeID = -1;
@@ -29,9 +29,9 @@ public:
         to = -1;
         d = 0;
         next = -1;
+        pre = -1;
         trueD = 0;
         usedPileCnt = 0;
-        //statisticCnt = 0;
         Pile = vector<int>(Configure::maxP, -1);
     }
 
@@ -43,7 +43,7 @@ public:
     int end;    // 业务终点
     int tranID;  // 业务ID
     int curA;   // 当前信号强度
-    int expectedAllocationPressure; // 期望分配压力，值为该业务的pathStatistic上经过的边的statisticCnt之和
+    int expectedAllocationPressure; // 期望分配压力
     Transaction()
     {
         start = -1;
@@ -54,10 +54,8 @@ public:
         expectedAllocationPressure = 0;
     }
     int pileID; // 业务所占据的通道ID
-    vector<int> pathTmp;   // 存储从起点到其它点的最短路径的末边的编号（考虑通道堵塞的最短）
-    vector<int> trueMinPath;   // 存储从起点到其它点的最短路径的末边的编号（不考虑通道堵塞的最短）
+    vector<int> lastEdgesOfShortestPaths;   // 存储从起点到其它点的最短路径的末边的编号（考虑通道堵塞的最短）
     vector<int> path;   // 存储路径所经过的边
-    //vector<int> pathStatistic;   // 存储在统计阶段时，无视通道限制，路径所经过的边
     vector<int> mutiplierID;    // 存储所经过的放大器所在节点的编号
 };
 
