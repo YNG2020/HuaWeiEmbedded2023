@@ -40,6 +40,7 @@ void Solution::runStrategy()
     tryDeleteEdge();
     tryDeleteEdge();
 
+    sumUPAllUsedEdge();
     if (forIter)
     {
         if (Configure::forIterOutput && !Configure::forJudger)
@@ -47,13 +48,15 @@ void Solution::runStrategy()
         for (int cnt = 0; cnt < cntLimit; ++cnt)
         {
             double reallocateTranNum = T;
-            //double reallocateTranNum = pow(reAllocateTranNumFunBase, reAllocateTranNumFunExpRatio * cnt) * T;
+            
+            int oriTotUsedEdge = totUsedEdge, oriNewEdge = newEdge.size();
             reAllocateTran(reallocateTranNum);
-            //tryDeleteEdge();
             if (Configure::forIterOutput && !Configure::forJudger)
             {
-                std::cout << "epoch: " << cnt << endl;
-                std::cout << "newEdge.size = " << newEdge.size() << endl;
+                std::cout << "epoch: " << cnt;
+                std::cout << "  newEdge.size = " << newEdge.size();
+                std::cout << "  changeUsedEdge: " << totUsedEdge - oriTotUsedEdge;
+                std::cout << "  totUsedEdge: " << totUsedEdge << endl;
             }
         }
     }
@@ -89,11 +92,12 @@ void Solution::reAllocateTran(int HLim)
 {
     int gap;
     if (strategy == 0)
-        gap = 1;       // (TODO，gap的机理需要被弄清楚)
+        gap = 1;
     else
-        gap = max(int(0.025 * T), 50);
+        gap = int(0.05 * T);
     if (gap > T)
         gap = T - 1;
+    ifIterSuccess = false;
     vector<int> totTranIDx(T, 0);
     vector<int> tranIDx(gap, 0);
     for (int i = 0; i < T; ++i)
@@ -156,6 +160,10 @@ void Solution::reAllocateTran(int HLim)
                 reloadTran(tranID, pileTmp1[j - i], pathTmp1[j - i]);
             }
             tryDeleteEdge(false);
+        }
+        else
+        {
+            ifIterSuccess = true;
         }
     }
 }

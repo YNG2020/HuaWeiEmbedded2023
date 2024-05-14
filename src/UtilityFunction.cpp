@@ -336,3 +336,13 @@ void calculateCost()
     }
     totCost = newEdge.size() * 1000000 + totM * 100 + totP;
 }
+
+// 统计所有业务上用掉的边的数量
+void sumUPAllUsedEdge()
+{
+    totUsedEdge = 0;
+    for (int i = 0; i < T; ++i)
+    {
+        totUsedEdge += trans[i].path.size();
+    }
+}

@@ -90,6 +90,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
     vector<vector<vector<int>>> totLastEdgesOfShortestPaths;                // 第一个维度代表新边被删除的顺序，
     vector<int> totDeleteEdgeID;                                            // 用于记录被删除的边的编号
 
+    int usedEdgeChangeNumInHere = 0;
     for (int idx = increasing ? 0 : n - 1; increasing ? (idx < n) : (idx >= 0); increasing ? ++idx : --idx)
     {
         int idxEdge = oriNewEdgePathID[idx]; // idxEdge为边在边集数组的编号（计数时，双向边视作同一边）  
@@ -110,7 +111,8 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         for (int k = 0; k < tranCnt; ++k)
         {
             lastEdgesOfShortestPaths[k] = trans[lastTranIDs[k]].lastEdgesOfShortestPaths;
-            recoverNetwork(lastTranIDs[k], lastPileIDs[k]);
+            usedEdgeChangeNumInHere -= trans[lastTranIDs[k]].path.size();
+            recoverNetwork(lastTranIDs[k], lastPileIDs[k]);            
         }
 
         bool findPath = true;
@@ -119,6 +121,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         for (int k = 0; k < tranCnt; ++k)
         {
             findPath = BFS_detectPath(trans[lastTranIDs[k]], idxEdge);
+            usedEdgeChangeNumInHere += trans[lastTranIDs[k]].path.size();
             if (findPath == false)
             {
                 stopK = k;
@@ -146,6 +149,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         {
             for (int k = 0; k < stopK; ++k)
             {   // 把试图寻路(BFS_detectPathSim)时，造成的对网络的影响消除
+                usedEdgeChangeNumInHere -= trans[lastTranIDs[k]].path.size();
                 recoverNetwork(lastTranIDs[k], tmpLastPileIDs[k]);
             }
 
@@ -159,6 +163,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
                 trans[lastTranIDs[k]].pileID = -1;
                 trans[lastTranIDs[k]].curA = D;
                 reloadTran(lastTranIDs[k], lastPileIDs[k], lastEdgesOfShortestPaths[k]);
+                usedEdgeChangeNumInHere += trans[lastTranIDs[k]].path.size();
             }
         }
     }
@@ -169,15 +174,18 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         {   // 将原本新添加的边idxEdge从newEdge中删除
             performDeleteEdge(totDeleteEdgeID[i] / 2, totLastTranID[i].size(), totLastTranID[i]);
         }
+        totUsedEdge = (totUsedEdge + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
         return true;
     }
-    else if (oriNewEdgeNum == (n - nDeleteEdge) && oriUsedEdgeNum > curUsedEdgeNum)
+    else if (oriNewEdgeNum == (n - nDeleteEdge) 
+        && (oriUsedEdgeNum > curUsedEdgeNum + usedEdgeChangeNumInHere))
     {   // 新增的边数不变，但是使用的边数减少，接受迁移
         for (int i = nDeleteEdge - 1; i >= 0; --i)
         {   // 将原本新添加的边idxEdge从newEdge中删除
             performDeleteEdge(totDeleteEdgeID[i] / 2, totLastTranID[i].size(), totLastTranID[i]);
         }
-        return true;;
+        totUsedEdge = (totUsedEdge + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
+        return true;
     }
     else
     {

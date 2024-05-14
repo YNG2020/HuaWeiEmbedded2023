@@ -6,6 +6,8 @@ int oriCntEdge = 0;
 int cntTran = 0;
 int strategy = 0;
 int totCost = 0;
+int totUsedEdge = 0;
+bool ifIterSuccess = true;
 
 int head[Configure::maxN];
 bool vis[Configure::maxN];

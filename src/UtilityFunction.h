@@ -10,4 +10,5 @@ void outputForJudger(); // 标准输出流，用于判题器
 void outputForFile();	// 文件输出流，用于文件
 void outputStatistic();	// 输出业务在网络上的分布的统计结果
 void calculateCost();	// 成本计算函数
+void sumUPAllUsedEdge();	// 统计所有业务上用掉的边的数量
 #endif

@@ -11,6 +11,8 @@ extern int oriCntEdge;		// 用于记录原始的cntEdge
 extern int cntTran;			// 当前业务数组所存储业务的数目
 extern int strategy;	// 加载业务顺序排序策略选择
 extern int totCost;		// 总成本
+extern int totUsedEdge;	// 总使用边数
+extern bool ifIterSuccess;	// 是否迭代成功
 
 extern int head[Configure::maxN];		// head[i]，表示以i为起点的在逻辑上的第一条边在边集数组的位置（编号）
 extern bool vis[Configure::maxN];		// 标识该点有无被访问过
