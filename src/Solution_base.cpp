@@ -91,7 +91,7 @@ void Solution::reAllocateTran(int HLim)
     if (strategy == 0)
         gap = 1;       // (TODO，gap的机理需要被弄清楚)
     else
-        gap = max(int(0.025 * T), 10);
+        gap = max(int(0.025 * T), 50);
     if (gap > T)
         gap = T - 1;
     vector<int> totTranIDx(T, 0);

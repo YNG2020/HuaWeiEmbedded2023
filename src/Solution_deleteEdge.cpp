@@ -241,12 +241,6 @@ void Solution::performDeleteEdge(int idxEdge, int tranCnt, const vector<int>& la
         loadMultiplier(lastTranIDs[k]);
     }
 
-    deleteEdge(trueEdgeID);
     deleteEdge(trueEdgeID + 1);
-
-    for (int k = 0; k < P; ++k)
-    {   // 该边已删除，就应对其进行封锁
-        edge[trueEdgeID].Pile[k] = T;
-        edge[trueEdgeID + 1].Pile[k] = T;   // 偶数+1
-    }
+    deleteEdge(trueEdgeID);
 }

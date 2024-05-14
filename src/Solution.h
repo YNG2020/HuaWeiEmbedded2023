@@ -37,7 +37,7 @@ public:
 	bool forTryDeleteEdge = true;	// 是否尝试删除边
 	bool ifLast = false;
 	float pathSizeLimRatio = 3.0;			// 限制找到的路径长度相对于理论上的最短路径长度的倍数
-	int cntLimit = 1000;						// 最大迭代次数
+	int cntLimit = 2500;					// 最大迭代次数
 	float reAllocateTranNumFunBase = 2.71;	// 重新分配业务时，要被重分配的业务的数量函数（一个指数函数）的基数
 	float reAllocateTranNumFunExpRatio = -0.005;	// 重新分配业务时，要被重分配的业务的数量函数（一个指数函数）的指数
 };

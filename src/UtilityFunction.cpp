@@ -43,6 +43,10 @@ void deleteEdge(int edgeID)
 		head[edge[edgeID].from] = next;
     if (next != -1)
         edge[next].pre = pre;
+    if (edgeID == cntEdge - 1)
+    {   // 说明要删除的边是最后一条边，尽可能回收利用被删边在边集数组中占用的空间
+        --cntEdge;
+    }
 }
 
 // 加业务函数
