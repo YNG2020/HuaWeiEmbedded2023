@@ -15,6 +15,7 @@ extern int totUsedEdge;	// 总使用边数
 extern bool ifIterSuccess;	// 是否迭代成功
 
 extern int head[Configure::maxN];		// head[i]，表示以i为起点的在逻辑上的第一条边在边集数组的位置（编号）
+extern int tail[Configure::maxN];		// tail[i]，表示以i为起点的在逻辑上的最后一条边在边集数组的位置（编号）
 extern bool vis[Configure::maxN];		// 标识该点有无被访问过
 extern std::vector<std::pair<int, int>> newEdge; // 记录新添加的边的起点和终点
 extern std::vector<int> newEdgePathID;		// 记录新边在边集中的位置（计数时，双向边视为同一边）

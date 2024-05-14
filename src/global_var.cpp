@@ -9,6 +9,7 @@ int totCost = 0;
 int totUsedEdge = 0;
 bool ifIterSuccess = true;
 
+int tail[Configure::maxN];
 int head[Configure::maxN];
 bool vis[Configure::maxN];
 std::vector<std::pair<int, int>> newEdge;

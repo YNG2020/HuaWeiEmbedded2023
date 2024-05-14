@@ -13,7 +13,6 @@ public:
 	void sumUptheAllocationPressure();
 	void BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge);
 	bool BFS_detectPath(Transaction& tran, int blockEdge);
-	bool BFS_detectPathSim(const Transaction& tran, int blockEdge);
 	void BFS_addNewEdge(Transaction& tran);
 	void BFS_tranStatistic(Transaction& tran);
 	void loadTran(int tranID, bool ifTryDeleteEdge);
@@ -35,7 +34,6 @@ public:
 	const bool forSortTran = true;		// 是否对加载业务进行排序
 	const bool forIter = true;			// 是否使用迭代策略
 	bool forTryDeleteEdge = true;	// 是否尝试删除边
-	bool ifLast = false;
 	float pathSizeLimRatio = 3.0;			// 限制找到的路径长度相对于理论上的最短路径长度的倍数
 	int cntLimit = 2500;					// 最大迭代次数
 	float reAllocateTranNumFunBase = 2.71;	// 重新分配业务时，要被重分配的业务的数量函数（一个指数函数）的基数

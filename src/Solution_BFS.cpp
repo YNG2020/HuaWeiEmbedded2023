@@ -35,7 +35,7 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
             curDis = nodes.front().dis;
             nodes.pop();
 
-            for (int i = head[from]; i != -1; i = edge[i].next)
+            for (int i = tail[from]; i != -1; i = edge[i].pre)
             {
                 if (edge[i].Pile[p] == -1)
                 {   // pile未被占用时，才试图走该边
@@ -114,7 +114,7 @@ bool Solution::BFS_detectPath(Transaction& tran, int blockEdge)
             curDis = nodes.front().dis;
             nodes.pop();
 
-            for (int i = head[from]; i != -1; i = edge[i].next)
+            for (int i = tail[from]; i != -1; i = edge[i].pre)
             {
                 if (i / 2 == blockEdge)
                     continue;
@@ -184,7 +184,7 @@ void Solution::BFS_addNewEdge(Transaction& tran)
         curDis = nodes.front().dis;
         nodes.pop();
 
-        for (int i = head[from]; i != -1; i = edge[i].next)
+        for (int i = tail[from]; i != -1; i = edge[i].pre)
         {
             to = edge[i].to;
             if (vis[to])
@@ -289,7 +289,7 @@ void Solution::BFS_tranStatistic(Transaction& tran)
         curDis = nodes.front().dis;
         nodes.pop();
 
-        for (int i = head[from]; i != -1; i = edge[i].next)
+        for (int i = tail[from]; i != -1; i = edge[i].pre)
         {
             to = edge[i].to;
             if (vis[to])
@@ -328,95 +328,3 @@ void Solution::BFS_tranStatistic(Transaction& tran)
     minPathSize[make_pair(start, end)] = tran.path.size();
 }
 
-// BFS_detectPath的模拟，不对trans的属性进行修改
-bool Solution::BFS_detectPathSim(const Transaction& tran, int blockEdge)
-{
-    int start = tran.start, end = tran.end;
-
-    bool findPath = false;
-    int minPathDist = Configure::INF;
-    int choosenP = -1;
-    vector<int> tmpPath;
-
-    for (int p = 0; p < P; ++p)
-    {
-        // 相关寻路变量的初始化
-        std::fill(tmpOKPath.begin(), tmpOKPath.end(), -1);      // 存储路径的数组初始化
-        memset(vis, 0, sizeof(vis));                            // vis数组初始化
-        queue<SimpleNode> nodes;
-        nodes.emplace(start, 0);
-        vis[start] = true;
-        int from = start, to = -1, curDis = 0;
-
-        while (!nodes.empty() && to != end)
-        {   // 队列为空即，所有点都被加入到生成树中去了
-            from = nodes.front().nodeID;
-            curDis = nodes.front().dis;
-            nodes.pop();
-
-            for (int i = head[from]; i != -1; i = edge[i].next)
-            {
-                if (i / 2 == blockEdge)
-                    continue;
-
-                if (edge[i].Pile[p] == -1)
-                {   // pile未被占用时，才试图走该边
-                    to = edge[i].to;
-                    if (vis[to])
-                        continue;
-                    vis[to] = true;
-                    tmpOKPath[to] = i;    // 记录下抵达路径点to的边的编号i
-
-                    if (to == end)
-                    {
-                        from = to;
-                        ++curDis;
-                        break;
-                    }
-                    else
-                    {
-                        nodes.emplace(to, curDis + 1);
-                    }
-
-                }
-            }
-        }
-        if (from == end)
-        {
-            int curNode = end, tmpDist = curDis;
-            if (tmpDist <= minPathDist)
-            {
-                minPathDist = tmpDist;
-                tmpPath = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
-                choosenP = p;
-            }
-            findPath = true;
-        }
-
-    }
-    if (findPath == false)
-    {   // 找不到路，直接返回
-        return false;
-    }
-
-    int curNode = tran.end;
-    while (tmpPath[curNode] != -1)
-    {
-        int edgeID = tmpPath[curNode];  // 存储于edge数组中真正的边的ID
-
-        edge[edgeID].Pile[choosenP] = tran.tranID;
-        ++edge[edgeID].usedPileCnt;
-
-        if (edgeID % 2) {   // 奇数-1
-            edge[edgeID - 1].Pile[choosenP] = tran.tranID;   // 双向边，两边一起处理
-            ++edge[edgeID - 1].usedPileCnt;
-        }
-        else {  // 偶数+1
-            edge[edgeID + 1].Pile[choosenP] = tran.tranID;
-            ++edge[edgeID + 1].usedPileCnt;
-        }
-
-        curNode = edge[tmpPath[curNode]].from;
-    }
-    return true;
-}

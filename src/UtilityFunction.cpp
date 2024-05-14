@@ -21,6 +21,8 @@ void addEdge(int s, int t, int d)
     for (int i = 0; i < P; ++i)
         edge[cntEdge].Pile[i] = -1;
     edge[cntEdge].usedPileCnt = 0;
+    if (tail[s] == -1)
+        tail[s] = cntEdge;
     head[s] = cntEdge++;    // 更新以s为起点的在逻辑上的第一条边在边集数组的位置（编号）
     if (d < minDist[make_pair(s, t)])
         minDist[make_pair(s, t)] = d;
@@ -69,6 +71,7 @@ void inputFromJudger()
     for (int i = 0; i < N; ++i)
     {   // 初始化一些东西
         head[i] = -1;
+        tail[i] = -1;
         for (int j = 0; j < P; ++j)
             node[i].Multiplier[j] = -1;
     }
@@ -112,6 +115,7 @@ void inputFromFile()
     for (int i = 0; i < N; ++i)
     {   // 初始化一些东西
         head[i] = -1;
+        tail[i] = -1;
         for (int j = 0; j < P; ++j)
             node[i].Multiplier[j] = -1;
     }

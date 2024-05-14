@@ -147,17 +147,17 @@ void Solution::reAllocateTran(int HLim)
                 recoverNetwork(tranID, pileTmp2[j]);
             }
 
-            for (int j = i, tranID; j < i + gap; ++j)
+            for (int j = 0, tranID; j < gap; ++j)
             {   // 重新加载所有的边
                 vector<int> nullVector, nullPath1, nullPath2;
-                tranID = tranIDx[j - i];
+                tranID = tranIDx[j];
                 trans[tranID].mutiplierID.swap(nullVector);
                 trans[tranID].path.swap(nullPath1);
                 trans[tranID].lastEdgesOfShortestPaths.swap(nullPath2);
 
                 trans[tranID].pileID = -1;
                 trans[tranID].curA = D;
-                reloadTran(tranID, pileTmp1[j - i], pathTmp1[j - i]);
+                reloadTran(tranID, pileTmp1[j], pathTmp1[j]);
             }
             tryDeleteEdge(false);
         }
@@ -349,8 +349,6 @@ void Solution::resetEverything()
 // 在重边之间迁移业务
 void Solution::transferTranInMultiEdge(Transaction& tran)
 {
-    if (!ifLast)
-        return;
     for (int i = 0; i < tran.path.size(); ++i)
     {
         int trueEdgeID = tran.path[i] * 2;
