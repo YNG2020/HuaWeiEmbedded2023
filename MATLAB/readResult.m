@@ -130,7 +130,8 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     fclose(fileID);
 
     % 记录每个业务在不考虑通道堵塞的条件下经过的边的编号
-    fileID = fopen('transactionMinPath.txt', 'r');
+    fileID = fopen('businessAllocation.txt', 'r');
+    T = fscanf(fileID, '%d', 1);
     transactionMinPath = cell(T, 1);
     for i = 1 : T
         m = fscanf(fileID, '%d', 1); % 读取每一个业务的经过的最小边的数量

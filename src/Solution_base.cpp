@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <vector>
 #include <random>
+#include <time.h>
 
 // Solution初始化
 Solution::Solution()
@@ -18,8 +19,12 @@ Solution::Solution()
 // 光线扩容难题总策略
 void Solution::runStrategy()
 {  
+    clock_t startTime, curTime, reAllocateTime;
+    double iterationUnitTime = 0;
+    startTime = clock();
+
     for (int i = 0; i < T; ++i)
-        BFS_tranStatistic(trans[i]);    // 先找到最短路径及其长度，并统计每条边的使用次数（edge[edgeId].statisticCnt）
+        BFS_tranStatistic(trans[i]);    // 先找到最短路径及其长度
     if (Configure::forStatisticOutput && !Configure::forJudger)
         outputStatistic();
     sortedTranIndices.resize(T);
@@ -31,26 +36,23 @@ void Solution::runStrategy()
     resetEverything();      // 把加载光业务对网络的影响全部清除
     preAllocateTran();      // 初分配
 
-    //sumUptheAllocationPressure();
-    //sortTran();
-    //resetEverything();
-    //preAllocateTran();
-
-    forTryDeleteEdge = true;
     tryDeleteEdge();
     tryDeleteEdge();
 
     sumUPAllUsedEdge();
+
+    curTime = clock();
+    double leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
+
     if (forIter)
     {
         if (Configure::forIterOutput && !Configure::forJudger)
             std::cout << "Original newEdge.size = " << newEdge.size() << endl;
         for (int cnt = 0; cnt < cntLimit; ++cnt)
-        {
-            double reallocateTranNum = T;
-            
+        {   
+            reAllocateTime = clock();
             int oriTotUsedEdge = totUsedEdge, oriNewEdge = newEdge.size();
-            reAllocateTran(reallocateTranNum);
+            reAllocateTran(T);
             if (Configure::forIterOutput && !Configure::forJudger)
             {
                 std::cout << "epoch: " << cnt;
@@ -58,13 +60,20 @@ void Solution::runStrategy()
                 std::cout << "  changeUsedEdge: " << totUsedEdge - oriTotUsedEdge;
                 std::cout << "  totUsedEdge: " << totUsedEdge << endl;
             }
+            curTime = clock();
+            iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
+            leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
+            if (leftTime < iterationUnitTime)
+				break;
         }
     }
 
-    if (!Configure::forJudger)
+    if (Configure::forIterOutput && !Configure::forJudger)
     {
         std::cout << "cntEdge: " << cntEdge << endl;
     }
+    //curTime = clock();
+    //std::cout << "Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s" << endl;
 }
 
 // 对业务路径在网络上的分布做一个统计（不考虑通道编号限制）
@@ -74,7 +83,6 @@ void Solution::sumUptheAllocationPressure()
     {
         Transaction& tran = trans[i];
         tran.expectedAllocationPressure = tran.path.size();
-        //tran.expectedAllocationPressure = (tran.path.size() + tran.path.size() - minPathSize[make_pair(tran.start, tran.end)]);
     }
 }
 
@@ -91,12 +99,10 @@ void Solution::preAllocateTran()
 void Solution::reAllocateTran(int HLim)
 {
     int gap;
-    if (strategy == 0)
+    if (!forBatchTranReAllocate)
         gap = 1;
     else
         gap = int(0.05 * T);
-    if (gap > T)
-        gap = T - 1;
     ifIterSuccess = false;
     vector<int> totTranIDx(T, 0);
     vector<int> tranIDx(gap, 0);

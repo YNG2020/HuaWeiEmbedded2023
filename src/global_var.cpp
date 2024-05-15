@@ -4,7 +4,6 @@ int N, M, T, P, D = 0;
 int cntEdge = 0;
 int oriCntEdge = 0;
 int cntTran = 0;
-int strategy = 0;
 int totCost = 0;
 int totUsedEdge = 0;
 bool ifIterSuccess = true;

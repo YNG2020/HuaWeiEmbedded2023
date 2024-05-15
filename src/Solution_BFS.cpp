@@ -59,7 +59,7 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
         }
         if (to == end)
         {   // 以下对找到的业务路径进行路径效率判断
-            if (curDis > pathSizeLimRatio * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
+            if (forNoDetour && curDis > pathSizeLimRatio * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
                 continue;
 
             int curNode = end, tmpDist = curDis;
@@ -271,7 +271,7 @@ void Solution::BFS_addNewEdge(Transaction& tran)
     std::reverse(tran.path.begin(), tran.path.end());
 }
 
-// 在不考虑通道堵塞的情况下，对业务Tran进行路径分配，以统计每条边的使用次数（edge[edgeId].statisticCnt）
+// 在不考虑通道堵塞的情况下，对业务Tran进行路径分配，以统计每个业务的路径长度
 void Solution::BFS_tranStatistic(Transaction& tran)
 {
     int start = tran.start, end = tran.end;
@@ -327,4 +327,3 @@ void Solution::BFS_tranStatistic(Transaction& tran)
     }
     minPathSize[make_pair(start, end)] = tran.path.size();
 }
-
