@@ -137,7 +137,6 @@ bool Solution::BFS_detectPath(Transaction& tran, int blockEdge)
                     {
                         nodes.emplace(to, curDis + 1);
                     }
-
                 }
             }
         }
@@ -201,8 +200,8 @@ void Solution::BFS_addNewEdge(Transaction& tran)
             else
                 nodes.emplace(to, curDis + 1);
         }
-
     }
+    vector<vector<pair<int, int>>> nodeEdgePair(P);
     for (int p = 0; p < P; ++p)
     {
         int curNode = end, tmpBlockEdgeCnt = 0;
@@ -210,18 +209,51 @@ void Solution::BFS_addNewEdge(Transaction& tran)
         {
             int edgeID = tmpOKPath[curNode];  // 存储于edge数组中真正的边的ID
             if (edge[edgeID].Pile[p] != -1)
-                ++tmpBlockEdgeCnt;
+            {
+    //            int from = edge[edgeID].from, to = edge[edgeID].to;
+    //            pair<int, int> nodePair = make_pair(from, to);
+    //            int multiEdgeSize = multiEdgeID[nodePair].size();
+    //            int i = 0;
+    //            for (; i < multiEdgeSize; ++i)
+    //            {
+				//	int multiEdgeId = multiEdgeID[nodePair][i];
+    //                if (edge[multiEdgeId].Pile[p] == -1)
+    //                {   // 这条重边在p通道上没有被占用，则把它更新为最短路径上的边
+    //                    if (edge[multiEdgeId].from == from && edge[multiEdgeId].to == to)
+    //                    {
+    //                        tmpOKPath[curNode] = multiEdgeId;
+    //                        nodeEdgePair[p].emplace_back(curNode, multiEdgeId);
+    //                    }
+    //                    else
+    //                    {
+    //                        tmpOKPath[curNode] = multiEdgeId + 1;
+    //                        nodeEdgePair[p].emplace_back(curNode, multiEdgeId + 1);
+    //                    }
+    //                    break;
+    //                }
+				//}
+                //if (i == multiEdgeSize)
+                    ++tmpBlockEdgeCnt;
+            }
+                
             curNode = edge[edgeID].from;
         }
 
         if (tmpBlockEdgeCnt < minBlockEdgeCnt)
         {   // 选需要加边数最少的通道
             minBlockEdgeCnt = tmpBlockEdgeCnt;
-            tran.lastEdgesOfShortestPaths = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
             choosenP = p;
         }
     }
 
+    for (int i = 0; i < nodeEdgePair[choosenP].size(); ++i)
+    {   // 更新最短路径上的边，更新为最佳重边（无须在该重边上执行加边操作）
+        int nodeID = nodeEdgePair[choosenP][i].first;
+        int edgeID = nodeEdgePair[choosenP][i].second;
+        tmpOKPath[nodeID] = edgeID;
+    }
+
+    tran.lastEdgesOfShortestPaths = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
     int curNode = end;
     tran.pileID = choosenP;
     while (tran.lastEdgesOfShortestPaths[curNode] != -1)

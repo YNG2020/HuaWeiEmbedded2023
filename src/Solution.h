@@ -31,11 +31,11 @@ public:
 	vector<int> tmpOKPath;      // 用于存储在某个通道下找到的路径
 
 	// 策略参数
-	bool forSortTran = false;		// 是否对加载业务进行排序
-	bool forTryDeleteEdge = false;	// 是否尝试删除边
-	bool forNoDetour = false;		// 是否禁止绕行，即是否使用pathSizeLimRatio参数
-	bool forIter = false;			// 是否使用迭代策略
-	bool forBatchTranReAllocate = false;		// 是否批量重新分配业务
+	bool forSortTran = true;		// 是否对加载业务进行排序
+	bool forTryDeleteEdge = true;	// 是否尝试删除边
+	bool forNoDetour = true;		// 是否禁止绕行，即是否使用pathSizeLimRatio参数
+	bool forIter = true;			// 是否使用迭代策略
+	bool forBatchTranReAllocate = true;		// 是否批量重新分配业务
 	float pathSizeLimRatio = 3.0;			// 限制找到的路径长度相对于理论上的最短路径长度的倍数
 	int cntLimit = 2500;					// 最大迭代次数
 };

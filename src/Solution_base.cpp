@@ -63,8 +63,8 @@ void Solution::runStrategy()
             curTime = clock();
             iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
             leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
-            if (leftTime < iterationUnitTime)
-				break;
+    //        if (leftTime < iterationUnitTime)
+				//break;
         }
     }
 
@@ -72,8 +72,9 @@ void Solution::runStrategy()
     {
         std::cout << "cntEdge: " << cntEdge << endl;
     }
-    //curTime = clock();
-    //std::cout << "Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s" << endl;
+    curTime = clock();
+    if (!Configure::forJudger)
+        std::cout << "Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s" << endl;
 }
 
 // 对业务路径在网络上的分布做一个统计（不考虑通道编号限制）
@@ -381,7 +382,7 @@ void Solution::transferTranInMultiEdge(Transaction& tran)
                 
                 tran.path[i] = edgeID / 2;
                 for (int k = 0; k < N; ++k)
-                {
+                {   // 将tran.lastEdgesOfShortestPaths[k]上的边编号替换为edgeID或edgeID+1
                     if (edge[tran.lastEdgesOfShortestPaths[k]].to == edge[edgeID].to && edge[tran.lastEdgesOfShortestPaths[k]].from == edge[edgeID].from)
                     {
                         tran.lastEdgesOfShortestPaths[k] = edgeID;
