@@ -68,13 +68,13 @@ void Solution::runStrategy()
         }
     }
 
-    if (Configure::forIterOutput && !Configure::forJudger)
-    {
-        std::cout << "cntEdge: " << cntEdge << endl;
-    }
+    //if (Configure::forIterOutput && !Configure::forJudger)
+    //{
+    //    std::cout << "cntEdge: " << cntEdge << endl;
+    //}
     curTime = clock();
     if (!Configure::forJudger)
-        std::cout << "Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s" << endl;
+        std::cout << "Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s  ";
 }
 
 // 对业务路径在网络上的分布做一个统计（不考虑通道编号限制）

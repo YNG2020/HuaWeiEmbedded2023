@@ -23,6 +23,7 @@ int main()
     //solution.forTryDeleteEdge = atoi(argv[3]);
     //solution.forIter = atoi(argv[4]);
     //solution.forBatchTranReAllocate = atoi(argv[5]);
+    //solution.forTransferEdgeInAddNewEdge = atoi(argv[6]);
     solution.runStrategy();     // 运行总策略
 
     if (Configure::forJudger)   // 用于评测
@@ -31,6 +32,6 @@ int main()
         outputForFile();
 
     //calculateCost();
-    //return newEdge.size();
-    return 0;
+    return newEdge.size();
+    //return 0;
 }
