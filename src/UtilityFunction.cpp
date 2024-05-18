@@ -94,12 +94,14 @@ void inputFromJudger()
     for (int i = 0; i < M; ++i)
     {
         oriHead[i] = head[i];
+        oriTail[i] = tail[i];
     }
     for (int i = 0; i < cntEdge; ++i)
     {
 		oriEdge[i] = edge[i];
     }
     oriCntEdge = cntEdge;
+    oriMultiEdgeID = multiEdgeID;
 }
 
 // 文件输入流，用于文件
@@ -138,12 +140,14 @@ void inputFromFile()
     for (int i = 0; i < M; ++i)
     {
         oriHead[i] = head[i];
+        oriTail[i] = tail[i];
     }
     for (int i = 0; i < cntEdge; ++i)
     {
         oriEdge[i] = edge[i];
     }
     oriCntEdge = cntEdge;
+    oriMultiEdgeID = multiEdgeID;
 }
 
 // 标准输出流，用于判题器
@@ -258,7 +262,7 @@ void outputForFile()
     myCout.close();
     totCost = n;
     totCost = n * 1000000 + totM * 100 + totP;
-    std::cerr << "Total Cost = " << totCost << "\n";
+    std::cerr << "Total Cost = " << totCost;
     // 以下输出边集数组的每条边（原有边和新加入的边）的通道分配情况
     ofstream myCout1("transactionInPile.txt");
     if (!myCout1.is_open())

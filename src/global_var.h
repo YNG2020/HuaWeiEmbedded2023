@@ -26,6 +26,8 @@ extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minDist;		// 
 extern unordered_map<pair<int, int>, int, HashFunc_t, Equalfunc_t> minPathSize;	// 两个节点之间经过的最下边数
 extern vector<int> sortedTranIndices;	// 业务按照期望分配压力排序后的索引
 extern int oriHead[Configure::maxN];		// 用于记录原始的head数组
+extern int oriTail[Configure::maxN];		// 用于记录原始的tail数组
 extern Edge oriEdge[Configure::maxM];		// 用于记录原始的edge数组
 extern unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> multiEdgeID;		// 用于记录各个重边在边集数组中的编号
+extern unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> oriMultiEdgeID;		// 用于记录原始各个重边在边集数组中的编号
 #endif    

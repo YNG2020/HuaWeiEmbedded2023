@@ -210,39 +210,35 @@ void Solution::BFS_addNewEdge(Transaction& tran)
             int edgeID = tmpOKPath[curNode];  // 存储于edge数组中真正的边的ID
             if (edge[edgeID].Pile[p] != -1)
             {
-                if (forTransferEdgeInAddNewEdge)
-                {
-                    int from = edge[edgeID].from, to = edge[edgeID].to;
-                    pair<int, int> nodePair = make_pair(from, to);
-                    int multiEdgeSize = multiEdgeID[nodePair].size();
-                    int i = 0;
-                    for (; i < multiEdgeSize; ++i)
-                    {
-                        int multiEdgeId = multiEdgeID[nodePair][i];
-                        if (edge[multiEdgeId].Pile[p] == -1)
-                        {   // 这条重边在p通道上没有被占用，则把它更新为最短路径上的边
-                            if (edge[multiEdgeId].from == from && edge[multiEdgeId].to == to)
-                            {
-                                tmpOKPath[curNode] = multiEdgeId;
-                                nodeEdgePair[p].emplace_back(curNode, multiEdgeId);
-                            }
-                            else
-                            {
-                                tmpOKPath[curNode] = multiEdgeId + 1;
-                                nodeEdgePair[p].emplace_back(curNode, multiEdgeId + 1);
-                            }
-                            break;
+                int from = edge[edgeID].from, to = edge[edgeID].to;
+                pair<int, int> nodePair = make_pair(from, to);
+                int multiEdgeSize = multiEdgeID[nodePair].size();
+                int i = 0;
+                for (; i < multiEdgeSize; ++i)
+                {   // 找到在通道p上空闲的重边
+                    int multiEdgeId = multiEdgeID[nodePair][i];
+                    if (edge[multiEdgeId].Pile[p] == -1)
+                    {   // 这条重边在p通道上没有被占用，则把它更新为最短路径上的边
+                        if (edge[multiEdgeId].from == from && edge[multiEdgeId].to == to)
+                        {
+                            tmpOKPath[curNode] = multiEdgeId;
+                            nodeEdgePair[p].emplace_back(curNode, multiEdgeId);
                         }
+                        else
+                        {
+                            tmpOKPath[curNode] = multiEdgeId + 1;
+                            nodeEdgePair[p].emplace_back(curNode, multiEdgeId + 1);
+                        }
+                        break;
                     }
-                    if (i == multiEdgeSize)
-                        ++tmpBlockEdgeCnt;
                 }
-                else
+                if (i == multiEdgeSize)
                     ++tmpBlockEdgeCnt;
-
             }
                 
             curNode = edge[edgeID].from;
+            if (curNode == -1)
+                int a = 1;
         }
 
         if (tmpBlockEdgeCnt < minBlockEdgeCnt)

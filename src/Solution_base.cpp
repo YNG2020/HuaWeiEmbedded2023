@@ -34,7 +34,15 @@ void Solution::runStrategy()
     sumUptheAllocationPressure();     // 求和分配光业务时，每条光业务的期望分配压力
     sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
     resetEverything();      // 把加载光业务对网络的影响全部清除
-    preAllocateTran();      // 初分配
+    preAllocateTran();      // 初分配    
+    
+    if (forDoubleSortTran)
+    {
+        sumUptheAllocationPressure();     // 求和分配光业务时，每条光业务的期望分配压力
+        sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
+        resetEverything();      // 把加载光业务对网络的影响全部清除
+        preAllocateTran();      // 初分配
+    }
 
     tryDeleteEdge();
     tryDeleteEdge();
@@ -44,11 +52,12 @@ void Solution::runStrategy()
     curTime = clock();
     double leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
 
+    int cnt = 0;
     if (forIter)
     {
         if (Configure::forIterOutput && !Configure::forJudger)
             std::cout << "Original newEdge.size = " << newEdge.size() << endl;
-        for (int cnt = 0; cnt < cntLimit; ++cnt)
+        for (; cnt < cntLimit; ++cnt)
         {   
             reAllocateTime = clock();
             int oriTotUsedEdge = totUsedEdge, oriNewEdge = newEdge.size();
@@ -63,18 +72,20 @@ void Solution::runStrategy()
             curTime = clock();
             iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
             leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
-    //        if (leftTime < iterationUnitTime)
-				//break;
+            if (leftTime < iterationUnitTime)
+				break;
         }
     }
 
-    //if (Configure::forIterOutput && !Configure::forJudger)
-    //{
-    //    std::cout << "cntEdge: " << cntEdge << endl;
-    //}
+    if (!Configure::forJudger)
+    {
+        std::cout << "totUsedEdge: " << totUsedEdge;
+    }
     curTime = clock();
     if (!Configure::forJudger)
-        std::cout << "Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s  ";
+        std::cout << "  Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s  ";
+    if (!Configure::forJudger)
+        std::cout << "Iteration Number: " << cnt << " ";
 }
 
 // 对业务路径在网络上的分布做一个统计（不考虑通道编号限制）
@@ -345,12 +356,14 @@ void Solution::resetEverything()
     for (int i = 0; i < M; ++i)
     {
         head[i] = oriHead[i];
+        tail[i] = oriTail[i];
     }
     for (int i = 0; i < cntEdge; ++i)
     {
         edge[i] = oriEdge[i];
     }
     cntEdge = oriCntEdge;
+    multiEdgeID = oriMultiEdgeID;
 }
 
 // 在重边之间迁移业务
