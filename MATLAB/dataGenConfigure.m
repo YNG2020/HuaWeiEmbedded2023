@@ -27,9 +27,9 @@ classdef dataGenConfigure < handle
         connected_8 = false;    % 在环化时，是否往8连通方向进行搜索，否则4连通
         
         % 往光网络上添加光业务的参数
-        p_distMode = [0.05, 0.3 0.35 0.2 0.1];
+        p_distMode = [0.00, 0.0 0.35 0.5 0.15];
         num_distMode = 0;   % 交由Constructor初始化
-        transactionPressure = 0.25; % 业务压力系数，控制着相同业务的重复次数，必须大于0小于1
+        transactionPressure = 0.99; % 业务压力系数，控制着相同业务的重复次数，必须大于0小于1
 
         % 控制是否展示对数据进行可视化
         isVisualization = false;

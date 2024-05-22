@@ -201,6 +201,13 @@ void Solution::BFS_addNewEdge(Transaction& tran)
     vis[start] = true;
     int from = start, to = -1, curDis = 0;
 
+    if (forAddingEdge && tran.tranID == 73)
+    {
+        ofstream myCout("BFS_Adding_Edge.txt", std::ios::app);
+        myCout << tran.tranID << endl;
+        myCout.close();
+    }
+
     while (!nodes.empty() && to != end)
     {
         from = nodes.front().nodeID;
@@ -226,6 +233,8 @@ void Solution::BFS_addNewEdge(Transaction& tran)
         }
     }
     vector<vector<pair<int, int>>> nodeEdgePair(P);
+    vector<vector<pair<int, int>>> nodePairStore(P);
+    int maxMultiEdgeSize = 0;
     for (int p = 0; p < P; ++p)
     {
         int curNode = end, tmpBlockEdgeCnt = 0;
@@ -257,10 +266,46 @@ void Solution::BFS_addNewEdge(Transaction& tran)
                     }
                 }
                 if (i == multiEdgeSize)
+                {
                     ++tmpBlockEdgeCnt;
+                    nodePairStore[p].emplace_back(nodePair);
+                }
+                    
             }
                 
             curNode = edge[edgeID].from;
+        }
+
+        if (forAddingEdge && tran.tranID == 73)
+        {
+            for (int i = 0; i < nodeEdgePair[p].size(); ++i)
+            {   // 更新最短路径上的边，更新为最佳重边（无须在该重边上执行加边操作）
+                int nodeID = nodeEdgePair[p][i].first;
+                int edgeID = nodeEdgePair[p][i].second;
+                tmpOKPath[nodeID] = edgeID;
+            }
+
+            ofstream myCout("BFS_Adding_Edge.txt", std::ios::app);
+            backtrackPathAndPrint(tran, tmpOKPath, p, myCout);
+
+            myCout << nodePairStore[p].size() << endl;
+            for (int i = 0; i < nodePairStore[p].size(); ++i)
+            {
+                pair<int, int> nodePair = nodePairStore[p][i];
+                int multiEdgeSize = multiEdgeID[nodePair].size();
+                for (int j = 0; j < multiEdgeSize; ++j)
+                {
+                    int multiEdgeId = multiEdgeID[nodePair][j];
+                    myCout << multiEdgeId / 2;
+                    if (j != multiEdgeSize - 1)
+						myCout << " ";
+                }
+                myCout << endl;
+                maxMultiEdgeSize = max(maxMultiEdgeSize, multiEdgeSize);
+
+            }
+
+            myCout.close();
         }
 
         if (tmpBlockEdgeCnt < minBlockEdgeCnt)
@@ -268,6 +313,12 @@ void Solution::BFS_addNewEdge(Transaction& tran)
             minBlockEdgeCnt = tmpBlockEdgeCnt;
             choosenP = p;
         }
+    }
+
+    if (forAddingEdge && tran.tranID == 73)
+    {
+        outputForFile();
+        exit(0);
     }
 
     for (int i = 0; i < nodeEdgePair[choosenP].size(); ++i)

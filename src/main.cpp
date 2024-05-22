@@ -27,7 +27,9 @@ int main()
     //solution.forNoDetour = atoi(argv[6]);
 
     ofstream myCout("BFS_Finding_Path.txt");
+    ofstream myCout1("BFS_Adding_Edge.txt");
     myCout.close();
+    myCout1.close();
     solution.runStrategy();     // 运行总策略
 
     if (Configure::forJudger)   // 用于评测

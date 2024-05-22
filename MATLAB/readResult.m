@@ -48,7 +48,7 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     totM = 0; totN = 0;
     
     % 读取 T 行，每行前三个整数𝑝𝑗、𝑚𝑗、𝑛𝑗，表示第 j 条业务的通道编号为𝑝𝑗、经过的边数量为𝑚𝑗、经过的放大器个数为𝑛𝑗
-    newEdgeIdx = zeros(M, 1);     % 用于存储新边的编号
+    newEdgeIdx = nan(M, 1);     % 用于存储新边的编号
     for i = 1 : M
         newEdgeIdx(i) = i - 1;
     end
@@ -90,6 +90,14 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
             edgeStat(edgeID, 5 + idx) = edgeStat(edgeID, 5 + idx) + 1;  % 对于重边的情况，分情况统计
         end
         amplifiers_passed = fscanf(fileID, '%d', n); % 读取经过的放大器所在节点的编号
+    end
+
+    for i = 1 : M
+        for j = 2 : size(newEdgeIdx, 2)
+            if newEdgeIdx(i, j) == 0
+                newEdgeIdx(i, j) = nan;
+            end
+        end
     end
     
     % edgeStat的后续处理

@@ -39,7 +39,8 @@ public:
 	bool forNoDetour = false;		// 是否禁止绕行，即是否使用pathSizeLimRatio参数
 
 	// 可视化参数
-	bool forBFSFindingPath = true;	// 是否使用可视化基本策略的BFS寻路过程
+	bool forBFSFindingPath = false;	// 是否使用可视化基本策略的BFS寻路过程
+	bool forAddingEdge = true;	// 是否使用可视化基本策略的添加边过程
 		
 	//bool forSortTran = true;		// 是否对加载业务进行排序
 	//bool forDoubleSortTran = true;		// 是否对加载业务进行二次排序
