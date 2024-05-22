@@ -48,8 +48,11 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     totM = 0; totN = 0;
     
     % 读取 T 行，每行前三个整数𝑝𝑗、𝑚𝑗、𝑛𝑗，表示第 j 条业务的通道编号为𝑝𝑗、经过的边数量为𝑚𝑗、经过的放大器个数为𝑛𝑗
-    newEdgeIdx = ones(M, max(edgeStat(:, 4))) * 1000000;     % 用于存储新边的编号，先初始化为一个不可能的值
-    newEdgeTmpCnt = zeros(M, 1);                   % 与上述数组配套使用
+    newEdgeIdx = zeros(M, 1);     % 用于存储新边的编号
+    for i = 1 : M
+        newEdgeIdx(i) = i - 1;
+    end
+    newEdgeTmpCnt = ones(M, 1);                   % 与上述数组配套使用
     
     edgeStat = [edgeStat zeros(M, max(edgeStat(:, 4) + 2))];     % 用于统计每一条重边上的业务量，并存储利用率最低的重边和第几次出现重边时利用率最低
     for i = 1 : T
@@ -117,7 +120,7 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     fclose(fileID);
     sortedEdgeStat = sortrows(edgeStat, [-4 5 3 1 2]);
 
-    % 读取每条边上的通道的使用情况，前三个数是边的起点，终点，使用的边数，剩下的P个数是占用某个通道的业务编号
+    % 读取每条边上的通道的使用情况，前三个数是边的起点，终点，被占用的通道数，剩下的P个数是占用某个通道的业务编号
     edgePile = zeros(M + newEdgesCnt, 3 + P);
     fileID = fopen('transactionInPile.txt', 'r');
     for i = 1 : M + newEdgesCnt

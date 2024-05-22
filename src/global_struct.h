@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "Configure.h"
+#include "configure.h"
 #include <unordered_map>
 
 using namespace std;

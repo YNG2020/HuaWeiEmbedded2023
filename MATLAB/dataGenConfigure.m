@@ -5,7 +5,7 @@ classdef dataGenConfigure < handle
         NMAX = 5000; NMIN = 2;
         MMAX = 5000; MMIN = 2;
         TMAX = 10000; TMIN = 2;
-        PMAX = 80; PMIN = 2;
+        PMAX = 10; PMIN = 10;
         DMAX = 1000; DMIN = 2;
         N = 1; M = 1; T = 1; P = 1; D = 1;  % 记录实际的NMTPD
 
@@ -29,7 +29,7 @@ classdef dataGenConfigure < handle
         % 往光网络上添加光业务的参数
         p_distMode = [0.05, 0.3 0.35 0.2 0.1];
         num_distMode = 0;   % 交由Constructor初始化
-        transactionPressure = 0.5; % 业务压力系数，控制着相同业务的重复次数，必须大于0小于1
+        transactionPressure = 0.25; % 业务压力系数，控制着相同业务的重复次数，必须大于0小于1
 
         % 控制是否展示对数据进行可视化
         isVisualization = false;

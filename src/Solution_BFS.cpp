@@ -5,6 +5,7 @@
 #include <queue>
 #include <algorithm>
 #include <vector>
+#include <fstream>
 #include <cstring>
 
 // 考虑一边多通道的情况下，寻找业务tran的起点到终点的路径（不一定是最少边数路径，因为有可能边的通道被完全占用）
@@ -17,6 +18,13 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
     bool findPath = false;
     int minPathDist = Configure::INF;
     int choosenP = -1;
+
+    if (forBFSFindingPath && tran.tranID == 51)
+    {
+        ofstream myCout("BFS_Finding_Path.txt", std::ios::app);
+        myCout << tran.tranID << endl;
+        myCout.close();
+    }
 
     // P个编号的通道都搜索一次
     for (int p = 0; p < P; ++p)
@@ -57,6 +65,7 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
                 }
             }
         }
+
         if (to == end)
         {   // 以下对找到的业务路径进行路径效率判断
             if (forNoDetour && curDis > pathSizeLimRatio * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
@@ -70,9 +79,24 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
                 choosenP = p;
             }
             findPath = true;
+            
+            if (forBFSFindingPath && tran.tranID == 51)
+            {
+                ofstream myCout("BFS_Finding_Path.txt", std::ios::app);
+                backtrackPathAndPrint(tran, tmpOKPath, p, myCout);
+                myCout.close();
+            }
+            
         }
 
     }
+
+    if (forBFSFindingPath && tran.tranID == 51)
+    {
+        outputForFile();
+        exit(0);
+    }
+    
     if (findPath == false)
     {   // 找不到路，需要构造新边
         if (ifTryDeleteEdge)
@@ -237,8 +261,6 @@ void Solution::BFS_addNewEdge(Transaction& tran)
             }
                 
             curNode = edge[edgeID].from;
-            if (curNode == -1)
-                int a = 1;
         }
 
         if (tmpBlockEdgeCnt < minBlockEdgeCnt)

@@ -2,7 +2,7 @@
 #define GLOBAL_VARS_H
 #include <vector>
 #include <map>
-#include "Configure.h"
+#include "configure.h"
 #include "global_struct.h"
 
 extern int N, M, T, P, D;	// 节点数量N，连边数量M，业务数量T，单边通道数量P、最大衰减距离D

@@ -1,5 +1,5 @@
 #include "UtilityFunction.h"
-#include "Configure.h"
+#include "configure.h"
 #include "global_var.h"
 #include "global_struct.h"
 #include <iostream>
