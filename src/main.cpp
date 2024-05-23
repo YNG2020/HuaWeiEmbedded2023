@@ -10,18 +10,22 @@
 
 using namespace std;
 
-int main()
-//int main(int argc, char* argv[])
+//int main()
+int main(int argc, char* argv[])
 {
-    //strategy = atoi(argv[1]);
-    strategy = 1;
-
     if (Configure::forJudger)   // 用于评测
         inputFromJudger();
     else                        // 用于本地测试
         inputFromFile();
-
     Solution solution;
+    
+    solution.forSortTran = atoi(argv[1]);
+    solution.forDoubleSortTran = atoi(argv[2]);
+    solution.forTryDeleteEdge = atoi(argv[3]);
+    solution.forIter = atoi(argv[4]);
+    solution.forBatchTranReAllocate = atoi(argv[5]);
+    solution.forNoDetour = atoi(argv[6]);
+
     solution.runStrategy();     // 运行总策略
 
     if (Configure::forJudger)   // 用于评测
@@ -29,5 +33,7 @@ int main()
     else                        // 用于本地测试
         outputForFile();
 
-    return totCost;
+    //calculateCost();
+    return newEdge.size() * 1000000 + totUsedEdge;
+    //return 0;
 }

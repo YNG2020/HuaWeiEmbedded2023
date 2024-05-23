@@ -59,7 +59,7 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
         }
         if (to == end)
         {   // 以下对找到的业务路径进行路径效率判断
-            if (curDis > pathSizeLimRatio * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
+            if (forNoDetour && curDis > pathSizeLimRatio * minPathSize[make_pair(start, end)])  // 找到的路径长度太长，宁愿不要
                 continue;
 
             int curNode = end, tmpDist = curDis;
@@ -137,7 +137,6 @@ bool Solution::BFS_detectPath(Transaction& tran, int blockEdge)
                     {
                         nodes.emplace(to, curDis + 1);
                     }
-
                 }
             }
         }
@@ -201,8 +200,8 @@ void Solution::BFS_addNewEdge(Transaction& tran)
             else
                 nodes.emplace(to, curDis + 1);
         }
-
     }
+    vector<vector<pair<int, int>>> nodeEdgePair(P);
     for (int p = 0; p < P; ++p)
     {
         int curNode = end, tmpBlockEdgeCnt = 0;
@@ -210,18 +209,53 @@ void Solution::BFS_addNewEdge(Transaction& tran)
         {
             int edgeID = tmpOKPath[curNode];  // 存储于edge数组中真正的边的ID
             if (edge[edgeID].Pile[p] != -1)
-                ++tmpBlockEdgeCnt;
+            {
+                int from = edge[edgeID].from, to = edge[edgeID].to;
+                pair<int, int> nodePair = make_pair(from, to);
+                int multiEdgeSize = multiEdgeID[nodePair].size();
+                int i = 0;
+                for (; i < multiEdgeSize; ++i)
+                {   // 找到在通道p上空闲的重边
+                    int multiEdgeId = multiEdgeID[nodePair][i];
+                    if (edge[multiEdgeId].Pile[p] == -1)
+                    {   // 这条重边在p通道上没有被占用，则把它更新为最短路径上的边
+                        if (edge[multiEdgeId].from == from && edge[multiEdgeId].to == to)
+                        {
+                            tmpOKPath[curNode] = multiEdgeId;
+                            nodeEdgePair[p].emplace_back(curNode, multiEdgeId);
+                        }
+                        else
+                        {
+                            tmpOKPath[curNode] = multiEdgeId + 1;
+                            nodeEdgePair[p].emplace_back(curNode, multiEdgeId + 1);
+                        }
+                        break;
+                    }
+                }
+                if (i == multiEdgeSize)
+                    ++tmpBlockEdgeCnt;
+            }
+                
             curNode = edge[edgeID].from;
+            if (curNode == -1)
+                int a = 1;
         }
 
         if (tmpBlockEdgeCnt < minBlockEdgeCnt)
         {   // 选需要加边数最少的通道
             minBlockEdgeCnt = tmpBlockEdgeCnt;
-            tran.lastEdgesOfShortestPaths = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
             choosenP = p;
         }
     }
 
+    for (int i = 0; i < nodeEdgePair[choosenP].size(); ++i)
+    {   // 更新最短路径上的边，更新为最佳重边（无须在该重边上执行加边操作）
+        int nodeID = nodeEdgePair[choosenP][i].first;
+        int edgeID = nodeEdgePair[choosenP][i].second;
+        tmpOKPath[nodeID] = edgeID;
+    }
+
+    tran.lastEdgesOfShortestPaths = vector<int>(tmpOKPath.begin(), tmpOKPath.end());
     int curNode = end;
     tran.pileID = choosenP;
     while (tran.lastEdgesOfShortestPaths[curNode] != -1)
@@ -271,7 +305,7 @@ void Solution::BFS_addNewEdge(Transaction& tran)
     std::reverse(tran.path.begin(), tran.path.end());
 }
 
-// 在不考虑通道堵塞的情况下，对业务Tran进行路径分配，以统计每条边的使用次数（edge[edgeId].statisticCnt）
+// 在不考虑通道堵塞的情况下，对业务Tran进行路径分配，以统计每个业务的路径长度
 void Solution::BFS_tranStatistic(Transaction& tran)
 {
     int start = tran.start, end = tran.end;
@@ -327,4 +361,3 @@ void Solution::BFS_tranStatistic(Transaction& tran)
     }
     minPathSize[make_pair(start, end)] = tran.path.size();
 }
-

@@ -34,7 +34,6 @@ public:
         usedPileCnt = 0;
         Pile = vector<int>(Configure::maxP, -1);
     }
-
 };
 
 class Transaction {

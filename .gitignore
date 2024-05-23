@@ -7,5 +7,10 @@
 .png
 .txt
 MATLAB/businessAllocation.txt
+<<<<<<< HEAD
 MATLAB/BFS_Adding_Edge.txt
 MATLAB/BFS_Finding_Path.txt
+=======
+MATLAB/BFS_Finding_Path.txt
+MATLAB/BFS_Adding_Edge.txt
+>>>>>>> data_analysis
