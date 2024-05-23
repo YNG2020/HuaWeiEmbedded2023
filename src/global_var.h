@@ -11,6 +11,7 @@ extern int oriCntEdge;		// 用于记录原始的cntEdge
 extern int cntTran;			// 当前业务数组所存储业务的数目
 extern int totCost;		// 总成本
 extern int totUsedEdge;	// 总使用边数
+extern int minTotUsedEdge;	// 理论最小总使用边数
 extern bool ifIterSuccess;	// 是否迭代成功
 
 extern int head[Configure::maxN];		// head[i]，表示以i为起点的在逻辑上的第一条边在边集数组的位置（编号）
@@ -30,4 +31,6 @@ extern int oriTail[Configure::maxN];		// 用于记录原始的tail数组
 extern Edge oriEdge[Configure::maxM];		// 用于记录原始的edge数组
 extern unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> multiEdgeID;		// 用于记录各个重边在边集数组中的编号
 extern unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> oriMultiEdgeID;		// 用于记录原始各个重边在边集数组中的编号
+extern vector<bool> recordIterSuccess;		// 记录每次迭代是否成功
+extern vector<int> reallocatedTranSta;		// 记录重新分配的业务的状态
 #endif    

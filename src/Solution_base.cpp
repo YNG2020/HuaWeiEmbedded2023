@@ -50,6 +50,8 @@ void Solution::runStrategy()
     sumUPAllUsedEdge();
 
     curTime = clock();
+    recordIterSuccess.resize(cntLimit * (T / int(reAllocateRatio * T)), false);
+    reallocatedTranSta.resize(cntLimit * (T / int(reAllocateRatio * T)), 0);
     double leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
 
     int cnt = 0;
@@ -69,18 +71,14 @@ void Solution::runStrategy()
                 std::cout << "  changeUsedEdge: " << totUsedEdge - oriTotUsedEdge;
                 std::cout << "  totUsedEdge: " << totUsedEdge << endl;
             }
-            curTime = clock();
-            iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
-            leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
-            if (leftTime < iterationUnitTime)
-				break;
+    //        curTime = clock();
+    //        iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
+    //        leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
+    //        if (leftTime < iterationUnitTime)
+				//break;
         }
     }
 
-    if (!Configure::forJudger)
-    {
-        std::cout << "totUsedEdge: " << totUsedEdge;
-    }
     curTime = clock();
     if (!Configure::forJudger)
         std::cout << "  Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s  ";
@@ -104,85 +102,6 @@ void Solution::preAllocateTran()
     for (int i = 0; i < T; ++i)
     {
         loadTran(sortedTranIndices[i], true);
-    }
-}
-
-// 试图重新分配业务到光网络中
-void Solution::reAllocateTran(int HLim)
-{
-    int gap;
-    if (!forBatchTranReAllocate)
-        gap = 1;
-    else
-        gap = int(0.05 * T);
-    ifIterSuccess = false;
-    vector<int> totTranIDx(T, 0);
-    vector<int> tranIDx(gap, 0);
-    for (int i = 0; i < T; ++i)
-        totTranIDx[i] = i;
-    for (int i = 0; i + gap < HLim; i = i + gap)
-    {
-        std::mt19937 rng(42); // 设置随机数种子  
-        random_shuffle(totTranIDx.begin(), totTranIDx.end());
-        for (int j = 0; j < gap; ++j)
-        {
-            tranIDx[j] = totTranIDx[j];
-        }
-
-        int oriUsedEdgeNum = 0, oriNewEdgeNum = newEdge.size();
-
-        vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
-        vector<int> pileTmp1(gap, -1);
-        for (int j = 0, tranID; j < gap; ++j)
-        {
-            tranID = tranIDx[j];
-            oriUsedEdgeNum += trans[tranID].path.size();
-            pathTmp1[j] = trans[tranID].lastEdgesOfShortestPaths;
-            pileTmp1[j] = trans[tranID].pileID;
-            recoverNetwork(tranID, trans[tranID].pileID);
-        }
-
-        int curUsedEdgeNum = 0;
-        bool findPath = false;
-        vector<vector<int>> pathTmp2(gap, vector<int>());     // 用于此后重新加载边
-        vector<int> pileTmp2(gap, -1);
-        for (int j = gap - 1, tranID; j >= 0; --j)      // 反向加载效果更好
-        {
-            tranID = tranIDx[j];
-            loadTran(tranID, false);
-            pathTmp2[j] = trans[tranID].lastEdgesOfShortestPaths;
-            pileTmp2[j] = trans[tranID].pileID;
-            curUsedEdgeNum += trans[tranID].path.size();
-        }
-
-        bool ifSuccess = tryDeleteEdgeSim(oriNewEdgeNum, oriUsedEdgeNum, curUsedEdgeNum);
-
-        if (!ifSuccess)
-        {  // 回复为原状态
-            for (int j = 0, tranID; j < gap; ++j)
-            {   // 把试图寻路时，造成的对网络的影响消除
-                tranID = tranIDx[j];
-                recoverNetwork(tranID, pileTmp2[j]);
-            }
-
-            for (int j = 0, tranID; j < gap; ++j)
-            {   // 重新加载所有的边
-                vector<int> nullVector, nullPath1, nullPath2;
-                tranID = tranIDx[j];
-                trans[tranID].mutiplierID.swap(nullVector);
-                trans[tranID].path.swap(nullPath1);
-                trans[tranID].lastEdgesOfShortestPaths.swap(nullPath2);
-
-                trans[tranID].pileID = -1;
-                trans[tranID].curA = D;
-                reloadTran(tranID, pileTmp1[j], pathTmp1[j]);
-            }
-            tryDeleteEdge(false);
-        }
-        else
-        {
-            ifIterSuccess = true;
-        }
     }
 }
 

@@ -200,6 +200,5 @@ void outPut() {
             else
                 cout << " ";
         }
-
     }
 }

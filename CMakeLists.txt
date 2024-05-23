@@ -22,4 +22,5 @@ add_executable(main
     ${CMAKE_SOURCE_DIR}/src/Solution_base.cpp
     ${CMAKE_SOURCE_DIR}/src/Solution_BFS.cpp
     ${CMAKE_SOURCE_DIR}/src/Solution_deleteEdge.cpp
+    ${CMAKE_SOURCE_DIR}/src/Solution_reallocate.cpp
 )

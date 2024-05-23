@@ -288,6 +288,12 @@ void outputForFile()
 		myCout1 << endl;
 	}
     myCout1.close();
+
+    ofstream myCout2("iterStatistic.txt");
+    for (int i = 0; i < recordIterSuccess.size(); ++i)
+    {
+		myCout2 << recordIterSuccess[i] << " " << reallocatedTranSta[i] << endl;
+	}
 }
 
 // 输出业务在网络上的分布的统计结果

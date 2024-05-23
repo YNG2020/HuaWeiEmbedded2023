@@ -6,6 +6,7 @@ int oriCntEdge = 0;
 int cntTran = 0;
 int totCost = 0;
 int totUsedEdge = 0;
+int minTotUsedEdge = 0;
 bool ifIterSuccess = true;
 
 int tail[Configure::maxN];
@@ -25,3 +26,5 @@ int oriTail[Configure::maxN];
 Edge oriEdge[Configure::maxM];
 unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> multiEdgeID;
 unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> oriMultiEdgeID;
+vector<bool> recordIterSuccess;
+vector<int> reallocatedTranSta;
