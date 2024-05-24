@@ -82,13 +82,20 @@ void Solution::reAllocateTran(int HLim)
                 reloadTran(tranID, pileTmp1[j], pathTmp1[j]);
             }
             tryDeleteEdge(false);
+            recordIterNewEdgeNum[iterCnter] = newEdge.size();
+            recordIterTotUsedPile[iterCnter] = totUsedPile;
             recordIterSuccess[iterCnter++] = false;
+
         }
         else
         {
-            ifIterSuccess = true;
+            recordIterNewEdgeNum[iterCnter] = newEdge.size();
+            recordIterTotUsedPile[iterCnter] = totUsedPile;
             recordIterSuccess[iterCnter++] = true;
+            ifIterSuccess = true;
         }
+        if (iterCnter == iterCnterLimit)
+            return;
     }
 }
 

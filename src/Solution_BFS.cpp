@@ -360,5 +360,5 @@ void Solution::BFS_tranStatistic(Transaction& tran)
 		++edge[edgeId + 1].usedPileCnt;
     }
     minPathSize[make_pair(start, end)] = tran.path.size();
-    minTotUsedEdge += tran.path.size();
+    minTotUsedPile += tran.path.size();
 }

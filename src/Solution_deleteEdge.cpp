@@ -174,8 +174,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         {   // 将原本新添加的边idxEdge从newEdge中删除
             performDeleteEdge(totDeleteEdgeID[i] / 2, totLastTranID[i].size(), totLastTranID[i]);
         }
-        totUsedEdge = (totUsedEdge + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
-        return true;
+        totUsedPile = (totUsedPile + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
     }
     else if (oriNewEdgeNum == (n - nDeleteEdge) 
         && (oriUsedEdgeNum > curUsedEdgeNum + usedEdgeChangeNumInHere))
@@ -184,8 +183,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         {   // 将原本新添加的边idxEdge从newEdge中删除
             performDeleteEdge(totDeleteEdgeID[i] / 2, totLastTranID[i].size(), totLastTranID[i]);
         }
-        totUsedEdge = (totUsedEdge + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
-        return true;
+        totUsedPile = (totUsedPile + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
     }
     else
     {

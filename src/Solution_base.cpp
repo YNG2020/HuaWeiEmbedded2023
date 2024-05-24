@@ -50,8 +50,11 @@ void Solution::runStrategy()
     sumUPAllUsedEdge();
 
     curTime = clock();
-    recordIterSuccess.resize(cntLimit * (T / int(reAllocateRatio * T)), false);
-    reallocatedTranSta.resize(cntLimit * (T / int(reAllocateRatio * T)), 0);
+    iterCnterLimit = cntLimit * (T / int(reAllocateRatio * T));
+    recordIterSuccess.resize(iterCnterLimit, false);
+    reallocatedTranSta.resize(iterCnterLimit, 0);
+    recordIterNewEdgeNum.resize(iterCnterLimit, 0);
+    recordIterTotUsedPile.resize(iterCnterLimit, 0);
     double leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
 
     int cnt = 0;
@@ -59,17 +62,17 @@ void Solution::runStrategy()
     {
         if (Configure::forIterOutput && !Configure::forJudger)
             std::cout << "Original newEdge.size = " << newEdge.size() << endl;
-        for (; cnt < cntLimit; ++cnt)
+        for (; cnt < cntLimit && iterCnter < iterCnterLimit; ++cnt)
         {   
             reAllocateTime = clock();
-            int oriTotUsedEdge = totUsedEdge, oriNewEdge = newEdge.size();
+            int oriTotUsedEdge = totUsedPile, oriNewEdge = newEdge.size();
             reAllocateTran(T);
             if (Configure::forIterOutput && !Configure::forJudger)
             {
                 std::cout << "epoch: " << cnt;
                 std::cout << "  newEdge.size = " << newEdge.size();
-                std::cout << "  changeUsedEdge: " << totUsedEdge - oriTotUsedEdge;
-                std::cout << "  totUsedEdge: " << totUsedEdge << endl;
+                std::cout << "  changeUsedEdge: " << totUsedPile - oriTotUsedEdge;
+                std::cout << "  totUsedEdge: " << totUsedPile << endl;
             }
     //        curTime = clock();
     //        iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;

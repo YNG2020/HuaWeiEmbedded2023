@@ -4,15 +4,17 @@
 #include <map>
 #include "Configure.h"
 #include "global_struct.h"
+#include <string>
 
 extern int N, M, T, P, D;	// 节点数量N，连边数量M，业务数量T，单边通道数量P、最大衰减距离D
 extern int cntEdge;		// 当前边集数组所存储的边的数目
 extern int oriCntEdge;		// 用于记录原始的cntEdge
 extern int cntTran;			// 当前业务数组所存储业务的数目
 extern int totCost;		// 总成本
-extern int totUsedEdge;	// 总使用边数
-extern int minTotUsedEdge;	// 理论最小总使用边数
+extern int totUsedPile;	// 总使用通道数
+extern int minTotUsedPile;	// 理论最小总使用通道数
 extern bool ifIterSuccess;	// 是否迭代成功
+extern string dataGenSeed;	// 数据生成器所用的随机种子
 
 extern int head[Configure::maxN];		// head[i]，表示以i为起点的在逻辑上的第一条边在边集数组的位置（编号）
 extern int tail[Configure::maxN];		// tail[i]，表示以i为起点的在逻辑上的最后一条边在边集数组的位置（编号）
@@ -32,5 +34,7 @@ extern Edge oriEdge[Configure::maxM];		// 用于记录原始的edge数组
 extern unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> multiEdgeID;		// 用于记录各个重边在边集数组中的编号
 extern unordered_map<pair<int, int>, std::vector<int>, HashFunc_t, Equalfunc_t> oriMultiEdgeID;		// 用于记录原始各个重边在边集数组中的编号
 extern vector<bool> recordIterSuccess;		// 记录每次迭代是否成功
+extern vector<int> recordIterNewEdgeNum;	// 记录每次迭代后的新边数
+extern vector<int> recordIterTotUsedPile;	// 记录每次迭代后的总使用通道数
 extern vector<int> reallocatedTranSta;		// 记录重新分配的业务的状态
 #endif    
