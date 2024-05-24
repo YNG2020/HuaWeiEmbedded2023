@@ -9,4 +9,5 @@
 MATLAB/businessAllocation.txt
 MATLAB/BFS_Adding_Edge.txt
 MATLAB/BFS_Finding_Path.txt
-/MATLAB/output
+MATLAB/output/*result*
+MATLAB/output/*transactionInPile*
