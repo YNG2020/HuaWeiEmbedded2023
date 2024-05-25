@@ -301,7 +301,7 @@ void outputForFile()
 // 输出业务在网络上的分布的统计结果
 void outputStatistic()
 {
-	ofstream myCout("transactionStatistic.txt");
+	ofstream myCout("./output/" + dataGenSeed + string("transactionStatistic.txt"));
     if (!myCout.is_open())
     {
         return;
@@ -312,7 +312,7 @@ void outputStatistic()
 	}
 	myCout.close();
 
-    ofstream myCout1("transactionMinPath.txt");
+    ofstream myCout1("./output/" + dataGenSeed + string("transactionMinPath.txt"));
     if (!myCout1.is_open())
     {
         return;

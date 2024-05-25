@@ -11,3 +11,6 @@ MATLAB/BFS_Adding_Edge.txt
 MATLAB/BFS_Finding_Path.txt
 MATLAB/output/*result*
 MATLAB/output/*transactionInPile*
+MATLAB/output/*transactionStatistic*
+MATLAB/output/*transactionMinPath*
+

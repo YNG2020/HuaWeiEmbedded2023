@@ -27,7 +27,7 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     fclose(fileID);
     
     % 打开文件
-    fileID = fopen('result.txt', 'r');
+    fileID = fopen('output\0result.txt', 'r');
     
     % 读取第一行，表示要加边数量Y
     newEdgesCnt = fscanf(fileID, '%d', 1);
@@ -48,8 +48,11 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     totM = 0; totN = 0;
     
     % 读取 T 行，每行前三个整数𝑝𝑗、𝑚𝑗、𝑛𝑗，表示第 j 条业务的通道编号为𝑝𝑗、经过的边数量为𝑚𝑗、经过的放大器个数为𝑛𝑗
-    newEdgeIdx = ones(M, max(edgeStat(:, 4))) * 1000000;     % 用于存储新边的编号，先初始化为一个不可能的值
-    newEdgeTmpCnt = zeros(M, 1);                   % 与上述数组配套使用
+    newEdgeIdx = nan(M, 1);     % 用于存储新边的编号
+    for i = 1 : M
+        newEdgeIdx(i) = i - 1;
+    end
+    newEdgeTmpCnt = ones(M, 1);                   % 与上述数组配套使用
     
     edgeStat = [edgeStat zeros(M, max(edgeStat(:, 4) + 2))];     % 用于统计每一条重边上的业务量，并存储利用率最低的重边和第几次出现重边时利用率最低
     for i = 1 : T
@@ -88,6 +91,14 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
         end
         amplifiers_passed = fscanf(fileID, '%d', n); % 读取经过的放大器所在节点的编号
     end
+
+    for i = 1 : M
+        for j = 2 : size(newEdgeIdx, 2)
+            if newEdgeIdx(i, j) == 0
+                newEdgeIdx(i, j) = nan;
+            end
+        end
+    end
     
     % edgeStat的后续处理
     edgeStat(:, 5) = round(100 * edgeStat(:, 3) ./ (edgeStat(:, 4) * P));   % 通道利用率，用百分数表示
@@ -117,9 +128,9 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     fclose(fileID);
     sortedEdgeStat = sortrows(edgeStat, [-4 5 3 1 2]);
 
-    % 读取每条边上的通道的使用情况，前三个数是边的起点，终点，使用的边数，剩下的P个数是占用某个通道的业务编号
+    % 读取每条边上的通道的使用情况，前三个数是边的起点，终点，被占用的通道数，剩下的P个数是占用某个通道的业务编号
     edgePile = zeros(M + newEdgesCnt, 3 + P);
-    fileID = fopen('transactionInPile.txt', 'r');
+    fileID = fopen('output\0transactionInPile.txt', 'r');
     for i = 1 : M + newEdgesCnt
         tmp = fscanf(fileID, '%d', 3 + P);
         edgePile(i, 1) = tmp(1);
@@ -130,8 +141,7 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     fclose(fileID);
 
     % 记录每个业务在不考虑通道堵塞的条件下经过的边的编号
-    fileID = fopen('businessAllocation.txt', 'r');
-    T = fscanf(fileID, '%d', 1);
+    fileID = fopen('output\0transactionMinPath.txt', 'r');
     transactionMinPath = cell(T, 1);
     for i = 1 : T
         m = fscanf(fileID, '%d', 1); % 读取每一个业务的经过的最小边的数量
