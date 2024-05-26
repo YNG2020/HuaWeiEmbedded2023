@@ -20,5 +20,7 @@ function [f_iterationDetail] = plotIterationDetail()
         ytickformat('%.1f')
         ylabel("Number of used piles", 'FontSize', 12)
         legend('box', 'off')
+        title("Data set " + num2str(i), 'FontSize', 12);
+        
     end
 end

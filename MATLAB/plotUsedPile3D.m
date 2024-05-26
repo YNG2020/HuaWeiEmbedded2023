@@ -58,5 +58,5 @@ function [UsedPile, ax] = plotUsedPile3D(edgePile)
     dcm = datacursormode(gcf);
     set(dcm, 'UpdateFcn', {@customGraphDatatip, nodeArray, args});
     set(gcf, 'Color', 'white');
-
+    title("Strategy step 6 (Iteration-plus)", 'FontSize', 15)
 end

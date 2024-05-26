@@ -37,5 +37,6 @@ function [singleTransaction, figureUsedPile] = ...
     copyobj(fig2,s2); % copyobj does not copy properties
     close(UsedPile1);
     close(UsedPile2);
+    title
 
 end
