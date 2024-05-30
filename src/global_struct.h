@@ -56,6 +56,7 @@ public:
     vector<int> lastEdgesOfShortestPaths;   // 存储从起点到其它点的最短路径的末边的编号（考虑通道堵塞的最短）
     vector<int> path;   // 存储路径所经过的边
     vector<int> mutiplierID;    // 存储所经过的放大器所在节点的编号
+    int minPathSize = 0;    // 存储最短路径的长度
 };
 
 struct HashFunc_t

@@ -25,8 +25,6 @@ int main(int argc, char* argv[])
     solution.forIter = atoi(argv[4]);
     solution.forBatchTranReAllocate = atoi(argv[5]);
     dataGenSeed = string(argv[6]);
-    // 
-    //solution.forDoubleSortTran = atoi(argv[6]);
 
     solution.runStrategy();     // 运行总策略
 

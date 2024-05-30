@@ -35,14 +35,6 @@ void Solution::runStrategy()
     sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
     resetEverything();      // 把加载光业务对网络的影响全部清除
     preAllocateTran();      // 初分配    
-    
-    if (forDoubleSortTran)
-    {
-        sumUptheAllocationPressure();     // 求和分配光业务时，每条光业务的期望分配压力
-        sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
-        resetEverything();      // 把加载光业务对网络的影响全部清除
-        preAllocateTran();      // 初分配
-    }
 
     tryDeleteEdge();
     tryDeleteEdge();
@@ -74,6 +66,7 @@ void Solution::runStrategy()
                 std::cout << "  changeUsedEdge: " << totUsedPile - oriTotUsedEdge;
                 std::cout << "  totUsedEdge: " << totUsedPile << endl;
             }
+
     //        curTime = clock();
     //        iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
     //        leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
@@ -243,16 +236,26 @@ void Solution::sortTran()
     if (!forSortTran)
         return;
     // 根据 expectedAllocationPressure 进行排序
-    sort(sortedTranIndices.begin(), sortedTranIndices.end(), [&](int a, int b) {
-        // 匿名 lambda 函数作为比较函数
-        return [&](int a, int b) {
-            // 如果 a 和 b 满足相邻条件，则优先满足相邻条件
-            if ((trans[a].start == trans[b].start && trans[a].end == trans[b].end) || (trans[a].start == trans[b].end && trans[a].end == trans[b].start))
-                return false; // 保持相邻
-            // 否则按照 expectedAllocationPressure 进行降序排序
-            return trans[a].expectedAllocationPressure > trans[b].expectedAllocationPressure;
-            }(a, b);
-        });
+    std::sort(sortedTranIndices.begin(), sortedTranIndices.end(), [&](int a, int b) {
+        if (trans[a].path.size() != trans[b].path.size())
+            return trans[a].path.size() > trans[b].path.size();  // 首先按path.size()降序排序
+        int startA = trans[a].start, startB = trans[b].start, endA = trans[a].end, endB = trans[b].end;
+        if (startA > endA)
+        {
+            int temp = startA;
+            startA = endA;
+            endA = temp;
+        }
+        if (startB > endB)
+		{
+			int temp = startB;
+			startB = endB;
+            endB = temp;
+		}
+        if (startA != startB)
+            return startA > startB;  // 其次按start降序排序
+        return endA > endB;  // 最后按end降序排序
+    });
 }
 
 // 把加载光业务对网络的影响全部清除
@@ -302,7 +305,7 @@ void Solution::transferTranInMultiEdge(Transaction& tran)
         int lastEdgeID = multiEdgeID[nodePair][multiEdgeid];
         for (int j = multiEdgeid - 1; j >= 0; --j)
         {   // 尽可能把业务迁移到重边编号小的边上
-            int edgeID = multiEdgeID[nodePair][0];
+            int edgeID = multiEdgeID[nodePair][j];
             if (edge[edgeID].Pile[tran.pileID] == -1)
             {
                 edge[edgeID].Pile[tran.pileID] = tran.tranID;

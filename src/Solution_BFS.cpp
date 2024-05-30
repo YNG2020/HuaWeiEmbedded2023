@@ -86,7 +86,6 @@ void Solution::BFS_loadTran(Transaction& tran, bool ifTryDeleteEdge)
 
     tran.pileID = choosenP;
     backtrackPath(tran);     // 回溯路径，以构造出一条完整的路径
-    transferTranInMultiEdge(tran);
 }
 
 // 考虑一边多通道的情况下，寻找业务tran的起点到终点的路径，但遇到需要加边的情况，不做处理，直接返回，仅tryDeletegeEdge时使用
@@ -201,6 +200,7 @@ void Solution::BFS_addNewEdge(Transaction& tran)
                 nodes.emplace(to, curDis + 1);
         }
     }
+    
     vector<vector<pair<int, int>>> nodeEdgePair(P);
     for (int p = 0; p < P; ++p)
     {
@@ -220,15 +220,9 @@ void Solution::BFS_addNewEdge(Transaction& tran)
                     if (edge[multiEdgeId].Pile[p] == -1)
                     {   // 这条重边在p通道上没有被占用，则把它更新为最短路径上的边
                         if (edge[multiEdgeId].from == from && edge[multiEdgeId].to == to)
-                        {
-                            tmpOKPath[curNode] = multiEdgeId;
                             nodeEdgePair[p].emplace_back(curNode, multiEdgeId);
-                        }
                         else
-                        {
-                            tmpOKPath[curNode] = multiEdgeId + 1;
                             nodeEdgePair[p].emplace_back(curNode, multiEdgeId + 1);
-                        }
                         break;
                     }
                 }
@@ -237,8 +231,6 @@ void Solution::BFS_addNewEdge(Transaction& tran)
             }
                 
             curNode = edge[edgeID].from;
-            if (curNode == -1)
-                int a = 1;
         }
 
         if (tmpBlockEdgeCnt < minBlockEdgeCnt)
@@ -282,7 +274,7 @@ void Solution::BFS_addNewEdge(Transaction& tran)
             }
         }
         else 
-        {      // 需要加边
+        {   // 需要加边
             addEdge(edge[edgeID].from, edge[edgeID].to, minDist[make_pair(edge[edgeID].from, edge[edgeID].to)]);
             addEdge(edge[edgeID].to, edge[edgeID].from, minDist[make_pair(edge[edgeID].to, edge[edgeID].from)]);
 
@@ -301,7 +293,6 @@ void Solution::BFS_addNewEdge(Transaction& tran)
         }
 
     }
-    transferTranInMultiEdge(tran);
     std::reverse(tran.path.begin(), tran.path.end());
 }
 
@@ -361,4 +352,5 @@ void Solution::BFS_tranStatistic(Transaction& tran)
     }
     minPathSize[make_pair(start, end)] = tran.path.size();
     minTotUsedPile += tran.path.size();
+    tran.minPathSize = tran.path.size();
 }

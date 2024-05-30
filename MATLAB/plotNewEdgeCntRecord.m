@@ -1,6 +1,6 @@
 function [f_newEdgeCntRecord] = plotNewEdgeCntRecord()
     load newEdgeCntRecord.mat newEdgeCntRecord
-    % load totUsedPileCntRecord.mat
+    % load totUsedPileCntRecord.mat totUsedPileCntRecord
     n_step = size(newEdgeCntRecord, 2);
     for step = 1 : n_step
         f_newEdgeCntRecord = figure("Name", "newEdgeCntRecord");

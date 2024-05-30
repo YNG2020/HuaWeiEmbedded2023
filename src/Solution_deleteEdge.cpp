@@ -24,7 +24,7 @@ void Solution::tryDeleteEdge(bool increasing, bool ifSimDeleteEdge)
         vector<int> lastTranIDs, lastPileIDs;        // 存储将要被删除的边上承载的业务ID和通道ID
 
         for (int j = 0; j < P; ++j)
-            if (edge[trueEdgeID].Pile[j] != -1 && edge[trueEdgeID].Pile[j] != T)
+            if (edge[trueEdgeID].Pile[j] != -1)
             {   // 说明在通道j上承载了该业务
                 ++tranCnt;
                 lastTranIDs.push_back(edge[trueEdgeID].Pile[j]);

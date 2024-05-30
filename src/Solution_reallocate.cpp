@@ -126,8 +126,10 @@ void Solution::getReallocatedTranID(vector<int>& totTranIDx, vector<int>& tranID
  //       if (extraEdgeNum == 0)
  //           tranIDx[j++] = totTranIDx[cnter];
  //   }
-    for (int j = 0; j < gap; ++j)
+    int j = 0;
+    for (; j < gap; ++j)
     {
+        //if (trans[totTranIDx[j]].path.size() == trans[totTranIDx[j]].minPathSize)
         tranIDx[j] = totTranIDx[j];
     }
 }
