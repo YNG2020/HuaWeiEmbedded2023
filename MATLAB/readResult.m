@@ -1,6 +1,6 @@
-function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, transactionMinPath] = readResult()
+function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, transactionMinPath] = readResult(randSeed)
     % 读取原始光网络
-    fileID = fopen('dataMATLAB.txt', 'r');
+    fileID = fopen("dataMATLAB.txt", 'r');
     
     % 读取第一行
     firstLine = fscanf(fileID, '%d', 5);
@@ -27,7 +27,7 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     fclose(fileID);
     
     % 打开文件
-    fileID = fopen('output\0result.txt', 'r');
+    fileID = fopen("output\" + num2str(randSeed) + "result.txt", 'r');
     
     % 读取第一行，表示要加边数量Y
     newEdgesCnt = fscanf(fileID, '%d', 1);
@@ -130,7 +130,7 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
 
     % 读取每条边上的通道的使用情况，前三个数是边的起点，终点，被占用的通道数，剩下的P个数是占用某个通道的业务编号
     edgePile = zeros(M + newEdgesCnt, 3 + P);
-    fileID = fopen('output\0transactionInPile.txt', 'r');
+    fileID = fopen("output\" + num2str(randSeed) + "transactionInPile.txt", 'r');
     for i = 1 : M + newEdgesCnt
         tmp = fscanf(fileID, '%d', 3 + P);
         edgePile(i, 1) = tmp(1);
@@ -141,7 +141,7 @@ function [totCost, edgeStat, sortedEdgeStat, edgePile, transactionPassEdgeID, tr
     fclose(fileID);
 
     % 记录每个业务在不考虑通道堵塞的条件下经过的边的编号
-    fileID = fopen('output\0transactionMinPath.txt', 'r');
+    fileID = fopen("output\" + num2str(randSeed) + "transactionMinPath.txt", 'r');
     transactionMinPath = cell(T, 1);
     for i = 1 : T
         m = fscanf(fileID, '%d', 1); % 读取每一个业务的经过的最小边的数量

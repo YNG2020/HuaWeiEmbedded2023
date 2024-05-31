@@ -9,6 +9,8 @@
 #include <vector>
 #include <random>
 #include <time.h>
+#include <chrono>
+#include <ctime>
 
 // Solution初始化
 Solution::Solution()
@@ -233,6 +235,14 @@ void Solution::backtrackPath(Transaction& tran)
 // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
 void Solution::sortTran()
 {   // 在业务分配的后期，加边是一定要加的。应该思考，在需要加边时，如何优化加载业务的顺序，使得加边的数目最少。
+    // 获取当前时间点
+    auto now = std::chrono::system_clock::now();
+    // 转换为微秒
+    auto micros = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    // 从时间点中获取距离1970年1月1日的微秒数
+    long long micros_from_epoch = micros.time_since_epoch().count();
+    srand(micros_from_epoch);    // 设置随机数种子
+    random_shuffle(sortedTranIndices.begin(), sortedTranIndices.end());   // 先打乱totTranIDx
     if (!forSortTran)
         return;
     // 根据 expectedAllocationPressure 进行排序
