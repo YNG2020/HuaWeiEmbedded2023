@@ -35,6 +35,11 @@ void Solution::runStrategy()
     
     sumUptheAllocationPressure();     // 求和分配光业务时，每条光业务的期望分配压力
     sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
+    //// 输出加载业务的顺序
+    //for (int i = 0; i < T; ++i)
+    //{
+    //    std::cout << "TranID: " << trans[sortedTranIndices[i]].tranID << " start: " << trans[sortedTranIndices[i]].start << "  end: " << trans[sortedTranIndices[i]].end << "  pathSize: " << trans[sortedTranIndices[i]].minPathSize << endl;
+    //}
     resetEverything();      // 把加载光业务对网络的影响全部清除
     preAllocateTran();      // 初分配    
 
@@ -235,14 +240,14 @@ void Solution::backtrackPath(Transaction& tran)
 // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
 void Solution::sortTran()
 {   // 在业务分配的后期，加边是一定要加的。应该思考，在需要加边时，如何优化加载业务的顺序，使得加边的数目最少。
-    // 获取当前时间点
-    auto now = std::chrono::system_clock::now();
-    // 转换为微秒
-    auto micros = std::chrono::time_point_cast<std::chrono::microseconds>(now);
-    // 从时间点中获取距离1970年1月1日的微秒数
-    long long micros_from_epoch = micros.time_since_epoch().count();
-    srand(micros_from_epoch);    // 设置随机数种子
-    random_shuffle(sortedTranIndices.begin(), sortedTranIndices.end());   // 先打乱totTranIDx
+    //// 获取当前时间点
+    //auto now = std::chrono::system_clock::now();
+    //// 转换为微秒
+    //auto micros = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    //// 从时间点中获取距离1970年1月1日的微秒数
+    //long long micros_from_epoch = micros.time_since_epoch().count();
+    //srand(5);    // 设置随机数种子
+    //random_shuffle(sortedTranIndices.begin(), sortedTranIndices.end());   // 先打乱totTranIDx
     if (!forSortTran)
         return;
     // 根据 expectedAllocationPressure 进行排序
@@ -266,6 +271,76 @@ void Solution::sortTran()
             return startA > startB;  // 其次按start降序排序
         return endA > endB;  // 最后按end降序排序
     });
+
+    vector<int> sortedTranIndices2(T, 0);
+    int sortedTranIndices2Cnt = 0;
+    vector<vector<int>> groups;
+    groups.push_back(vector<int>());
+    int groupIdx = 0;
+    int lastGroupIdx = 0;
+    groups[groupIdx].push_back(sortedTranIndices[0]);
+    for (int j = 1; j < T; ++j)
+    {
+        if (trans[sortedTranIndices[j]].path.size() != trans[sortedTranIndices[j - 1]].path.size())
+        {   // 对相同的pathSize的组，再次进行排序，使得排序后相邻的两个tran的起点或终点尽可能不相同
+            int commonCnt = 0;
+            bool getoutFlag = false;
+            while (!getoutFlag)
+            {
+                getoutFlag = true;
+                for (int idx = lastGroupIdx; idx <= groupIdx; ++idx)
+                {
+                    if (commonCnt < groups[idx].size())
+                    {
+                        sortedTranIndices2[sortedTranIndices2Cnt++] = groups[idx][commonCnt];
+                        getoutFlag = false;
+                    }
+                }
+                ++commonCnt;
+            }
+            lastGroupIdx = groupIdx + 1;
+        }
+        int startA = trans[sortedTranIndices[j - 1]].start, startB = trans[sortedTranIndices[j]].start,
+            endA = trans[sortedTranIndices[j - 1]].end, endB = trans[sortedTranIndices[j]].end;
+        if (startA > endA)
+        {
+            int temp = startA;
+            startA = endA;
+            endA = temp;
+        }
+        if (startB > endB)
+        {
+            int temp = startB;
+            startB = endB;
+            endB = temp;
+        }
+        // 判断下一个编号是否要加入到当前groupIdx中
+        if (startA != startB || endA != endB)
+        {
+            ++groupIdx;
+            groups.push_back(vector<int>());
+        }
+        groups[groupIdx].push_back(sortedTranIndices[j]);
+        if (j == T - 1)
+        {   // 特殊处理最后一批的组
+            int commonCnt = 0;
+            bool getoutFlag = false;
+            while (!getoutFlag)
+            {
+                getoutFlag = true;
+                for (int idx = lastGroupIdx; idx <= groupIdx; ++idx)
+                {
+                    if (commonCnt < groups[idx].size())
+                    {
+                        sortedTranIndices2[sortedTranIndices2Cnt++] = groups[idx][commonCnt];
+                        getoutFlag = false;
+                    }
+                }
+                ++commonCnt;
+            }
+        }
+    }
+    sortedTranIndices = sortedTranIndices2;
 }
 
 // 把加载光业务对网络的影响全部清除
