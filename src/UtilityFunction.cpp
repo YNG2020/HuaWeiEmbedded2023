@@ -4,6 +4,7 @@
 #include "global_struct.h"
 #include <iostream>
 #include <fstream>
+#include <string>
 #include  <stdio.h> 
 
 // 加边函数，s起点，t终点，d距离
@@ -205,7 +206,7 @@ void outputForJudger()
 // 文件输出流，用于文件
 void outputForFile()
 {
-    ofstream myCout("result.txt");
+    ofstream myCout("./output/" + dataGenSeed + "result.txt");
     if (!myCout.is_open())
     {
         std::cerr << "Error opening file." << endl;
@@ -263,8 +264,9 @@ void outputForFile()
     totCost = n;
     totCost = n * 1000000 + totM * 100 + totP;
     std::cerr << "Total Cost = " << totCost;
+    std::cerr << endl;
     // 以下输出边集数组的每条边（原有边和新加入的边）的通道分配情况
-    ofstream myCout1("transactionInPile.txt");
+    ofstream myCout1("./output/" + dataGenSeed + string("transactionInPile.txt"));
     if (!myCout1.is_open())
     {
         return;
@@ -288,12 +290,19 @@ void outputForFile()
 		myCout1 << endl;
 	}
     myCout1.close();
+
+    ofstream myCout2("./output/" + dataGenSeed + string("iterStatistic.txt"));
+    for (int i = 0; i < recordIterSuccess.size(); ++i)
+    {
+		myCout2 << recordIterSuccess[i] << " " << reallocatedTranSta[i] << " " <<
+            recordIterNewEdgeNum[i] << " " << recordIterTotUsedPile[i] << " " << endl;
+	}
 }
 
 // 输出业务在网络上的分布的统计结果
 void outputStatistic()
 {
-	ofstream myCout("transactionStatistic.txt");
+	ofstream myCout("./output/" + dataGenSeed + string("transactionStatistic.txt"));
     if (!myCout.is_open())
     {
         return;
@@ -304,7 +313,7 @@ void outputStatistic()
 	}
 	myCout.close();
 
-    ofstream myCout1("transactionMinPath.txt");
+    ofstream myCout1("./output/" + dataGenSeed + string("transactionMinPath.txt"));
     if (!myCout1.is_open())
     {
         return;
@@ -348,9 +357,9 @@ void calculateCost()
 // 统计所有业务上用掉的边的数量
 void sumUPAllUsedEdge()
 {
-    totUsedEdge = 0;
+    totUsedPile = 0;
     for (int i = 0; i < T; ++i)
     {
-        totUsedEdge += trans[i].path.size();
+        totUsedPile += trans[i].path.size();
     }
 }

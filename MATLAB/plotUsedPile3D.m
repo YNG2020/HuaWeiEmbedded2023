@@ -6,6 +6,7 @@ function [UsedPile, ax] = plotUsedPile3D(edgePile)
     load newEdgeTmpCnt.mat newEdgeTmpCnt
     UsedPile = figure("Name", "UsedPile3D");
     set(gcf, 'WindowState', 'maximized');
+    view([52.499999999999986,13.560000000000045])
     ax = gca;
     p = args.P;             % 通道数量
     maxMultiEdgeID = size(newEdgeIdx, 2);
@@ -23,6 +24,7 @@ function [UsedPile, ax] = plotUsedPile3D(edgePile)
             if ~isempty(find(newEdgeIdx(:, j) == edgeID - 1, 1))
                 multiEdgeID = j;
                 singleEdgeID = find(newEdgeIdx(:, j) == edgeID - 1, 1);
+                break;
             end
         end
         startNodeID = edgePile(edgeID, 1) + 1;
@@ -43,7 +45,7 @@ function [UsedPile, ax] = plotUsedPile3D(edgePile)
             else
                 fill3(x, y, z, colors(edgePile(edgeID, 3 + j) + 2, :), 'FaceAlpha', 1);
                 % 添加标记
-                text((x(1) + x(4)) / 2, (y(1) + y(4)) / 2, (z(1) + z(2)) / 2, num2str(edgePile(edgeID, 3 + j)),'HorizontalAlignment', 'center', 'Color', 'w');
+                text((x(1) + x(4)) / 2, (y(1) + y(4)) / 2, (z(1) + z(2)) / 2, num2str(edgePile(edgeID, 3 + j)),'HorizontalAlignment', 'center', 'Color', 'w', 'FontSize', 8);
             end
 
         end
@@ -56,5 +58,5 @@ function [UsedPile, ax] = plotUsedPile3D(edgePile)
     dcm = datacursormode(gcf);
     set(dcm, 'UpdateFcn', {@customGraphDatatip, nodeArray, args});
     set(gcf, 'Color', 'white');
-
+    title("Strategy step 6 (Iteration-plus)", 'FontSize', 15)
 end

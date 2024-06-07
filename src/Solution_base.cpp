@@ -9,6 +9,8 @@
 #include <vector>
 #include <random>
 #include <time.h>
+#include <chrono>
+#include <ctime>
 
 // Solution初始化
 Solution::Solution()
@@ -33,16 +35,13 @@ void Solution::runStrategy()
     
     sumUptheAllocationPressure();     // 求和分配光业务时，每条光业务的期望分配压力
     sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
+    //// 输出加载业务的顺序
+    //for (int i = 0; i < T; ++i)
+    //{
+    //    std::cout << "TranID: " << trans[sortedTranIndices[i]].tranID << " start: " << trans[sortedTranIndices[i]].start << "  end: " << trans[sortedTranIndices[i]].end << "  pathSize: " << trans[sortedTranIndices[i]].minPathSize << endl;
+    //}
     resetEverything();      // 把加载光业务对网络的影响全部清除
     preAllocateTran();      // 初分配    
-    
-    if (forDoubleSortTran)
-    {
-        sumUptheAllocationPressure();     // 求和分配光业务时，每条光业务的期望分配压力
-        sortTran();             // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
-        resetEverything();      // 把加载光业务对网络的影响全部清除
-        preAllocateTran();      // 初分配
-    }
 
     tryDeleteEdge();
     tryDeleteEdge();
@@ -50,6 +49,11 @@ void Solution::runStrategy()
     sumUPAllUsedEdge();
 
     curTime = clock();
+    iterCnterLimit = cntLimit * (T / int(reAllocateRatio * T));
+    recordIterSuccess.resize(iterCnterLimit, false);
+    reallocatedTranSta.resize(iterCnterLimit, 0);
+    recordIterNewEdgeNum.resize(iterCnterLimit, 0);
+    recordIterTotUsedPile.resize(iterCnterLimit, 0);
     double leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
 
     int cnt = 0;
@@ -57,30 +61,27 @@ void Solution::runStrategy()
     {
         if (Configure::forIterOutput && !Configure::forJudger)
             std::cout << "Original newEdge.size = " << newEdge.size() << endl;
-        for (; cnt < cntLimit; ++cnt)
+        for (; cnt < cntLimit && iterCnter < iterCnterLimit; ++cnt)
         {   
             reAllocateTime = clock();
-            int oriTotUsedEdge = totUsedEdge, oriNewEdge = newEdge.size();
+            int oriTotUsedEdge = totUsedPile, oriNewEdge = newEdge.size();
             reAllocateTran(T);
             if (Configure::forIterOutput && !Configure::forJudger)
             {
                 std::cout << "epoch: " << cnt;
                 std::cout << "  newEdge.size = " << newEdge.size();
-                std::cout << "  changeUsedEdge: " << totUsedEdge - oriTotUsedEdge;
-                std::cout << "  totUsedEdge: " << totUsedEdge << endl;
+                std::cout << "  changeUsedEdge: " << totUsedPile - oriTotUsedEdge;
+                std::cout << "  totUsedEdge: " << totUsedPile << endl;
             }
-            curTime = clock();
-            iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
-            leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
-            if (leftTime < iterationUnitTime)
-				break;
+
+    //        curTime = clock();
+    //        iterationUnitTime = double(curTime - reAllocateTime) / CLOCKS_PER_SEC;
+    //        leftTime = 120 - double(curTime - startTime) / CLOCKS_PER_SEC;
+    //        if (leftTime < iterationUnitTime)
+				//break;
         }
     }
 
-    if (!Configure::forJudger)
-    {
-        std::cout << "totUsedEdge: " << totUsedEdge;
-    }
     curTime = clock();
     if (!Configure::forJudger)
         std::cout << "  Used Time: " << double(curTime - startTime) / CLOCKS_PER_SEC << "s  ";
@@ -104,85 +105,6 @@ void Solution::preAllocateTran()
     for (int i = 0; i < T; ++i)
     {
         loadTran(sortedTranIndices[i], true);
-    }
-}
-
-// 试图重新分配业务到光网络中
-void Solution::reAllocateTran(int HLim)
-{
-    int gap;
-    if (!forBatchTranReAllocate)
-        gap = 1;
-    else
-        gap = int(0.05 * T);
-    ifIterSuccess = false;
-    vector<int> totTranIDx(T, 0);
-    vector<int> tranIDx(gap, 0);
-    for (int i = 0; i < T; ++i)
-        totTranIDx[i] = i;
-    for (int i = 0; i + gap < HLim; i = i + gap)
-    {
-        std::mt19937 rng(42); // 设置随机数种子  
-        random_shuffle(totTranIDx.begin(), totTranIDx.end());
-        for (int j = 0; j < gap; ++j)
-        {
-            tranIDx[j] = totTranIDx[j];
-        }
-
-        int oriUsedEdgeNum = 0, oriNewEdgeNum = newEdge.size();
-
-        vector<vector<int>> pathTmp1(gap, vector<int>());     // 用于此后重新加载边
-        vector<int> pileTmp1(gap, -1);
-        for (int j = 0, tranID; j < gap; ++j)
-        {
-            tranID = tranIDx[j];
-            oriUsedEdgeNum += trans[tranID].path.size();
-            pathTmp1[j] = trans[tranID].lastEdgesOfShortestPaths;
-            pileTmp1[j] = trans[tranID].pileID;
-            recoverNetwork(tranID, trans[tranID].pileID);
-        }
-
-        int curUsedEdgeNum = 0;
-        bool findPath = false;
-        vector<vector<int>> pathTmp2(gap, vector<int>());     // 用于此后重新加载边
-        vector<int> pileTmp2(gap, -1);
-        for (int j = gap - 1, tranID; j >= 0; --j)      // 反向加载效果更好
-        {
-            tranID = tranIDx[j];
-            loadTran(tranID, false);
-            pathTmp2[j] = trans[tranID].lastEdgesOfShortestPaths;
-            pileTmp2[j] = trans[tranID].pileID;
-            curUsedEdgeNum += trans[tranID].path.size();
-        }
-
-        bool ifSuccess = tryDeleteEdgeSim(oriNewEdgeNum, oriUsedEdgeNum, curUsedEdgeNum);
-
-        if (!ifSuccess)
-        {  // 回复为原状态
-            for (int j = 0, tranID; j < gap; ++j)
-            {   // 把试图寻路时，造成的对网络的影响消除
-                tranID = tranIDx[j];
-                recoverNetwork(tranID, pileTmp2[j]);
-            }
-
-            for (int j = 0, tranID; j < gap; ++j)
-            {   // 重新加载所有的边
-                vector<int> nullVector, nullPath1, nullPath2;
-                tranID = tranIDx[j];
-                trans[tranID].mutiplierID.swap(nullVector);
-                trans[tranID].path.swap(nullPath1);
-                trans[tranID].lastEdgesOfShortestPaths.swap(nullPath2);
-
-                trans[tranID].pileID = -1;
-                trans[tranID].curA = D;
-                reloadTran(tranID, pileTmp1[j], pathTmp1[j]);
-            }
-            tryDeleteEdge(false);
-        }
-        else
-        {
-            ifIterSuccess = true;
-        }
     }
 }
 
@@ -318,19 +240,107 @@ void Solution::backtrackPath(Transaction& tran)
 // 根据 expectedAllocationPressure 对加载业务的顺序进行排序
 void Solution::sortTran()
 {   // 在业务分配的后期，加边是一定要加的。应该思考，在需要加边时，如何优化加载业务的顺序，使得加边的数目最少。
+    //// 获取当前时间点
+    //auto now = std::chrono::system_clock::now();
+    //// 转换为微秒
+    //auto micros = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    //// 从时间点中获取距离1970年1月1日的微秒数
+    //long long micros_from_epoch = micros.time_since_epoch().count();
+    //srand(5);    // 设置随机数种子
+    //random_shuffle(sortedTranIndices.begin(), sortedTranIndices.end());   // 先打乱totTranIDx
     if (!forSortTran)
         return;
     // 根据 expectedAllocationPressure 进行排序
-    sort(sortedTranIndices.begin(), sortedTranIndices.end(), [&](int a, int b) {
-        // 匿名 lambda 函数作为比较函数
-        return [&](int a, int b) {
-            // 如果 a 和 b 满足相邻条件，则优先满足相邻条件
-            if ((trans[a].start == trans[b].start && trans[a].end == trans[b].end) || (trans[a].start == trans[b].end && trans[a].end == trans[b].start))
-                return false; // 保持相邻
-            // 否则按照 expectedAllocationPressure 进行降序排序
-            return trans[a].expectedAllocationPressure > trans[b].expectedAllocationPressure;
-            }(a, b);
-        });
+    std::sort(sortedTranIndices.begin(), sortedTranIndices.end(), [&](int a, int b) {
+        if (trans[a].path.size() != trans[b].path.size())
+            return trans[a].path.size() > trans[b].path.size();  // 首先按path.size()降序排序
+        int startA = trans[a].start, startB = trans[b].start, endA = trans[a].end, endB = trans[b].end;
+        if (startA > endA)
+        {
+            int temp = startA;
+            startA = endA;
+            endA = temp;
+        }
+        if (startB > endB)
+		{
+			int temp = startB;
+			startB = endB;
+            endB = temp;
+		}
+        if (startA != startB)
+            return startA > startB;  // 其次按start降序排序
+        return endA > endB;  // 最后按end降序排序
+    });
+
+    vector<int> sortedTranIndices2(T, 0);
+    int sortedTranIndices2Cnt = 0;
+    vector<vector<int>> groups;
+    groups.push_back(vector<int>());
+    int groupIdx = 0;
+    int lastGroupIdx = 0;
+    groups[groupIdx].push_back(sortedTranIndices[0]);
+    for (int j = 1; j < T; ++j)
+    {
+        if (trans[sortedTranIndices[j]].path.size() != trans[sortedTranIndices[j - 1]].path.size())
+        {   // 对相同的pathSize的组，再次进行排序，使得排序后相邻的两个tran的起点或终点尽可能不相同
+            int commonCnt = 0;
+            bool getoutFlag = false;
+            while (!getoutFlag)
+            {
+                getoutFlag = true;
+                for (int idx = lastGroupIdx; idx <= groupIdx; ++idx)
+                {
+                    if (commonCnt < groups[idx].size())
+                    {
+                        sortedTranIndices2[sortedTranIndices2Cnt++] = groups[idx][commonCnt];
+                        getoutFlag = false;
+                    }
+                }
+                ++commonCnt;
+            }
+            lastGroupIdx = groupIdx + 1;
+        }
+        int startA = trans[sortedTranIndices[j - 1]].start, startB = trans[sortedTranIndices[j]].start,
+            endA = trans[sortedTranIndices[j - 1]].end, endB = trans[sortedTranIndices[j]].end;
+        if (startA > endA)
+        {
+            int temp = startA;
+            startA = endA;
+            endA = temp;
+        }
+        if (startB > endB)
+        {
+            int temp = startB;
+            startB = endB;
+            endB = temp;
+        }
+        // 判断下一个编号是否要加入到当前groupIdx中
+        if (startA != startB || endA != endB)
+        {
+            ++groupIdx;
+            groups.push_back(vector<int>());
+        }
+        groups[groupIdx].push_back(sortedTranIndices[j]);
+        if (j == T - 1)
+        {   // 特殊处理最后一批的组
+            int commonCnt = 0;
+            bool getoutFlag = false;
+            while (!getoutFlag)
+            {
+                getoutFlag = true;
+                for (int idx = lastGroupIdx; idx <= groupIdx; ++idx)
+                {
+                    if (commonCnt < groups[idx].size())
+                    {
+                        sortedTranIndices2[sortedTranIndices2Cnt++] = groups[idx][commonCnt];
+                        getoutFlag = false;
+                    }
+                }
+                ++commonCnt;
+            }
+        }
+    }
+    sortedTranIndices = sortedTranIndices2;
 }
 
 // 把加载光业务对网络的影响全部清除
@@ -380,7 +390,7 @@ void Solution::transferTranInMultiEdge(Transaction& tran)
         int lastEdgeID = multiEdgeID[nodePair][multiEdgeid];
         for (int j = multiEdgeid - 1; j >= 0; --j)
         {   // 尽可能把业务迁移到重边编号小的边上
-            int edgeID = multiEdgeID[nodePair][0];
+            int edgeID = multiEdgeID[nodePair][j];
             if (edge[edgeID].Pile[tran.pileID] == -1)
             {
                 edge[edgeID].Pile[tran.pileID] = tran.tranID;

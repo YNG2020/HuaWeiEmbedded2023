@@ -24,7 +24,7 @@ void Solution::tryDeleteEdge(bool increasing, bool ifSimDeleteEdge)
         vector<int> lastTranIDs, lastPileIDs;        // 存储将要被删除的边上承载的业务ID和通道ID
 
         for (int j = 0; j < P; ++j)
-            if (edge[trueEdgeID].Pile[j] != -1 && edge[trueEdgeID].Pile[j] != T)
+            if (edge[trueEdgeID].Pile[j] != -1)
             {   // 说明在通道j上承载了该业务
                 ++tranCnt;
                 lastTranIDs.push_back(edge[trueEdgeID].Pile[j]);
@@ -174,8 +174,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         {   // 将原本新添加的边idxEdge从newEdge中删除
             performDeleteEdge(totDeleteEdgeID[i] / 2, totLastTranID[i].size(), totLastTranID[i]);
         }
-        totUsedEdge = (totUsedEdge + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
-        return true;
+        totUsedPile = (totUsedPile + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
     }
     else if (oriNewEdgeNum == (n - nDeleteEdge) 
         && (oriUsedEdgeNum > curUsedEdgeNum + usedEdgeChangeNumInHere))
@@ -184,8 +183,7 @@ bool Solution::tryDeleteEdgeSim(int oriNewEdgeNum, int oriUsedEdgeNum, int curUs
         {   // 将原本新添加的边idxEdge从newEdge中删除
             performDeleteEdge(totDeleteEdgeID[i] / 2, totLastTranID[i].size(), totLastTranID[i]);
         }
-        totUsedEdge = (totUsedEdge + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
-        return true;
+        totUsedPile = (totUsedPile + usedEdgeChangeNumInHere + (curUsedEdgeNum - oriUsedEdgeNum));
     }
     else
     {

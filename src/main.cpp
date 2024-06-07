@@ -20,11 +20,11 @@ int main(int argc, char* argv[])
     Solution solution;
     
     solution.forSortTran = atoi(argv[1]);
-    solution.forDoubleSortTran = atoi(argv[2]);
+    solution.forNoDetour = atoi(argv[2]);
     solution.forTryDeleteEdge = atoi(argv[3]);
     solution.forIter = atoi(argv[4]);
     solution.forBatchTranReAllocate = atoi(argv[5]);
-    solution.forNoDetour = atoi(argv[6]);
+    dataGenSeed = string(argv[6]);
 
     solution.runStrategy();     // 运行总策略
 
@@ -34,6 +34,6 @@ int main(int argc, char* argv[])
         outputForFile();
 
     //calculateCost();
-    return newEdge.size() * 1000000 + totUsedEdge;
+    return newEdge.size() * 1000000 + totUsedPile;
     //return 0;
 }
